@@ -293,6 +293,92 @@ comportamiento a reproducir con políticas RLS reales en la Fase 4:
 
 ---
 
+## FASE 3 (parcial) — Cliente Supabase y esquema de base de datos
+
+Decisión del usuario: proyecto de Supabase Cloud ya creado por él mismo.
+Coloca `PUBLIC_SUPABASE_URL` y `PUBLIC_SUPABASE_PUBLISHABLE_KEY` en
+`/home/elias/Escritorio/convoca/.env` (ya tiene las claves correctas
+esperando su valor; `.env.example` actualizado con nombres y valores
+ficticios). La `secret key`/`service_role key` **nunca** debe ir en ese
+archivo ni en ninguna variable `PUBLIC_*`.
+
+### 1. Cliente
+
+`src/lib/supabase/client.ts` — cliente único (`ssr = false`, no hace falta
+uno de servidor), instanciado solo con la publishable key.
+`src/lib/supabase/database.types.ts` — tipos escritos a mano a partir de
+las migraciones de abajo (nota en el propio archivo: sustituir por
+`supabase gen types typescript --linked` en cuanto haya CLI vinculada, para
+que no puedan divergir del esquema real).
+
+### 2. Migraciones creadas (`supabase/migrations/`), pendientes de aplicar
+
+**No las he ejecutado yo contra tu proyecto** — no tengo ninguna forma de
+conectar con tu base de datos real desde este entorno (sin credenciales de
+servidor, sin CLI vinculada). Aplícalas tú, en este orden, pegando cada
+archivo en el **SQL Editor** del panel de Supabase de tu proyecto:
+
+| Archivo                                       | Qué crea                                                                                                                                                                        | ¿Borra algo? |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| `0001_extensions_and_helpers.sql`             | `public.profiles` (rol de cada cuenta) + funciones auxiliares para las políticas RLS de las siguientes migraciones + un trigger que impide que una cuenta cambie su propio rol. | No           |
+| `0002_organizers.sql`                         | `public.organizers` (perfil público) y `public.organizer_private_profiles` (datos privados).                                                                                    | No           |
+| `0003_events.sql`                             | `public.events`, con RLS de propiedad/moderación (Fase 4) y el contador `published_events_count` mantenido automáticamente.                                                     | No           |
+| `0004_event_updates.sql`                      | `public.event_updates`.                                                                                                                                                         | No           |
+| `0005_reports_and_audit_logs.sql`             | `public.reports` y `public.audit_logs`.                                                                                                                                         | No           |
+| `0006_verification_documents_and_storage.sql` | `public.verification_documents` + bucket privado de Storage `verification-documents` + políticas de acceso.                                                                     | No           |
+| `0007_new_user_trigger.sql`                   | Trigger que, al registrarte, crea automáticamente tu fila en `profiles`, `organizers` y `organizer_private_profiles` a partir de los metadatos de `signUp(...)`.                | No           |
+
+Todas son `create table` / `create policy` / `create function` /
+`create trigger` sobre un proyecto nuevo: no hay ninguna sentencia
+`drop`/`delete`/`truncate` en ninguna de las siete, y no hay datos previos
+que perder. Ascender una cuenta a moderador/administrador se hace a mano,
+después, con `update public.profiles set role = 'moderator' where id = '<uuid>';`
+en el mismo SQL Editor (documentado también dentro de `0001_...sql`).
+
+### 3. Bugs encontrados y corregidos en revisión manual (no probados en vivo)
+
+No hay Docker/`psql` disponibles en esta máquina para levantar un Postgres
+de prueba, así que estas migraciones están revisadas dos veces por mí a
+mano, **no ejecutadas** contra ningún Postgres real todavía. Dos errores
+que encontré y corregí en esa revisión:
+
+- La política de lectura de `profiles` y el trigger que protege el rol
+  hacían una subconsulta directa contra la propia tabla `profiles` desde
+  dentro de una política RLS de `profiles` — el clásico error de
+  "infinite recursion detected in policy" de Postgres. Corregido: ambas
+  usan ahora la función `is_moderator_or_admin()` (`security definer`,
+  que rompe el ciclo).
+- Un comentario en `0002_organizers.sql` afirmaba que
+  `published_events_count` se mantenía con un trigger que en realidad no
+  había escrito. Corregido añadiendo el trigger real en
+  `0003_events.sql` en vez de dejar el comentario falso.
+
+**Dado que no se han ejecutado en vivo, pueden seguir teniendo errores que
+solo aparecerán al aplicarlas.** Si algo falla al pegarlas en el SQL
+Editor, dímelo con el mensaje de error exacto de Postgres y lo corrijo.
+
+### 4. Lo que queda pendiente de Fase 3 (honesto)
+
+- **El código de la app (`authService.ts`, `eventsService.ts`,
+  `organizersService.ts`, `updatesService.ts`, `moderationService.ts`)
+  todavía no habla con Supabase — sigue leyendo/escribiendo
+  `localStorage`, exactamente igual que antes de esta fase.** Este
+  esquema es la base sobre la que se conectará, pero la sustitución del
+  código en sí es el siguiente paso, no algo ya hecho.
+- Cambiar `authService.ts` a Supabase real implica un cambio de contrato:
+  con confirmación de correo obligatoria (lo que pide la Fase 3),
+  `signUp()` no puede devolver una sesión inmediatamente como hace hoy el
+  mock — hay que avisar de "revisa tu correo" en vez de redirigir. Toca
+  `src/lib/auth/types.ts` y `src/routes/registro/+page.svelte`, entre
+  otros. Todavía no se ha hecho.
+- **No se declara nada de esto listo para producción**: sigue habiendo
+  autenticación mock en el código que corre hoy, y las políticas RLS de
+  este esquema no protegen nada todavía porque el código de la app no las
+  usa. Esto se actualizará en cuanto avance la sustitución real del
+  código.
+
+---
+
 ## Estado de las fases siguientes
 
 Ver las secciones más abajo, que se añaden a medida que se ejecuta cada
