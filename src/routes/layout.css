@@ -1,0 +1,110 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/space-grotesk';
+
+/*
+ * Sistema de diseño de Convoca.
+ *
+ * Paleta deliberadamente alejada de los colores partidistas habituales
+ * (rojo/azul de partido, estética militar o policial): un verde-petróleo
+ * ("brand") como color de confianza cívica y un terracota cálido
+ * ("accent") como color de participación/comunidad, usado con moderación
+ * para llamadas a la acción y estados de interés.
+ */
+@theme {
+	--font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+	--font-display: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+
+	--color-brand-50: #eefaf7;
+	--color-brand-100: #d2f1e9;
+	--color-brand-200: #a6e3d4;
+	--color-brand-300: #72cebb;
+	--color-brand-400: #43b29e;
+	--color-brand-500: #279583;
+	--color-brand-600: #1a786a;
+	--color-brand-700: #176056;
+	--color-brand-800: #164d46;
+	--color-brand-900: #14403b;
+	--color-brand-950: #072522;
+
+	--color-accent-50: #fdf6ee;
+	--color-accent-100: #fbe8d2;
+	--color-accent-200: #f6cea0;
+	--color-accent-300: #f0ac68;
+	--color-accent-400: #e98a3f;
+	--color-accent-500: #dc6c25;
+	--color-accent-600: #ba531b;
+	--color-accent-700: #953f19;
+	--color-accent-800: #79341a;
+	--color-accent-900: #642c18;
+	--color-accent-950: #35150a;
+
+	--color-ink-50: #f7f6f4;
+	--color-ink-100: #ece9e4;
+	--color-ink-200: #dad4ca;
+	--color-ink-300: #bfb5a5;
+	--color-ink-400: #a2937d;
+	--color-ink-500: #8a7a63;
+	--color-ink-600: #6f6150;
+	--color-ink-700: #594e42;
+	--color-ink-800: #423a32;
+	--color-ink-900: #2b2622;
+	--color-ink-950: #171410;
+
+	--color-warning-50: #fffbeb;
+	--color-warning-100: #fef3c7;
+	--color-warning-300: #fcd34d;
+	--color-warning-500: #d99400;
+	--color-warning-700: #8a5c02;
+
+	--color-critical-50: #fdf2f0;
+	--color-critical-100: #fbdfd8;
+	--color-critical-300: #ec9c88;
+	--color-critical-500: #b9512f;
+	--color-critical-700: #833823;
+
+	--shadow-card: 0 1px 2px rgb(23 20 16 / 0.04), 0 8px 24px -12px rgb(23 20 16 / 0.18);
+	--shadow-card-hover: 0 2px 4px rgb(23 20 16 / 0.06), 0 16px 32px -14px rgb(23 20 16 / 0.22);
+}
+
+@layer base {
+	html {
+		font-family: var(--font-sans);
+		color-scheme: light;
+	}
+
+	body {
+		background-color: var(--color-ink-50);
+		color: var(--color-ink-900);
+	}
+
+	h1,
+	h2,
+	h3,
+	h4 {
+		font-family: var(--font-display);
+		letter-spacing: -0.01em;
+	}
+}
+
+@layer utilities {
+	/* Textura de puntos suave que evoca puntos de encuentro sobre un mapa. */
+	.bg-dot-grid {
+		background-image: radial-gradient(circle, var(--color-brand-800) 1px, transparent 1px);
+		background-size: 18px 18px;
+	}
+
+	.safe-bottom {
+		padding-bottom: env(safe-area-inset-bottom);
+	}
+
+	.no-scrollbar::-webkit-scrollbar {
+		display: none;
+	}
+
+	.no-scrollbar {
+		scrollbar-width: none;
+	}
+}
