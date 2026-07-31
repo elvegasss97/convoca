@@ -1,64 +1,106 @@
 /**
- * Capa de acceso a datos de convocatorias.
+ * Capa de acceso a datos de convocatorias, sobre Supabase.
  *
- * Todas las funciones son `async` y devuelven exactamente lo que devolverían
- * las futuras consultas a Supabase (`supabase.from('events')...`), para que
- * sustituir la implementación mock por llamadas reales no requiera tocar
- * ningún componente ni pantalla — solo este archivo.
+ * Todas las funciones mantienen exactamente la misma firma pública que la
+ * implementación mock anterior, para que ningún componente Svelte necesite
+ * cambiar. `attendance` (going/interested) nunca es una columna editable de
+ * `events`: se calcula en el servidor vía `get_attendance_counts()` (ver
+ * `supabase/migrations/0009_attendance_responses.sql`), así que aquí se
+ * recompone tras cada lectura.
  *
- * El array en memoria simula la tabla `events`. Los cambios se pierden al
- * recargar la página, igual que ocurriría con cualquier estado de cliente
- * no persistido; en producción esto será una tabla de Postgres.
- *
- * Los datos ficticios (`$lib/mock/events`) solo se cargan si
- * `ENABLE_DEMO_DATA` es `true` (ver `$lib/config/env.ts`), y se importan de
- * forma dinámica para que, cuando esa constante es `false` en tiempo de
- * compilación (siempre lo es en producción), el bundler elimine la rama
- * entera — ni el código ni los datos ficticios llegan al bundle de
- * producción. Si no hay datos de demostración, el servicio arranca con la
- * tabla vacía, tal cual arrancaría contra una base de datos real recién
- * creada.
+ * La autorización real (quién puede leer/crear/editar qué) vive en las
+ * políticas RLS de Postgres (`supabase/migrations/0003_events.sql`), no en
+ * este archivo: las comprobaciones de propiedad de aquí son una
+ * conveniencia de UX (fallar rápido con un mensaje claro), nunca la única
+ * barrera de seguridad.
  */
-import type { Event, EventFiltersState, GeoPoint } from '$lib/types';
+import { supabase } from '$lib/supabase/client';
+import type { Database, Json } from '$lib/supabase/database.types';
+import type { Event, EventFiltersState, GeoPoint, AttendanceCounts } from '$lib/types';
 import { filterEvents } from '$lib/utils/filterEvents';
-import { loadPersisted, savePersisted } from '$lib/utils/persistedArray';
+
+type EventUpdatePayload = Database['public']['Tables']['events']['Update'];
 import { randomId } from '$lib/utils/id';
-import { ENABLE_DEMO_DATA } from '$lib/config/env';
 
-const STORAGE_KEY = 'events';
-let events: Event[] = loadPersisted<Event>(STORAGE_KEY, []);
+type EventRow = {
+	id: string;
+	slug: string;
+	title: string;
+	description: string;
+	objective: string;
+	category: string;
+	themes: string[];
+	custom_theme_label: string | null;
+	status: string;
+	status_note: string | null;
+	start_at: string;
+	end_at: string | null;
+	duration_minutes: number | null;
+	meeting_point: Json;
+	route: Json | null;
+	organizer_id: string;
+	created_by_user_id: string;
+	verification: Json;
+	prior_communication: string;
+	rules: string[];
+	peaceful_declaration: boolean;
+	cover_image_url: string | null;
+	archived: boolean;
+	created_at: string;
+	updated_at: string;
+};
 
-function persist(): void {
-	savePersisted(STORAGE_KEY, events);
+const EMPTY_ATTENDANCE: AttendanceCounts = { going: 0, interested: 0, isEstimate: true };
+
+const HIDDEN_FROM_PUBLIC = ['draft', 'pending_review', 'hidden', 'rejected'];
+
+export function rowToEvent(row: EventRow, attendance: AttendanceCounts = EMPTY_ATTENDANCE): Event {
+	return {
+		id: row.id,
+		slug: row.slug,
+		title: row.title,
+		description: row.description,
+		objective: row.objective,
+		category: row.category as Event['category'],
+		themes: row.themes as Event['themes'],
+		customThemeLabel: row.custom_theme_label ?? undefined,
+		status: row.status as Event['status'],
+		startAt: row.start_at,
+		endAt: row.end_at ?? undefined,
+		durationMinutes: row.duration_minutes ?? undefined,
+		meetingPoint: row.meeting_point as unknown as Event['meetingPoint'],
+		route: (row.route as unknown as Event['route']) ?? undefined,
+		organizerId: row.organizer_id,
+		createdByUserId: row.created_by_user_id,
+		verification: row.verification as unknown as Event['verification'],
+		priorCommunication: row.prior_communication as Event['priorCommunication'],
+		rules: row.rules,
+		peacefulDeclaration: row.peaceful_declaration,
+		attendance,
+		coverImageUrl: row.cover_image_url ?? undefined,
+		createdAt: row.created_at,
+		updatedAt: row.updated_at,
+		statusNote: row.status_note ?? undefined,
+		archived: row.archived
+	};
 }
 
-let seedingPromise: Promise<void> | null = null;
-
-function ensureSeeded(): Promise<void> {
-	if (!seedingPromise) seedingPromise = seedIfNeeded();
-	return seedingPromise;
+async function attachAttendance(rows: EventRow[]): Promise<Event[]> {
+	if (rows.length === 0) return [];
+	const { data } = await supabase.rpc('get_attendance_counts', {
+		p_event_ids: rows.map((r) => r.id)
+	});
+	const countsByEvent = new Map((data ?? []).map((c) => [c.event_id, c]));
+	return rows.map((row) => {
+		const c = countsByEvent.get(row.id);
+		const attendance: AttendanceCounts = c
+			? { going: c.going_count, interested: c.interested_count, isEstimate: true }
+			: EMPTY_ATTENDANCE;
+		return rowToEvent(row, attendance);
+	});
 }
 
-async function seedIfNeeded(): Promise<void> {
-	if (events.length > 0 || !ENABLE_DEMO_DATA) return;
-	const { mockEvents } = await import('$lib/mock/events');
-	events = loadPersisted<Event>(STORAGE_KEY, mockEvents);
-}
-
-const HIDDEN_FROM_PUBLIC = new Set<Event['status']>([
-	'draft',
-	'pending_review',
-	'hidden',
-	'rejected'
-]);
-
-function delay<T>(value: T): Promise<T> {
-	return Promise.resolve(value);
-}
-
-function isPublic(event: Event): boolean {
-	return !HIDDEN_FROM_PUBLIC.has(event.status);
-}
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export interface ListPublicEventsOptions {
 	filters?: Partial<EventFiltersState>;
@@ -67,31 +109,47 @@ export interface ListPublicEventsOptions {
 
 /** Lista de convocatorias visibles públicamente, con filtros opcionales. */
 export async function listPublicEvents(options: ListPublicEventsOptions = {}): Promise<Event[]> {
-	await ensureSeeded();
 	const { filters = {}, origin } = options;
-	const results = filterEvents(events.filter(isPublic), filters, origin);
-	return delay(results);
+	const { data, error } = await supabase
+		.from('events')
+		.select('*')
+		.not('status', 'in', `(${HIDDEN_FROM_PUBLIC.join(',')})`)
+		.order('start_at', { ascending: true });
+	if (error) throw error;
+	const events = await attachAttendance(data ?? []);
+	return filterEvents(events, filters, origin);
 }
 
 export async function getEvent(idOrSlug: string): Promise<Event | undefined> {
-	await ensureSeeded();
-	return delay(events.find((e) => e.id === idOrSlug || e.slug === idOrSlug));
+	const column = UUID_RE.test(idOrSlug) ? 'id' : 'slug';
+	const { data, error } = await supabase
+		.from('events')
+		.select('*')
+		.eq(column, idOrSlug)
+		.maybeSingle();
+	if (error || !data) return undefined;
+	const [event] = await attachAttendance([data]);
+	return event;
 }
 
 export async function listEventsByOrganizer(organizerId: string): Promise<Event[]> {
-	await ensureSeeded();
-	const results = events
-		.filter((e) => e.organizerId === organizerId)
-		.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-	return delay(results);
+	const { data, error } = await supabase
+		.from('events')
+		.select('*')
+		.eq('organizer_id', organizerId)
+		.order('updated_at', { ascending: false });
+	if (error) throw error;
+	return attachAttendance(data ?? []);
 }
 
 export async function listPendingModeration(): Promise<Event[]> {
-	await ensureSeeded();
-	const results = events
-		.filter((e) => e.status === 'pending_review')
-		.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-	return delay(results);
+	const { data, error } = await supabase
+		.from('events')
+		.select('*')
+		.eq('status', 'pending_review')
+		.order('created_at', { ascending: true });
+	if (error) throw error;
+	return attachAttendance(data ?? []);
 }
 
 /** Devuelve estadísticas agregadas para la cabecera de Inicio. Nunca inventa cifras: es la suma real de `events`. */
@@ -99,14 +157,13 @@ export async function getPublicStats(): Promise<{
 	eventCount: number;
 	estimatedAttendance: number;
 }> {
-	await ensureSeeded();
-	const publicEvents = events.filter(isPublic);
+	const publicEvents = await listPublicEvents();
 	const eventCount = publicEvents.length;
 	const estimatedAttendance = publicEvents.reduce(
 		(sum, e) => sum + e.attendance.going + e.attendance.interested,
 		0
 	);
-	return delay({ eventCount, estimatedAttendance });
+	return { eventCount, estimatedAttendance };
 }
 
 export type NewEventInput = Omit<
@@ -114,46 +171,84 @@ export type NewEventInput = Omit<
 	'id' | 'slug' | 'createdAt' | 'updatedAt' | 'attendance' | 'verification' | 'status'
 > & { status?: Event['status'] };
 
-function slugify(title: string): string {
+export function slugify(title: string): string {
 	return title
 		.toLowerCase()
 		.normalize('NFD')
-		.replace(/[\u0300-\u036f]/g, '')
+		.replace(/[̀-ͯ]/g, '')
 		.replace(/[^a-z0-9]+/g, '-')
 		.replace(/(^-|-$)/g, '');
 }
 
-function generateId(): string {
-	return `evt-${randomId().slice(0, 8)}`;
+function randomSlugSuffix(): string {
+	const cleaned = randomId().replace(/[^a-z0-9]/gi, '');
+	return (cleaned.slice(-8) || Math.random().toString(36).slice(2, 10)).toLowerCase();
 }
 
 export async function createEvent(input: NewEventInput): Promise<Event> {
-	await ensureSeeded();
-	const now = new Date().toISOString();
-	const id = generateId();
-	const event: Event = {
-		...input,
-		id,
-		slug: `${slugify(input.title)}-${id.slice(4)}`,
-		status: input.status ?? 'pending_review',
-		verification: { level: 'none' },
-		attendance: { going: 0, interested: 0, isEstimate: true },
-		createdAt: now,
-		updatedAt: now
-	};
-	events.unshift(event);
-	persist();
-	return delay(event);
+	const slug = `${slugify(input.title)}-${randomSlugSuffix()}`;
+	const { data, error } = await supabase
+		.from('events')
+		.insert({
+			slug,
+			title: input.title,
+			description: input.description,
+			objective: input.objective,
+			category: input.category,
+			themes: input.themes,
+			custom_theme_label: input.customThemeLabel ?? null,
+			status: input.status ?? 'pending_review',
+			start_at: input.startAt,
+			end_at: input.endAt ?? null,
+			duration_minutes: input.durationMinutes ?? null,
+			meeting_point: input.meetingPoint as unknown as Json,
+			route: (input.route as unknown as Json) ?? null,
+			organizer_id: input.organizerId,
+			created_by_user_id: input.createdByUserId,
+			prior_communication: input.priorCommunication,
+			rules: input.rules,
+			peaceful_declaration: input.peacefulDeclaration,
+			cover_image_url: input.coverImageUrl ?? null
+		})
+		.select('*')
+		.single();
+	if (error) throw error;
+	const [event] = await attachAttendance([data]);
+	return event;
+}
+
+function patchToRow(patch: Partial<Event>): EventUpdatePayload {
+	const row: EventUpdatePayload = {};
+	if (patch.title !== undefined) row.title = patch.title;
+	if (patch.description !== undefined) row.description = patch.description;
+	if (patch.objective !== undefined) row.objective = patch.objective;
+	if (patch.category !== undefined) row.category = patch.category;
+	if (patch.themes !== undefined) row.themes = patch.themes;
+	if (patch.customThemeLabel !== undefined) row.custom_theme_label = patch.customThemeLabel ?? null;
+	if (patch.status !== undefined) row.status = patch.status;
+	if (patch.statusNote !== undefined) row.status_note = patch.statusNote ?? null;
+	if (patch.startAt !== undefined) row.start_at = patch.startAt;
+	if (patch.endAt !== undefined) row.end_at = patch.endAt ?? null;
+	if (patch.durationMinutes !== undefined) row.duration_minutes = patch.durationMinutes ?? null;
+	if (patch.meetingPoint !== undefined) row.meeting_point = patch.meetingPoint as unknown as Json;
+	if (patch.route !== undefined) row.route = (patch.route as unknown as Json) ?? null;
+	if (patch.rules !== undefined) row.rules = patch.rules;
+	if (patch.peacefulDeclaration !== undefined) row.peaceful_declaration = patch.peacefulDeclaration;
+	if (patch.coverImageUrl !== undefined) row.cover_image_url = patch.coverImageUrl ?? null;
+	if (patch.archived !== undefined) row.archived = patch.archived;
+	return row;
 }
 
 export async function updateEvent(id: string, patch: Partial<Event>): Promise<Event> {
-	await ensureSeeded();
-	const index = events.findIndex((e) => e.id === id);
-	if (index === -1) throw new Error(`Convocatoria no encontrada: ${id}`);
-	const updated: Event = { ...events[index], ...patch, updatedAt: new Date().toISOString() };
-	events[index] = updated;
-	persist();
-	return delay(updated);
+	const { data, error } = await supabase
+		.from('events')
+		.update(patchToRow(patch))
+		.eq('id', id)
+		.select('*')
+		.single();
+	if (error) throw error;
+	const [event] = await attachAttendance([data]);
+	return event;
 }
 
 export async function cancelEvent(id: string, note: string): Promise<Event> {
@@ -170,14 +265,15 @@ export async function setEventStatus(
 
 /**
  * Se lanza cuando una cuenta intenta modificar una convocatoria que no le
- * pertenece — incluido manipulando manualmente el id en la URL o en una
- * llamada directa. En esta fase mock es una comprobación en el cliente (sin
- * backend no hay una capa de autorización real); con Supabase, esto lo
- * reforzarán las políticas de Row Level Security en el servidor.
+ * pertenece. Es una comprobación de UX (falla rápido, mensaje claro): la
+ * barrera de seguridad real es la política RLS `events_update_own_or_staff`
+ * (`supabase/migrations/0003_events.sql`), que rechaza el UPDATE en
+ * Postgres incluso si esta comprobación de cliente no se ejecutara o se
+ * saltase por completo.
  */
 export class OwnershipError extends Error {}
 
-function assertOwnership(event: Event, userId: string): void {
+export function assertOwnership(event: Pick<Event, 'createdByUserId'>, userId: string): void {
 	if (event.createdByUserId !== userId) {
 		throw new OwnershipError('No tienes permiso para modificar esta convocatoria.');
 	}
@@ -189,8 +285,7 @@ export async function updateEventAsOwner(
 	id: string,
 	patch: Partial<Event>
 ): Promise<Event> {
-	await ensureSeeded();
-	const event = events.find((e) => e.id === id);
+	const event = await getEvent(id);
 	if (!event) throw new Error(`Convocatoria no encontrada: ${id}`);
 	assertOwnership(event, userId);
 	return updateEvent(id, patch);
@@ -210,27 +305,28 @@ export async function setArchivedAsOwner(
 
 /** Crea una copia en borrador de una convocatoria propia, con nuevo id y contadores a cero. */
 export async function duplicateEventAsOwner(userId: string, id: string): Promise<Event> {
-	await ensureSeeded();
-	const source = events.find((e) => e.id === id);
+	const source = await getEvent(id);
 	if (!source) throw new Error(`Convocatoria no encontrada: ${id}`);
 	assertOwnership(source, userId);
 
-	const now = new Date().toISOString();
-	const newId = generateId();
-	const duplicate: Event = {
-		...source,
-		id: newId,
-		slug: `${slugify(source.title)}-${newId.slice(4)}`,
+	return createEvent({
 		title: `${source.title} (copia)`,
-		status: 'draft',
-		statusNote: undefined,
-		archived: false,
-		verification: { level: 'none' },
-		attendance: { going: 0, interested: 0, isEstimate: true },
-		createdAt: now,
-		updatedAt: now
-	};
-	events.unshift(duplicate);
-	persist();
-	return delay(duplicate);
+		description: source.description,
+		objective: source.objective,
+		category: source.category,
+		themes: source.themes,
+		customThemeLabel: source.customThemeLabel,
+		startAt: source.startAt,
+		endAt: source.endAt,
+		durationMinutes: source.durationMinutes,
+		meetingPoint: source.meetingPoint,
+		route: source.route,
+		organizerId: source.organizerId,
+		createdByUserId: source.createdByUserId,
+		priorCommunication: source.priorCommunication,
+		rules: source.rules,
+		peacefulDeclaration: source.peacefulDeclaration,
+		coverImageUrl: source.coverImageUrl,
+		status: 'draft'
+	});
 }

@@ -3,19 +3,11 @@ import type { OrganizerKind } from '$lib/types';
 /**
  * Tipos del subsistema de autenticación.
  *
- * ⚠️ IMPORTANTE — ESTO ES UN MOCK, NO SEGURIDAD REAL ⚠️
- * Toda la implementación detrás de estos tipos (`authService.ts`) vive
- * enteramente en el navegador: usuarios, sesión y "hash" de contraseña se
- * guardan en `localStorage`. Cualquier persona con acceso a las
- * herramientas de desarrollador del navegador puede leer, falsificar o
- * eliminar esos datos. No aporta ninguna garantía de seguridad real y
- * NUNCA debe usarse en producción.
- *
- * Estos tipos y la forma de `AuthService` están deliberadamente alineados
- * con la API de Supabase Auth (`supabase.auth.signUp`,
- * `signInWithPassword`, `signOut`, `resetPasswordForEmail`, `getSession`,
- * `onAuthStateChange`) para que sustituir `authService.ts` por un cliente
- * real de Supabase no requiera cambiar ningún componente ni pantalla.
+ * `authService.ts` implementa `AuthService` sobre Supabase Auth
+ * (`supabase.auth.signUp`, `signInWithPassword`, `signOut`,
+ * `resetPasswordForEmail`, `getSession`, `onAuthStateChange`). Ningún
+ * componente ni pantalla depende de Supabase directamente: todos dependen
+ * de esta interfaz.
  */
 
 export type UserRole = 'organizer' | 'moderator' | 'admin';
@@ -28,7 +20,6 @@ export interface User {
 	id: string;
 	email: string;
 	role: UserRole;
-	/** Siempre `false` en el mock: no hay envío real de correo de verificación. */
 	emailVerified: boolean;
 	/** Id del perfil público de organizador vinculado a esta cuenta (rol `organizer`). */
 	organizerId?: string;
@@ -37,14 +28,10 @@ export interface User {
 
 export interface UserSession {
 	user: User;
-	/**
-	 * Token opaco de esta sesión local. No es un JWT real y no debe tratarse
-	 * como una credencial: solo identifica la sesión guardada en este
-	 * navegador para este prototipo.
-	 */
+	/** Access token JWT de la sesión de Supabase Auth. */
 	token: string;
 	expiresAt: string;
-	/** Si la persona marcó "recordar sesión" (sesión de larga duración) o no (expira antes). */
+	/** Si la persona marcó "recordar sesión" (persistida en localStorage) o no (solo dura la pestaña, sessionStorage). */
 	remembered: boolean;
 }
 
@@ -78,21 +65,40 @@ export interface SignInInput {
 	rememberSession: boolean;
 }
 
-export class AuthError extends Error {}
+/**
+ * `field`, cuando está presente, indica que el mensaje pertenece a un campo
+ * concreto del formulario (para mostrarlo junto a ese campo, con
+ * `FieldError`, en vez de en un banner genérico arriba del todo).
+ */
+export class AuthError extends Error {
+	field?: 'email' | 'password';
+	constructor(message: string, field?: 'email' | 'password') {
+		super(message);
+		this.field = field;
+	}
+}
 
 /**
  * Contrato del servicio de autenticación. `authService.ts` lo implementa
- * con localStorage; un futuro `supabaseAuthService.ts` lo implementará con
- * `@supabase/supabase-js` sin que cambie ni una línea fuera de ese archivo.
+ * sobre `@supabase/supabase-js`.
  */
 export interface AuthService {
 	getSession(): Promise<UserSession | null>;
 	/** Se notifica en cada login/logout/registro, incluido entre pestañas. */
 	onAuthStateChange(callback: (session: UserSession | null) => void): () => void;
-	signUp(input: SignUpInput): Promise<UserSession>;
+	/** `null` = cuenta creada pero pendiente de confirmación de correo (sin sesión activa todavía). */
+	signUp(input: SignUpInput): Promise<UserSession | null>;
 	signInWithPassword(input: SignInInput): Promise<UserSession>;
+	/**
+	 * Inicia el flujo de "Continuar con Google" (redirección de página
+	 * completa, PKCE). `redirectTo` es la ruta interna de Convoca a la que
+	 * volver tras `/auth/callback` — nunca una URL absoluta arbitraria.
+	 */
+	signInWithGoogle(redirectTo: string): Promise<void>;
 	signOut(): Promise<void>;
 	resetPasswordForEmail(email: string): Promise<void>;
+	/** Reenvía el correo de confirmación de registro (p. ej. si el primero no llegó o expiró). */
+	resendSignUpConfirmation(email: string): Promise<void>;
 	updateDisplayName(displayName: string, organizationName?: string): Promise<void>;
 	/** Borra la cuenta y su perfil de organizador. Nunca borra convocatorias de otras cuentas. */
 	deleteAccount(): Promise<void>;

@@ -1,113 +1,138 @@
-import type { Organizer, OrganizerKind, VerificationDocument } from '$lib/types';
-import { loadPersisted, savePersisted } from '$lib/utils/persistedArray';
-import { randomId } from '$lib/utils/id';
-import { ENABLE_DEMO_DATA } from '$lib/config/env';
+import type { Organizer, VerificationDocument } from '$lib/types';
+import type { Database } from '$lib/supabase/database.types';
+import { supabase } from '$lib/supabase/client';
 import { listEventsByOrganizer } from './eventsService';
 
-const ORGANIZERS_KEY = 'organizers';
-let organizers: Organizer[] = loadPersisted<Organizer>(ORGANIZERS_KEY, []);
-
-function persistOrganizers(): void {
-	savePersisted(ORGANIZERS_KEY, organizers);
-}
+type OrganizerUpdatePayload = Database['public']['Tables']['organizers']['Update'];
 
 /**
- * La documentación de verificación NUNCA se persiste en localStorage (a
- * diferencia de convocatorias, actualizaciones o el perfil público del
- * organizador): es el dato más sensible del prototipo, así que solo vive en
- * memoria y se pierde al recargar la página. En producción esto sería un
- * archivo en Supabase Storage con acceso restringido por RLS, nunca datos
- * de cliente.
+ * Capa de acceso a datos de organizadores y su documentación de
+ * verificación, sobre Supabase.
+ *
+ * A propósito NO hay `createOrganizer`/`deleteOrganizer`: el perfil público
+ * de organizador se crea automáticamente al registrarse (trigger
+ * `handle_new_user`, `supabase/migrations/0007_new_user_trigger.sql`) y se
+ * borra en cascada cuando se elimina la cuenta (`on delete cascade` en
+ * `organizers.created_by`, ver Edge Function `delete-account`). No existe
+ * ninguna política RLS de INSERT/DELETE en `organizers` para `authenticated`
+ * — solo la propia cuenta puede *editar* su perfil (`organizers_update_own`).
  */
-let documents: VerificationDocument[] = [];
 
-let seedingPromise: Promise<void> | null = null;
-
-function ensureSeeded(): Promise<void> {
-	if (!seedingPromise) seedingPromise = seedIfNeeded();
-	return seedingPromise;
+interface OrganizerRow {
+	id: string;
+	display_name: string;
+	kind: string;
+	bio: string | null;
+	contact_email: string | null;
+	website: string | null;
+	avatar_url: string | null;
+	published_events_count: number;
+	created_at: string;
 }
 
-async function seedIfNeeded(): Promise<void> {
-	if (organizers.length > 0 || !ENABLE_DEMO_DATA) return;
-	const [{ mockOrganizers }, { mockVerificationDocuments }] = await Promise.all([
-		import('$lib/mock/organizers'),
-		import('$lib/mock/documents')
-	]);
-	organizers = loadPersisted<Organizer>(ORGANIZERS_KEY, mockOrganizers);
-	documents = [...mockVerificationDocuments];
+function rowToOrganizer(row: OrganizerRow): Organizer {
+	return {
+		id: row.id,
+		displayName: row.display_name,
+		kind: row.kind as Organizer['kind'],
+		bio: row.bio ?? undefined,
+		contactEmail: row.contact_email ?? undefined,
+		website: row.website ?? undefined,
+		avatarUrl: row.avatar_url ?? undefined,
+		publishedEventsCount: row.published_events_count,
+		createdAt: row.created_at
+	};
 }
 
-function delay<T>(value: T): Promise<T> {
-	return Promise.resolve(value);
-}
+const ORGANIZER_COLUMNS =
+	'id, display_name, kind, bio, contact_email, website, avatar_url, published_events_count, created_at';
 
 export async function getOrganizer(id: string): Promise<Organizer | undefined> {
-	await ensureSeeded();
-	return delay(organizers.find((o) => o.id === id));
+	const { data } = await supabase
+		.from('organizers')
+		.select(ORGANIZER_COLUMNS)
+		.eq('id', id)
+		.maybeSingle();
+	return data ? rowToOrganizer(data) : undefined;
 }
 
 export async function listOrganizers(): Promise<Organizer[]> {
-	await ensureSeeded();
-	return delay(organizers);
-}
-
-export interface NewOrganizerInput {
-	displayName: string;
-	kind: OrganizerKind;
-	bio?: string;
-	contactEmail?: string;
-}
-
-/** Crea el perfil público de organizador asociado a una cuenta nueva (ver `$lib/auth`). */
-export async function createOrganizer(input: NewOrganizerInput): Promise<Organizer> {
-	await ensureSeeded();
-	const organizer: Organizer = {
-		...input,
-		id: `org-${randomId().slice(0, 8)}`,
-		publishedEventsCount: 0,
-		createdAt: new Date().toISOString()
-	};
-	organizers.push(organizer);
-	persistOrganizers();
-	return delay(organizer);
+	const { data, error } = await supabase.from('organizers').select(ORGANIZER_COLUMNS);
+	if (error) throw error;
+	return (data ?? []).map(rowToOrganizer);
 }
 
 export async function updateOrganizerProfile(
 	organizerId: string,
 	patch: Partial<Pick<Organizer, 'displayName' | 'bio'>>
 ): Promise<Organizer> {
-	await ensureSeeded();
-	const index = organizers.findIndex((o) => o.id === organizerId);
-	if (index === -1) throw new Error(`Organizador no encontrado: ${organizerId}`);
-	const updated = { ...organizers[index], ...patch };
-	organizers[index] = updated;
-	persistOrganizers();
-	return delay(updated);
+	const row: OrganizerUpdatePayload = {};
+	if (patch.displayName !== undefined) row.display_name = patch.displayName;
+	if (patch.bio !== undefined) row.bio = patch.bio ?? null;
+
+	const { data, error } = await supabase
+		.from('organizers')
+		.update(row)
+		.eq('id', organizerId)
+		.select(ORGANIZER_COLUMNS)
+		.single();
+	if (error) throw error;
+	return rowToOrganizer(data);
 }
 
-export async function deleteOrganizer(organizerId: string): Promise<void> {
-	await ensureSeeded();
-	const index = organizers.findIndex((o) => o.id === organizerId);
-	if (index === -1) return;
-	organizers.splice(index, 1);
-	persistOrganizers();
+interface VerificationDocumentRow {
+	id: string;
+	organizer_id: string;
+	event_id: string | null;
+	type: string;
+	file_name: string;
+	status: string;
+	submitted_at: string;
+	reviewed_at: string | null;
+	reviewer_note: string | null;
 }
 
-/** Documentación privada del organizador: solo para el propio organizador y moderación. */
+function rowToDocument(row: VerificationDocumentRow): VerificationDocument {
+	return {
+		id: row.id,
+		organizerId: row.organizer_id,
+		eventId: row.event_id ?? undefined,
+		type: row.type as VerificationDocument['type'],
+		fileName: row.file_name,
+		status: row.status as VerificationDocument['status'],
+		submittedAt: row.submitted_at,
+		reviewedAt: row.reviewed_at ?? undefined,
+		reviewerNote: row.reviewer_note ?? undefined
+	};
+}
+
+const DOCUMENT_COLUMNS =
+	'id, organizer_id, event_id, type, file_name, status, submitted_at, reviewed_at, reviewer_note';
+
+/** Documentación privada del organizador: solo para el propio organizador y moderación (RLS). */
 export async function getOrganizerDocuments(organizerId: string): Promise<VerificationDocument[]> {
-	await ensureSeeded();
-	return delay(documents.filter((d) => d.organizerId === organizerId));
+	const { data, error } = await supabase
+		.from('verification_documents')
+		.select(DOCUMENT_COLUMNS)
+		.eq('organizer_id', organizerId);
+	if (error) throw error;
+	return (data ?? []).map(rowToDocument);
 }
 
+/** Solo devuelve resultados si quien llama es moderador/admin (RLS lo exige). */
 export async function listAllDocuments(): Promise<VerificationDocument[]> {
-	await ensureSeeded();
-	return delay(documents);
+	const { data, error } = await supabase.from('verification_documents').select(DOCUMENT_COLUMNS);
+	if (error) throw error;
+	return (data ?? []).map(rowToDocument);
 }
 
 export async function getPendingDocuments(): Promise<VerificationDocument[]> {
-	await ensureSeeded();
-	return delay(documents.filter((d) => d.status === 'pending'));
+	const { data, error } = await supabase
+		.from('verification_documents')
+		.select(DOCUMENT_COLUMNS)
+		.eq('status', 'pending');
+	if (error) throw error;
+	return (data ?? []).map(rowToDocument);
 }
 
 export async function reviewDocument(
@@ -115,17 +140,18 @@ export async function reviewDocument(
 	status: 'approved' | 'rejected',
 	reviewerNote?: string
 ): Promise<VerificationDocument> {
-	await ensureSeeded();
-	const index = documents.findIndex((d) => d.id === documentId);
-	if (index === -1) throw new Error(`Documento no encontrado: ${documentId}`);
-	const updated: VerificationDocument = {
-		...documents[index],
-		status,
-		reviewedAt: new Date().toISOString(),
-		reviewerNote
-	};
-	documents[index] = updated;
-	return delay(updated);
+	const { data, error } = await supabase
+		.from('verification_documents')
+		.update({
+			status,
+			reviewed_at: new Date().toISOString(),
+			reviewer_note: reviewerNote ?? null
+		})
+		.eq('id', documentId)
+		.select(DOCUMENT_COLUMNS)
+		.single();
+	if (error) throw error;
+	return rowToDocument(data);
 }
 
 /** Agregado usado por el panel del organizador. */

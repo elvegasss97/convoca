@@ -1,41 +1,47 @@
 import type { AuditLog, Event, ModerationAction, Report, ReportReason } from '$lib/types';
-import { loadPersisted, savePersisted } from '$lib/utils/persistedArray';
-import { randomId } from '$lib/utils/id';
-import { ENABLE_DEMO_DATA } from '$lib/config/env';
+import { supabase } from '$lib/supabase/client';
 import { listPendingModeration, setEventStatus, getEvent } from './eventsService';
 
-const REPORTS_KEY = 'reports';
-const AUDIT_LOGS_KEY = 'audit-logs';
-let reports: Report[] = loadPersisted<Report>(REPORTS_KEY, []);
-let auditLogs: AuditLog[] = loadPersisted<AuditLog>(AUDIT_LOGS_KEY, []);
-
-function persistReports(): void {
-	savePersisted(REPORTS_KEY, reports);
+interface ReportRow {
+	id: string;
+	event_id: string;
+	reason: string;
+	details: string | null;
+	status: string;
+	created_at: string;
+	resolved_at: string | null;
 }
 
-function persistAuditLogs(): void {
-	savePersisted(AUDIT_LOGS_KEY, auditLogs);
+function rowToReport(row: ReportRow): Report {
+	return {
+		id: row.id,
+		eventId: row.event_id,
+		reason: row.reason as ReportReason,
+		details: row.details ?? undefined,
+		status: row.status as Report['status'],
+		createdAt: row.created_at,
+		resolvedAt: row.resolved_at ?? undefined
+	};
 }
 
-let seedingPromise: Promise<void> | null = null;
-
-function ensureSeeded(): Promise<void> {
-	if (!seedingPromise) seedingPromise = seedIfNeeded();
-	return seedingPromise;
+interface AuditLogRow {
+	id: string;
+	event_id: string;
+	action: string;
+	moderator_id: string;
+	note: string | null;
+	created_at: string;
 }
 
-async function seedIfNeeded(): Promise<void> {
-	if (reports.length > 0 || auditLogs.length > 0 || !ENABLE_DEMO_DATA) return;
-	const [{ mockReports }, { mockAuditLogs }] = await Promise.all([
-		import('$lib/mock/reports'),
-		import('$lib/mock/auditLogs')
-	]);
-	reports = loadPersisted<Report>(REPORTS_KEY, mockReports);
-	auditLogs = loadPersisted<AuditLog>(AUDIT_LOGS_KEY, mockAuditLogs);
-}
-
-function delay<T>(value: T): Promise<T> {
-	return Promise.resolve(value);
+function rowToAuditLog(row: AuditLogRow): AuditLog {
+	return {
+		id: row.id,
+		eventId: row.event_id,
+		action: row.action as ModerationAction,
+		moderatorId: row.moderator_id,
+		note: row.note ?? undefined,
+		createdAt: row.created_at
+	};
 }
 
 export async function listPendingReview(): Promise<Event[]> {
@@ -47,9 +53,14 @@ export interface ReportedEventGroup {
 	reports: Report[];
 }
 
+/** Solo moderación/administración ven reportes (RLS): `reports_select_staff`. */
 export async function listReportedEvents(): Promise<ReportedEventGroup[]> {
-	await ensureSeeded();
-	const openReports = reports.filter((r) => r.status === 'open' || r.status === 'in_review');
+	const { data, error } = await supabase
+		.from('reports')
+		.select('*')
+		.in('status', ['open', 'in_review']);
+	if (error) throw error;
+	const openReports = (data ?? []).map(rowToReport);
 	const eventIds = [...new Set(openReports.map((r) => r.eventId))];
 
 	const groups: ReportedEventGroup[] = [];
@@ -57,27 +68,30 @@ export async function listReportedEvents(): Promise<ReportedEventGroup[]> {
 		const event = await getEvent(eventId);
 		if (event) groups.push({ event, reports: openReports.filter((r) => r.eventId === eventId) });
 	}
-	return delay(groups);
+	return groups;
 }
 
 export async function listAuditLogForEvent(eventId: string): Promise<AuditLog[]> {
-	await ensureSeeded();
-	const results = auditLogs
-		.filter((l) => l.eventId === eventId)
-		.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-	return delay(results);
+	const { data, error } = await supabase
+		.from('audit_logs')
+		.select('*')
+		.eq('event_id', eventId)
+		.order('created_at', { ascending: false });
+	if (error) throw error;
+	return (data ?? []).map(rowToAuditLog);
 }
 
 export async function listAllAuditLogs(): Promise<AuditLog[]> {
-	await ensureSeeded();
-	const results = [...auditLogs].sort(
-		(a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-	);
-	return delay(results);
+	const { data, error } = await supabase
+		.from('audit_logs')
+		.select('*')
+		.order('created_at', { ascending: false });
+	if (error) throw error;
+	return (data ?? []).map(rowToAuditLog);
 }
 
 /** Estado destino de la convocatoria para cada acción de moderación. */
-const actionToStatus: Partial<Record<ModerationAction, Event['status']>> = {
+export const actionToStatus: Partial<Record<ModerationAction, Event['status']>> = {
 	approve: 'published',
 	request_changes: 'draft',
 	hide: 'hidden',
@@ -91,58 +105,61 @@ export async function applyModerationAction(
 	moderatorId: string,
 	note?: string
 ): Promise<Event> {
-	await ensureSeeded();
 	const nextStatus = actionToStatus[action];
 	const event = nextStatus
 		? await setEventStatus(eventId, nextStatus, note)
 		: await getEvent(eventId);
 	if (!event) throw new Error(`Convocatoria no encontrada: ${eventId}`);
 
-	const log: AuditLog = {
-		id: `log-${randomId().slice(0, 8)}`,
-		eventId,
+	const { error: logError } = await supabase.from('audit_logs').insert({
+		event_id: eventId,
 		action,
-		moderatorId,
-		note,
-		createdAt: new Date().toISOString()
-	};
-	auditLogs.unshift(log);
-	persistAuditLogs();
+		moderator_id: moderatorId,
+		note: note ?? null
+	});
+	if (logError) throw logError;
 
-	// Marcamos como resueltos los reportes abiertos de esta convocatoria.
-	let reportsChanged = false;
-	for (const report of reports) {
-		if (report.eventId === eventId && (report.status === 'open' || report.status === 'in_review')) {
-			report.status = 'resolved';
-			report.resolvedAt = log.createdAt;
-			reportsChanged = true;
-		}
-	}
-	if (reportsChanged) persistReports();
+	await supabase
+		.from('reports')
+		.update({ status: 'resolved', resolved_at: new Date().toISOString() })
+		.eq('event_id', eventId)
+		.in('status', ['open', 'in_review']);
 
 	return event;
 }
 
 export async function listReportsForEvent(eventId: string): Promise<Report[]> {
-	await ensureSeeded();
-	return delay(reports.filter((r) => r.eventId === eventId));
+	const { data, error } = await supabase.from('reports').select('*').eq('event_id', eventId);
+	if (error) throw error;
+	return (data ?? []).map(rowToReport);
 }
 
+/**
+ * Reportar requiere estar autenticado (política `reports_insert_authenticated`
+ * en `supabase/migrations/0005_reports_and_audit_logs.sql`: `anon` no tiene
+ * política de INSERT). Quién reportó no se expone en ninguna vista pública
+ * ni siquiera a moderación desde la interfaz actual.
+ */
 export async function createReport(
 	eventId: string,
 	reason: ReportReason,
 	details?: string
 ): Promise<Report> {
-	await ensureSeeded();
-	const report: Report = {
-		id: `rep-${randomId().slice(0, 8)}`,
-		eventId,
-		reason,
-		details,
-		status: 'open',
-		createdAt: new Date().toISOString()
-	};
-	reports.unshift(report);
-	persistReports();
-	return delay(report);
+	const { data: sessionData } = await supabase.auth.getSession();
+	if (!sessionData.session) {
+		throw new Error('Debes iniciar sesión para reportar una convocatoria.');
+	}
+
+	const { data, error } = await supabase
+		.from('reports')
+		.insert({
+			event_id: eventId,
+			reported_by_user_id: sessionData.session.user.id,
+			reason,
+			details: details ?? null
+		})
+		.select('*')
+		.single();
+	if (error) throw error;
+	return rowToReport(data);
 }

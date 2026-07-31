@@ -1,7 +1,9 @@
 import {
 	PUBLIC_APP_ENV,
 	PUBLIC_ENABLE_DEMO_DATA,
-	PUBLIC_ENABLE_DEV_TOOLS
+	PUBLIC_ENABLE_DEV_TOOLS,
+	PUBLIC_AUTH_GOOGLE_ENABLED,
+	PUBLIC_AUTH_PASSWORD_ENABLED
 } from '$env/static/public';
 
 /**
@@ -37,5 +39,26 @@ export const IS_DEVELOPMENT = APP_ENV === 'development';
  * `PUBLIC_ENABLE_DEMO_DATA` / `PUBLIC_ENABLE_DEV_TOOLS` en el panel del
  * hosting. `IS_PRODUCTION` manda por encima de esas dos variables.
  */
+/**
+ * Con Supabase conectado, los datos de demostración ya no se cargan en el
+ * cliente (no hay ningún array mock que sembrar en el navegador): viven,
+ * si acaso, en `supabase/seed.sql` (solo para `supabase start`/`db reset`
+ * en local, nunca en el proyecto remoto). Esta constante se conserva
+ * porque el contrato de variables de entorno la sigue exigiendo, pero hoy
+ * no gatea ningún código de la SPA.
+ */
 export const ENABLE_DEMO_DATA = !IS_PRODUCTION && PUBLIC_ENABLE_DEMO_DATA === 'true';
 export const ENABLE_DEV_TOOLS = !IS_PRODUCTION && PUBLIC_ENABLE_DEV_TOOLS === 'true';
+
+/**
+ * Interruptores de método de autenticación (beta con Google como único
+ * método público). A diferencia de `ENABLE_DEMO_DATA`/`ENABLE_DEV_TOOLS`,
+ * estos NO se fuerzan por `IS_PRODUCTION`: son un ajuste de producto que el
+ * propio proyecto controla por entorno de despliegue (p. ej. mantener
+ * ambos activos en desarrollo para poder probar el formulario de correo,
+ * y solo Google en la producción de la beta). Siguen siendo constantes de
+ * compilación — nadie puede activarlas manipulando el navegador, cambiar
+ * su valor exige volver a desplegar con otra variable de entorno.
+ */
+export const ENABLE_GOOGLE_AUTH = PUBLIC_AUTH_GOOGLE_ENABLED === 'true';
+export const ENABLE_PASSWORD_AUTH = PUBLIC_AUTH_PASSWORD_ENABLED === 'true';

@@ -1,241 +1,473 @@
 /**
- * Tipos de la base de datos, escritos a mano a partir de
- * `supabase/migrations/*.sql` porque no hay acceso a la CLI de Supabase
- * vinculada al proyecto real desde este entorno.
- *
- * En cuanto tengas la CLI vinculada (`supabase link --project-ref <ref>`),
- * sustituye este archivo por la salida real de:
- *   supabase gen types typescript --linked > src/lib/supabase/database.types.ts
- * para que quede garantizado que coincide exactamente con el esquema en
- * producción, en vez de con esta copia mantenida a mano.
+ * Tipos generados automáticamente a partir del esquema remoto real
+ * (proyecto ihwzbdaeggvkzwevozra) con
+ * `mcp__supabase__generate_typescript_types`. No editar a mano: si el
+ * esquema cambia, añade una migración nueva y vuelve a generar este
+ * archivo.
  */
 
-export interface Database {
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+
+export type Database = {
+	// Allows to automatically instantiate createClient with right options
+	// instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+	__InternalSupabase: {
+		PostgrestVersion: '14.15';
+	};
 	public: {
 		Tables: {
-			profiles: {
+			attendance_responses: {
 				Row: {
-					id: string;
-					role: 'organizer' | 'moderator' | 'admin';
 					created_at: string;
+					dedup_token: string;
+					event_id: string;
+					id: string;
+					response: string;
 					updated_at: string;
 				};
 				Insert: {
-					id: string;
-					role?: 'organizer' | 'moderator' | 'admin';
-				};
-				Update: {
-					role?: 'organizer' | 'moderator' | 'admin';
-				};
-			};
-			organizers: {
-				Row: {
-					id: string;
-					created_by: string;
-					display_name: string;
-					kind: 'persona' | 'colectivo' | 'asociacion' | 'sindicato' | 'plataforma' | 'otro';
-					bio: string | null;
-					contact_email: string | null;
-					website: string | null;
-					avatar_url: string | null;
-					published_events_count: number;
-					created_at: string;
-					updated_at: string;
-				};
-				Insert: {
-					created_by: string;
-					display_name: string;
-					kind: 'persona' | 'colectivo' | 'asociacion' | 'sindicato' | 'plataforma' | 'otro';
-					bio?: string | null;
-					contact_email?: string | null;
-					website?: string | null;
-					avatar_url?: string | null;
-				};
-				Update: {
-					display_name?: string;
-					bio?: string | null;
-					contact_email?: string | null;
-					website?: string | null;
-					avatar_url?: string | null;
-				};
-			};
-			organizer_private_profiles: {
-				Row: {
-					organizer_id: string;
-					user_id: string;
-					legal_organization_name: string | null;
-					accepted_terms_at: string | null;
-					accepted_peaceful_use_at: string | null;
-					created_at: string;
-				};
-				Insert: {
-					organizer_id: string;
-					user_id: string;
-					legal_organization_name?: string | null;
-					accepted_terms_at?: string | null;
-					accepted_peaceful_use_at?: string | null;
-				};
-				Update: {
-					legal_organization_name?: string | null;
-				};
-			};
-			events: {
-				Row: {
-					id: string;
-					slug: string;
-					title: string;
-					description: string;
-					objective: string;
-					category: string;
-					themes: string[];
-					custom_theme_label: string | null;
-					status: string;
-					status_note: string | null;
-					start_at: string;
-					end_at: string | null;
-					duration_minutes: number | null;
-					meeting_point: Record<string, unknown>;
-					route: Record<string, unknown> | null;
-					organizer_id: string;
-					created_by_user_id: string;
-					verification: Record<string, unknown>;
-					prior_communication: string;
-					rules: string[];
-					peaceful_declaration: boolean;
-					cover_image_url: string | null;
-					archived: boolean;
-					created_at: string;
-					updated_at: string;
-				};
-				Insert: {
-					slug: string;
-					title: string;
-					description: string;
-					objective: string;
-					category: string;
-					themes?: string[];
-					custom_theme_label?: string | null;
-					status?: string;
-					status_note?: string | null;
-					start_at: string;
-					end_at?: string | null;
-					duration_minutes?: number | null;
-					meeting_point: Record<string, unknown>;
-					route?: Record<string, unknown> | null;
-					organizer_id: string;
-					created_by_user_id: string;
-					prior_communication: string;
-					rules?: string[];
-					peaceful_declaration: boolean;
-					cover_image_url?: string | null;
-					archived?: boolean;
-				};
-				Update: {
-					title?: string;
-					description?: string;
-					objective?: string;
-					category?: string;
-					themes?: string[];
-					custom_theme_label?: string | null;
-					status?: string;
-					status_note?: string | null;
-					start_at?: string;
-					end_at?: string | null;
-					duration_minutes?: number | null;
-					meeting_point?: Record<string, unknown>;
-					route?: Record<string, unknown> | null;
-					rules?: string[];
-					peaceful_declaration?: boolean;
-					cover_image_url?: string | null;
-					archived?: boolean;
-				};
-			};
-			event_updates: {
-				Row: {
-					id: string;
+					created_at?: string;
+					dedup_token: string;
 					event_id: string;
-					author_organizer_id: string;
-					title: string;
-					body: string;
-					is_critical: boolean;
-					created_at: string;
-				};
-				Insert: {
-					event_id: string;
-					author_organizer_id: string;
-					title: string;
-					body: string;
-					is_critical?: boolean;
-				};
-				Update: never;
-			};
-			reports: {
-				Row: {
-					id: string;
-					event_id: string;
-					reported_by_user_id: string | null;
-					reason: string;
-					details: string | null;
-					status: 'open' | 'in_review' | 'resolved' | 'dismissed';
-					created_at: string;
-					resolved_at: string | null;
-				};
-				Insert: {
-					event_id: string;
-					reported_by_user_id?: string | null;
-					reason: string;
-					details?: string | null;
+					id?: string;
+					response: string;
+					updated_at?: string;
 				};
 				Update: {
-					status?: 'open' | 'in_review' | 'resolved' | 'dismissed';
-					resolved_at?: string | null;
+					created_at?: string;
+					dedup_token?: string;
+					event_id?: string;
+					id?: string;
+					response?: string;
+					updated_at?: string;
 				};
+				Relationships: [
+					{
+						foreignKeyName: 'attendance_responses_event_id_fkey';
+						columns: ['event_id'];
+						isOneToOne: false;
+						referencedRelation: 'events';
+						referencedColumns: ['id'];
+					}
+				];
 			};
 			audit_logs: {
 				Row: {
-					id: string;
+					action: string;
+					created_at: string;
 					event_id: string;
-					action: 'approve' | 'request_changes' | 'hide' | 'reject' | 'reinstate';
+					id: string;
 					moderator_id: string;
 					note: string | null;
-					created_at: string;
 				};
 				Insert: {
+					action: string;
+					created_at?: string;
 					event_id: string;
-					action: 'approve' | 'request_changes' | 'hide' | 'reject' | 'reinstate';
+					id?: string;
 					moderator_id: string;
 					note?: string | null;
 				};
-				Update: never;
+				Update: {
+					action?: string;
+					created_at?: string;
+					event_id?: string;
+					id?: string;
+					moderator_id?: string;
+					note?: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'audit_logs_event_id_fkey';
+						columns: ['event_id'];
+						isOneToOne: false;
+						referencedRelation: 'events';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			event_updates: {
+				Row: {
+					author_organizer_id: string;
+					body: string;
+					created_at: string;
+					event_id: string;
+					id: string;
+					is_critical: boolean;
+					title: string;
+				};
+				Insert: {
+					author_organizer_id: string;
+					body: string;
+					created_at?: string;
+					event_id: string;
+					id?: string;
+					is_critical?: boolean;
+					title: string;
+				};
+				Update: {
+					author_organizer_id?: string;
+					body?: string;
+					created_at?: string;
+					event_id?: string;
+					id?: string;
+					is_critical?: boolean;
+					title?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'event_updates_author_organizer_id_fkey';
+						columns: ['author_organizer_id'];
+						isOneToOne: false;
+						referencedRelation: 'organizers';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'event_updates_event_id_fkey';
+						columns: ['event_id'];
+						isOneToOne: false;
+						referencedRelation: 'events';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			events: {
+				Row: {
+					archived: boolean;
+					category: string;
+					cover_image_url: string | null;
+					created_at: string;
+					created_by_user_id: string;
+					custom_theme_label: string | null;
+					description: string;
+					duration_minutes: number | null;
+					end_at: string | null;
+					id: string;
+					meeting_point: Json;
+					objective: string;
+					organizer_id: string;
+					peaceful_declaration: boolean;
+					prior_communication: string;
+					route: Json | null;
+					rules: string[];
+					slug: string;
+					start_at: string;
+					status: string;
+					status_note: string | null;
+					themes: string[];
+					title: string;
+					updated_at: string;
+					verification: Json;
+				};
+				Insert: {
+					archived?: boolean;
+					category: string;
+					cover_image_url?: string | null;
+					created_at?: string;
+					created_by_user_id: string;
+					custom_theme_label?: string | null;
+					description: string;
+					duration_minutes?: number | null;
+					end_at?: string | null;
+					id?: string;
+					meeting_point: Json;
+					objective: string;
+					organizer_id: string;
+					peaceful_declaration: boolean;
+					prior_communication: string;
+					route?: Json | null;
+					rules?: string[];
+					slug: string;
+					start_at: string;
+					status?: string;
+					status_note?: string | null;
+					themes?: string[];
+					title: string;
+					updated_at?: string;
+					verification?: Json;
+				};
+				Update: {
+					archived?: boolean;
+					category?: string;
+					cover_image_url?: string | null;
+					created_at?: string;
+					created_by_user_id?: string;
+					custom_theme_label?: string | null;
+					description?: string;
+					duration_minutes?: number | null;
+					end_at?: string | null;
+					id?: string;
+					meeting_point?: Json;
+					objective?: string;
+					organizer_id?: string;
+					peaceful_declaration?: boolean;
+					prior_communication?: string;
+					route?: Json | null;
+					rules?: string[];
+					slug?: string;
+					start_at?: string;
+					status?: string;
+					status_note?: string | null;
+					themes?: string[];
+					title?: string;
+					updated_at?: string;
+					verification?: Json;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'events_organizer_id_fkey';
+						columns: ['organizer_id'];
+						isOneToOne: false;
+						referencedRelation: 'organizers';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			organizer_private_profiles: {
+				Row: {
+					accepted_peaceful_use_at: string | null;
+					accepted_terms_at: string | null;
+					created_at: string;
+					legal_organization_name: string | null;
+					organizer_id: string;
+					user_id: string;
+				};
+				Insert: {
+					accepted_peaceful_use_at?: string | null;
+					accepted_terms_at?: string | null;
+					created_at?: string;
+					legal_organization_name?: string | null;
+					organizer_id: string;
+					user_id: string;
+				};
+				Update: {
+					accepted_peaceful_use_at?: string | null;
+					accepted_terms_at?: string | null;
+					created_at?: string;
+					legal_organization_name?: string | null;
+					organizer_id?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'organizer_private_profiles_organizer_id_fkey';
+						columns: ['organizer_id'];
+						isOneToOne: true;
+						referencedRelation: 'organizers';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			organizers: {
+				Row: {
+					avatar_url: string | null;
+					bio: string | null;
+					contact_email: string | null;
+					created_at: string;
+					created_by: string;
+					display_name: string;
+					id: string;
+					kind: string;
+					published_events_count: number;
+					updated_at: string;
+					website: string | null;
+				};
+				Insert: {
+					avatar_url?: string | null;
+					bio?: string | null;
+					contact_email?: string | null;
+					created_at?: string;
+					created_by: string;
+					display_name: string;
+					id?: string;
+					kind: string;
+					published_events_count?: number;
+					updated_at?: string;
+					website?: string | null;
+				};
+				Update: {
+					avatar_url?: string | null;
+					bio?: string | null;
+					contact_email?: string | null;
+					created_at?: string;
+					created_by?: string;
+					display_name?: string;
+					id?: string;
+					kind?: string;
+					published_events_count?: number;
+					updated_at?: string;
+					website?: string | null;
+				};
+				Relationships: [];
+			};
+			profiles: {
+				Row: {
+					created_at: string;
+					id: string;
+					role: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					id: string;
+					role?: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					role?: string;
+					updated_at?: string;
+				};
+				Relationships: [];
+			};
+			reports: {
+				Row: {
+					created_at: string;
+					details: string | null;
+					event_id: string;
+					id: string;
+					reason: string;
+					reported_by_user_id: string | null;
+					resolved_at: string | null;
+					status: string;
+				};
+				Insert: {
+					created_at?: string;
+					details?: string | null;
+					event_id: string;
+					id?: string;
+					reason: string;
+					reported_by_user_id?: string | null;
+					resolved_at?: string | null;
+					status?: string;
+				};
+				Update: {
+					created_at?: string;
+					details?: string | null;
+					event_id?: string;
+					id?: string;
+					reason?: string;
+					reported_by_user_id?: string | null;
+					resolved_at?: string | null;
+					status?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'reports_event_id_fkey';
+						columns: ['event_id'];
+						isOneToOne: false;
+						referencedRelation: 'events';
+						referencedColumns: ['id'];
+					}
+				];
 			};
 			verification_documents: {
 				Row: {
+					event_id: string | null;
+					file_name: string;
 					id: string;
 					organizer_id: string;
-					event_id: string | null;
-					uploaded_by_user_id: string;
-					type: 'identity' | 'organization_registration' | 'prior_communication_receipt' | 'other';
-					file_name: string;
-					storage_path: string;
-					status: 'pending' | 'approved' | 'rejected';
-					submitted_at: string;
 					reviewed_at: string | null;
 					reviewer_note: string | null;
+					status: string;
+					storage_path: string;
+					submitted_at: string;
+					type: string;
+					uploaded_by_user_id: string;
 				};
 				Insert: {
-					organizer_id: string;
 					event_id?: string | null;
-					uploaded_by_user_id: string;
-					type: 'identity' | 'organization_registration' | 'prior_communication_receipt' | 'other';
 					file_name: string;
-					storage_path: string;
-				};
-				Update: {
-					status?: 'pending' | 'approved' | 'rejected';
+					id?: string;
+					organizer_id: string;
 					reviewed_at?: string | null;
 					reviewer_note?: string | null;
+					status?: string;
+					storage_path: string;
+					submitted_at?: string;
+					type: string;
+					uploaded_by_user_id: string;
 				};
+				Update: {
+					event_id?: string | null;
+					file_name?: string;
+					id?: string;
+					organizer_id?: string;
+					reviewed_at?: string | null;
+					reviewer_note?: string | null;
+					status?: string;
+					storage_path?: string;
+					submitted_at?: string;
+					type?: string;
+					uploaded_by_user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'verification_documents_event_id_fkey';
+						columns: ['event_id'];
+						isOneToOne: false;
+						referencedRelation: 'events';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'verification_documents_organizer_id_fkey';
+						columns: ['organizer_id'];
+						isOneToOne: false;
+						referencedRelation: 'organizers';
+						referencedColumns: ['id'];
+					}
+				];
 			};
 		};
+		Views: {
+			[_ in never]: never;
+		};
+		Functions: {
+			get_attendance_counts: {
+				Args: { p_event_ids?: string[] };
+				Returns: {
+					event_id: string;
+					going_count: number;
+					interested_count: number;
+				}[];
+			};
+			is_moderator_or_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
+			purge_old_attendance_responses: { Args: Record<PropertyKey, never>; Returns: undefined };
+			set_attendance: {
+				Args: { p_dedup_token: string; p_event_id: string; p_response?: string };
+				Returns: undefined;
+			};
+		};
+		Enums: {
+			[_ in never]: never;
+		};
+		CompositeTypes: {
+			[_ in never]: never;
+		};
 	};
-}
+};
+
+type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>;
+type DefaultSchema = DatabaseWithoutInternals['public'];
+
+export type Tables<TableName extends keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])> =
+	(DefaultSchema['Tables'] & DefaultSchema['Views'])[TableName] extends {
+		Row: infer R;
+	}
+		? R
+		: never;
+
+export type TablesInsert<TableName extends keyof DefaultSchema['Tables']> =
+	DefaultSchema['Tables'][TableName] extends {
+		Insert: infer I;
+	}
+		? I
+		: never;
+
+export type TablesUpdate<TableName extends keyof DefaultSchema['Tables']> =
+	DefaultSchema['Tables'][TableName] extends {
+		Update: infer U;
+	}
+		? U
+		: never;

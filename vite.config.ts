@@ -1,45 +1,11 @@
-import { fileURLToPath } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
 import adapter from '@sveltejs/adapter-auto';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
-import { loadEnv } from 'vite';
 import { defineConfig } from 'vitest/config';
 
-export default defineConfig(({ mode }) => {
-	// `if (ENABLE_DEMO_DATA) { await import('./demoAccounts') }` NO basta para
-	// mantener la contraseña y los correos de demostración fuera del build de
-	// producción: comprobamos (build real + grep del output) que Rollup igual
-	// empaqueta el módulo importado dinámicamente como un chunk físico y lo
-	// publica en `_app/immutable/chunks/`, se ejecute o no esa rama en el
-	// navegador — el condicional en tiempo de ejecución no impide que el
-	// archivo exista y sea servible.
-	//
-	// La sustitución real ocurre aquí, en tiempo de bundling: el especificador
-	// virtual `convoca:demo-accounts` (ver `demo-accounts-virtual.d.ts`) se
-	// alía a `demoAccounts.ts` (datos reales) o a `demoAccounts.empty.ts`
-	// (vacío) según `PUBLIC_APP_ENV`, así que en un build de producción el
-	// chunk que Rollup genera para ese import ya no contiene los datos reales
-	// en ningún punto del pipeline.
-	//
-	// Usamos un especificador virtual (no `$lib/auth/demoAccounts`) a
-	// propósito: un alias más específico que sea prefijo de otro alias más
-	// genérico (`$lib`) no gana automáticamente — Vite resuelve alias en el
-	// orden en que aparecen en el array final y `$lib`, añadido por el propio
-	// plugin de SvelteKit, siempre queda primero. Un especificador único sin
-	// solapamiento evita ese problema de orden por completo.
-	const env = loadEnv(mode, process.cwd(), '');
-	const isProductionBuild = env.PUBLIC_APP_ENV === 'production';
-	const demoAccountsModule = isProductionBuild
-		? './src/lib/auth/demoAccounts.empty.ts'
-		: './src/lib/auth/demoAccounts.ts';
-
+export default defineConfig(() => {
 	return {
-		resolve: {
-			alias: {
-				'convoca:demo-accounts': fileURLToPath(new URL(demoAccountsModule, import.meta.url))
-			}
-		},
 		plugins: [
 			tailwindcss(),
 			SvelteKitPWA({

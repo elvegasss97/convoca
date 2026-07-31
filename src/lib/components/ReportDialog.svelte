@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Flag, X, CircleCheck } from '@lucide/svelte';
+	import { Flag, X, CircleCheck, AlertCircle } from '@lucide/svelte';
 	import type { ReportReason } from '$lib/types';
 	import { reportReasonLabels } from '$lib/labels';
 	import { createReport } from '$lib/services/moderationService';
@@ -18,13 +18,17 @@
 	let details = $state('');
 	let submitting = $state(false);
 	let submitted = $state(false);
+	let submitError = $state<string | null>(null);
 
 	async function submit(e: Event) {
 		e.preventDefault();
 		submitting = true;
+		submitError = null;
 		try {
 			await createReport(eventId, reason, details.trim() || undefined);
 			submitted = true;
+		} catch (err) {
+			submitError = err instanceof Error ? err.message : 'No se ha podido enviar el reporte.';
 		} finally {
 			submitting = false;
 		}
@@ -35,6 +39,7 @@
 		onClose();
 		setTimeout(() => {
 			submitted = false;
+			submitError = null;
 			details = '';
 			reason = 'informacion_falsa';
 		}, 200);
@@ -79,6 +84,15 @@
 				</div>
 			{:else}
 				<form class="mt-4 space-y-4" onsubmit={submit}>
+					{#if submitError}
+						<div
+							class="flex items-start gap-2 rounded-2xl border border-critical-300 bg-critical-50 p-3.5 text-sm text-critical-700"
+							role="alert"
+						>
+							<AlertCircle class="mt-0.5 size-4 shrink-0" />
+							{submitError}
+						</div>
+					{/if}
 					<div>
 						<label for="report-reason" class="mb-1 block text-sm font-medium text-ink-700"
 							>Motivo</label

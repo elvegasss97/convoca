@@ -202,15 +202,18 @@ export interface Event {
 // ---------------------------------------------------------------------------
 
 /**
- * Respuesta de asistencia de un usuario a una convocatoria. Nunca se debe
- * unir con datos identificativos en las vistas públicas: los asistentes
- * no aparecen públicamente en ningún listado.
+ * Fila de `attendance_responses` en Supabase. No hay `userId`: la tabla no
+ * tiene ninguna columna de identidad (ver
+ * `supabase/migrations/0009_attendance_responses.sql`). `dedupToken` es un
+ * identificador de dispositivo generado por el propio navegador, nunca una
+ * cuenta ni una persona, y la tabla no tiene política de SELECT para nadie
+ * — solo se leen contadores agregados (`AttendanceCounts`), nunca filas
+ * individuales.
  */
 export interface AttendanceResponse {
 	id: string;
 	eventId: string;
-	/** Id de sesión/usuario anónimo, nunca un nombre visible públicamente. */
-	userId: string;
+	dedupToken: string;
 	kind: AttendanceKind;
 	createdAt: string;
 }
