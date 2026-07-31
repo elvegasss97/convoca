@@ -3,13 +3,32 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import TopBar from '$lib/components/nav/TopBar.svelte';
 	import MobileTabBar from '$lib/components/nav/MobileTabBar.svelte';
-	import DevResetButton from '$lib/components/dev/DevResetButton.svelte';
 	import { ENABLE_DEV_TOOLS } from '$lib/config/env';
 	import { pwaInfo } from 'virtual:pwa-info';
+	import type { Component } from 'svelte';
 
 	let { children } = $props();
 
 	const webManifestLink = $derived(pwaInfo?.webManifest.linkTag ?? '');
+
+	/**
+	 * `import()` dinámico en vez de estático, guardado por el mismo `if
+	 * (ENABLE_DEV_TOOLS)`: con un import estático, Svelte compila el `{#if}`
+	 * como una rama en tiempo de EJECUCIÓN — el componente (con su texto
+	 * "Reset local (dev)") queda igualmente en el bundle que descarga
+	 * cualquier visitante de staging/producción, aunque nunca se monte.
+	 * Verificado en vivo con un build real (`grep` del output): con import
+	 * estático, la cadena aparecía en el bundle del layout raíz incluso con
+	 * `PUBLIC_ENABLE_DEV_TOOLS=false`. Con `import()` dinámico, Rollup lo
+	 * separa en un chunk aparte que solo se solicita si este código llega a
+	 * ejecutarse — y no se ejecuta cuando `ENABLE_DEV_TOOLS` es `false`.
+	 */
+	let DevResetButton = $state<Component | null>(null);
+	if (ENABLE_DEV_TOOLS) {
+		import('$lib/components/dev/DevResetButton.svelte').then((m) => {
+			DevResetButton = m.default;
+		});
+	}
 </script>
 
 <svelte:head>
@@ -30,7 +49,7 @@
 		{@render children()}
 	</main>
 	<MobileTabBar />
-	{#if ENABLE_DEV_TOOLS}
+	{#if DevResetButton}
 		<DevResetButton />
 	{/if}
 </div>

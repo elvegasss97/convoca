@@ -16,10 +16,11 @@
 	} from '@lucide/svelte';
 	import type { EventCategory, EventTheme, PriorCommunicationStatus } from '$lib/types';
 	import { categoryLabels, themeLabels, themeLabel, priorCommunicationLabels } from '$lib/labels';
-	import { mockCities } from '$lib/mock/cities';
+	import { mockCities } from '$lib/data/cities';
 	import { createEvent } from '$lib/services/eventsService';
 	import { getOrganizer } from '$lib/services/organizersService';
 	import { authState } from '$lib/auth/session.svelte';
+	import { getMyOrganizerPrivateProfile, hasCompletedLegalAcceptance } from '$lib/auth/authService';
 	import { formatEventDate, formatDuration } from '$lib/utils/date';
 	import CategoryGlyph from '$lib/components/CategoryGlyph.svelte';
 	import MeetingPointPicker from '$lib/components/MeetingPointPicker.svelte';
@@ -248,6 +249,15 @@
 		}
 		if (!session.user.organizerId) {
 			submitError = 'Esta cuenta no tiene un perfil de organizador vinculado.';
+			return;
+		}
+
+		const profile = await getMyOrganizerPrivateProfile(session.user.id);
+		if (!hasCompletedLegalAcceptance(profile)) {
+			// El borrador ya está guardado en localStorage (ver el $effect de
+			// arriba): al volver de /aceptar-condiciones a /crear se restaura solo,
+			// igual que con el redirect de /login de más arriba.
+			await goto('/aceptar-condiciones?redirect=/crear');
 			return;
 		}
 

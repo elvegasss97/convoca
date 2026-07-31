@@ -5,13 +5,20 @@
 > hizo y se comprobó — no lo que estaba planeado. Si algo no se pudo
 > verificar en vivo, se dice explícitamente.
 
-## Resumen ejecutivo (antes de empezar)
+## Resumen ejecutivo (actualizado tras la Fase 4)
 
-Convoca es, a fecha de este documento, un **prototipo visual completo con
-autenticación y persistencia simuladas**: no hay backend, no hay base de
-datos real, y toda la "seguridad" (sesiones, roles, propiedad de eventos)
-se aplica solo en el cliente. Es útil para validar el diseño y los flujos,
-pero **no debe desplegarse tal cual con usuarios reales**.
+Convoca **ya no es un prototipo simulado**: tiene backend real (Supabase),
+autenticación real (correo/contraseña + Google OAuth) y autorización real
+aplicada en la base de datos (RLS), no solo en el cliente. El sistema mock
+original (Fase 1) está eliminado, no solo aislado — no queda ningún array
+de datos ficticios en el árbol de código que se ejecuta.
+
+Sigue **sin estar listo para lanzamiento público**: falta desplegar y
+probar en staging (Fase 5 en adelante, ver más abajo), pasar una auditoría
+de seguridad externa (Strix) y corregir cualquier hallazgo crítico/alto
+antes de plantear un lanzamiento real. Este documento se sigue actualizando
+según ese principio: solo se declara hecho lo que de verdad se comprobó en
+vivo.
 
 ---
 
@@ -379,8 +386,137 @@ Editor, dímelo con el mensaje de error exacto de Postgres y lo corrijo.
 
 ---
 
-## Estado de las fases siguientes
+## FASE 3 (cierre) — Autenticación real y RLS en producción
 
-Ver las secciones más abajo, que se añaden a medida que se ejecuta cada
-fase. Cada una indica explícitamente qué se implementó, qué se verificó
-en vivo (contra qué infraestructura) y qué queda pendiente.
+Lo que la Fase 3 (parcial) dejaba como "siguiente paso" ya está hecho y
+verificado en vivo, no solo revisado a mano:
+
+### 1. El código habla con Supabase de verdad
+
+`authService.ts` implementa `AuthService` sobre
+`@supabase/supabase-js` (`signUp`, `signInWithPassword`,
+`signInWithGoogle`, `signOut`, `resetPasswordForEmail`,
+`onAuthStateChange`, `getSession`). `eventsService.ts`,
+`organizersService.ts`, `updatesService.ts` y `moderationService.ts` leen
+y escriben contra las tablas reales, no contra arrays en memoria. El
+sistema mock (Fase 1) está **eliminado, no aislado**: `src/lib/mock/`
+solo conserva `cities.ts` (reubicado a `src/lib/data/cities.ts` — es un
+listado de ciudades real que usa el selector de ubicación, nunca fue dato
+ficticio de demostración); `demoAccounts.ts`, `mockHash.ts`,
+`persistedArray.ts` y los arrays de eventos/organizadores/reportes de
+ejemplo se han borrado del árbol de código.
+
+### 2. Las 17 migraciones están aplicadas contra el proyecto real
+
+`ihwzbdaeggvkzwevozra`, confirmado con `list_migrations` (no son solo
+archivos locales pendientes de pegar en el SQL Editor, como decía la Fase
+3 parcial). Incluyen RLS en `events`, `organizers`,
+`organizer_private_profiles`, `reports`, `audit_logs`,
+`verification_documents`, y el trigger `handle_new_user` que da de alta
+`profiles`/`organizers`/`organizer_private_profiles` automáticamente.
+
+### 3. Google OAuth activado y verificado end-to-end
+
+- `external_google_enabled=true` en el proyecto real (Management API), con
+  callback `https://ihwzbdaeggvkzwevozra.supabase.co/auth/v1/callback`.
+- Probado en vivo: clic real en "Continuar con Google" desde
+  `localhost:5173/login` redirige a `accounts.google.com` con el
+  `client_id` y `redirect_uri` correctos.
+- Confirmado en base de datos tras logins reales: cada cuenta de Google
+  produce exactamente un perfil `organizer` (sin duplicados en logins
+  repetidos), y **0** cuentas con rol `moderator`/`admin` — el rol nunca
+  sale de metadatos que el cliente controle.
+- `prevent_role_self_update` (migración `0012`) bloquea cualquier cambio
+  de rol que no venga de una identidad ya moderadora/admin.
+
+### 4. RLS de `events` protege la publicación real
+
+`events_select_public` excluye `draft`/`pending_review`/`hidden`/`rejected`:
+una convocatoria nueva no es visible públicamente hasta que moderación la
+aprueba. Verificado leyendo las políticas reales, no solo el código de la
+SPA (que hasta la Fase 3 completa era la única barrera, ver advertencia de
+la Fase 1 sobre este mismo punto).
+
+---
+
+## FASE 4 — Aceptación legal obligatoria
+
+Antes de esta fase, `accepted_terms_at`/`accepted_peaceful_use_at` quedaban
+en `NULL` para siempre en cualquier alta por Google (no hay formulario en
+ese flujo), y no existía ninguna aceptación de política de privacidad en
+ningún flujo, ni por correo ni por Google.
+
+### 1. Esquema
+
+Migraciones `0018_legal_acceptance` y `0019_legal_acceptance_metadata`
+(aplicadas al proyecto real): `organizer_private_profiles` gana
+`accepted_privacy_at` y tres columnas de versión
+(`accepted_terms_version`, `accepted_privacy_version`,
+`accepted_peaceful_use_version`). Se guarda versión además de fecha para
+que, si el texto legal cambia, solo haga falta subir el número en
+`src/lib/legal/versions.ts` para que todas las cuentas —incluidas las que
+ya habían aceptado la versión anterior— tengan que volver a aceptar.
+
+### 2. Alta por correo — sin cambio de fricción
+
+`/registro` ya pedía aceptar condiciones y uso pacífico; ahora pide
+también privacidad (tercer checkbox, ninguno premarcado). Las tres se
+guardan en el mismo `signUp()`, vía metadatos que lee el trigger
+`handle_new_user` — no hace falta una segunda pantalla para quien ya
+aceptó en el registro.
+
+### 3. Alta por Google — gate antes de la primera convocatoria
+
+Nueva pantalla obligatoria `/aceptar-condiciones`: tres checkboxes
+(términos, privacidad, declaración de uso pacífico), ninguno marcado por
+defecto, botón "Continuar" deshabilitado hasta marcar los tres. Guarda
+fecha + versión de cada aceptación (`acceptLegalTerms()` en
+`authService.ts`). `/crear` comprueba `hasCompletedLegalAcceptance()` en el
+momento de enviar la convocatoria (no al abrir el formulario, para no
+romper el guardado de borrador anónimo ya existente) y redirige a
+`/aceptar-condiciones?redirect=/crear` si falta alguna; al volver, el
+borrador sigue ahí y solo hay que pulsar "Publicar" de nuevo.
+
+### 4. Texto legal: placeholder, no redactado por un profesional
+
+El texto mostrado en los checkboxes es funcional pero genérico — antes de
+un lanzamiento público real hace falta que alguien con criterio legal lo
+revise y lo sustituya. Esto queda explícitamente pendiente, no se declara
+resuelto.
+
+### 5. Limpieza de mock verificada con build real, no asumida
+
+Se encontró (con el mismo método de "build + grep" que ya usó la Fase 2
+para el hallazgo del `Convoca123!`) que el botón "Reset local (dev)"
+seguía compilándose dentro del bundle principal del layout raíz incluso
+con `PUBLIC_ENABLE_DEV_TOOLS=false` — un `{#if}` sobre un import estático
+es una rama en tiempo de ejecución, Svelte no elimina el componente del
+bundle solo porque la condición sea falsa. Corregido cargando
+`DevResetButton.svelte` con `import()` dinámico dentro del propio `if
+(ENABLE_DEV_TOOLS)`: así Rollup lo separa en un chunk aparte que nunca se
+solicita cuando la bandera es falsa. Reverificado con un build real: la
+cadena `"Reset local (dev)"` ya no aparece en el bundle que se envía al
+navegador en un build de staging.
+
+### 6. Lo que queda pendiente de esta fase (honesto)
+
+- El texto legal es un placeholder (punto 4).
+- No se ha probado el flujo `/aceptar-condiciones` con un login de Google
+  real de principio a fin en staging todavía — eso es la Fase 6 del
+  despliegue (ver más abajo).
+
+---
+
+## Despliegue a staging (Vercel) — en curso
+
+Fases numeradas por separado del resto de este documento, siguiendo el
+encargo del usuario: (1) punto de restauración de Git, (2) esta
+actualización + aceptación legal, (3) adapter de Vercel, (4) repositorio y
+despliegue, (5) URLs de Supabase/Google, (6) pruebas reales en staging,
+(7) checks finales. Cada una se documenta aquí a medida que se cierra, con
+lo mismo de siempre: qué se verificó en vivo y qué no.
+
+**No se declara Convoca lista para lanzamiento público en ningún punto de
+este proceso.** El objetivo de esta ronda es una URL de staging para
+probar Google OAuth desde el móvil, y pasar una auditoría de seguridad
+(Strix) antes de plantear un lanzamiento real.

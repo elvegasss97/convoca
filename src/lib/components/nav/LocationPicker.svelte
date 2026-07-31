@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { MapPin, ChevronDown } from '@lucide/svelte';
 	import { selectedCity } from '$lib/stores/location';
-	import { mockCities } from '$lib/mock/cities';
+	import { mockCities } from '$lib/data/cities';
 
 	let open = $state(false);
 

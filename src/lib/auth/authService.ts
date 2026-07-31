@@ -11,6 +11,7 @@ import type {
 import { AuthError } from './types';
 import { supabase, setSessionScope } from '$lib/supabase/client';
 import { ENABLE_PASSWORD_AUTH } from '$lib/config/env';
+import { LEGAL_VERSIONS } from '$lib/legal/versions';
 import type { Session as SupabaseSession } from '@supabase/supabase-js';
 
 /**
@@ -106,8 +107,10 @@ export function validateSignUpInput(input: SignUpInput): void {
 	if (!input.displayName.trim()) throw new AuthError('Indica el nombre público del organizador.');
 	if (input.password.length < 8)
 		throw new AuthError('La contraseña debe tener al menos 8 caracteres.', 'password');
-	if (!input.acceptedTerms || !input.acceptedPeacefulUse) {
-		throw new AuthError('Debes aceptar las condiciones y la declaración de uso pacífico.');
+	if (!input.acceptedTerms || !input.acceptedPrivacy || !input.acceptedPeacefulUse) {
+		throw new AuthError(
+			'Debes aceptar las condiciones, la política de privacidad y la declaración de uso pacífico.'
+		);
 	}
 }
 
@@ -229,7 +232,11 @@ async function performSignUp(input: SignUpInput, email: string): Promise<UserSes
 					organizer_kind: input.organizerKind,
 					organization_name: input.organizationName?.trim() || undefined,
 					accepted_terms: input.acceptedTerms,
-					accepted_peaceful_use: input.acceptedPeacefulUse
+					accepted_privacy: input.acceptedPrivacy,
+					accepted_peaceful_use: input.acceptedPeacefulUse,
+					legal_terms_version: LEGAL_VERSIONS.terms,
+					legal_privacy_version: LEGAL_VERSIONS.privacy,
+					legal_peaceful_use_version: LEGAL_VERSIONS.peacefulUse
 				},
 				emailRedirectTo: redirectOrigin() ? `${redirectOrigin()}/login` : undefined
 			}
@@ -421,6 +428,57 @@ export async function getMyOrganizerPrivateProfile(
 		userId: data.user_id,
 		legalOrganizationName: data.legal_organization_name ?? undefined,
 		acceptedTermsAt: data.accepted_terms_at ?? '',
-		acceptedPeacefulUseAt: data.accepted_peaceful_use_at ?? ''
+		acceptedPrivacyAt: data.accepted_privacy_at ?? '',
+		acceptedPeacefulUseAt: data.accepted_peaceful_use_at ?? '',
+		acceptedTermsVersion: data.accepted_terms_version ?? '',
+		acceptedPrivacyVersion: data.accepted_privacy_version ?? '',
+		acceptedPeacefulUseVersion: data.accepted_peaceful_use_version ?? ''
 	};
+}
+
+/**
+ * `true` solo si las tres aceptaciones existen Y coinciden con la versión
+ * vigente del texto (`LEGAL_VERSIONS`). Si el perfil no existe todavía
+ * (nunca debería pasar para una cuenta `organizer`, pero por robustez) se
+ * trata como pendiente, nunca como aceptado.
+ *
+ * Por qué comparar versión y no solo presencia de fecha: si el texto legal
+ * cambia, subir el número en `LEGAL_VERSIONS` basta para que todas las
+ * cuentas —incluidas las que ya habían aceptado la versión anterior—
+ * vuelvan a pasar por `/aceptar-condiciones` antes de crear su siguiente
+ * convocatoria.
+ */
+export function hasCompletedLegalAcceptance(profile: OrganizerPrivateProfile | undefined): boolean {
+	if (!profile) return false;
+	return (
+		Boolean(profile.acceptedTermsAt) &&
+		profile.acceptedTermsVersion === LEGAL_VERSIONS.terms &&
+		Boolean(profile.acceptedPrivacyAt) &&
+		profile.acceptedPrivacyVersion === LEGAL_VERSIONS.privacy &&
+		Boolean(profile.acceptedPeacefulUseAt) &&
+		profile.acceptedPeacefulUseVersion === LEGAL_VERSIONS.peacefulUse
+	);
+}
+
+/**
+ * Guarda la aceptación de los tres documentos legales vigentes para la
+ * cuenta autenticada. Se llama solo desde `/aceptar-condiciones`, y solo
+ * tras una acción explícita de la persona (marcar los tres checkboxes y
+ * pulsar "Continuar") — nunca se invoca automáticamente en ningún flujo de
+ * login o registro.
+ */
+export async function acceptLegalTerms(userId: string): Promise<void> {
+	const now = new Date().toISOString();
+	const { error } = await supabase
+		.from('organizer_private_profiles')
+		.update({
+			accepted_terms_at: now,
+			accepted_privacy_at: now,
+			accepted_peaceful_use_at: now,
+			accepted_terms_version: LEGAL_VERSIONS.terms,
+			accepted_privacy_version: LEGAL_VERSIONS.privacy,
+			accepted_peaceful_use_version: LEGAL_VERSIONS.peacefulUse
+		})
+		.eq('user_id', userId);
+	if (error) throw new AuthError('No se ha podido guardar la aceptación. Inténtalo de nuevo.');
 }

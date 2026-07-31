@@ -53,7 +53,15 @@ vi.mock('$lib/supabase/client', () => {
 });
 
 import { supabase } from '$lib/supabase/client';
-import { authService, validateSignUpInput, mapSignUpError, mapSignInError } from './authService';
+import {
+	authService,
+	validateSignUpInput,
+	mapSignUpError,
+	mapSignInError,
+	hasCompletedLegalAcceptance
+} from './authService';
+import type { OrganizerPrivateProfile } from './types';
+import { LEGAL_VERSIONS } from '$lib/legal/versions';
 
 function baseInput(overrides: Partial<SignUpInput> = {}): SignUpInput {
 	return {
@@ -62,6 +70,7 @@ function baseInput(overrides: Partial<SignUpInput> = {}): SignUpInput {
 		displayName: 'Asociación de prueba',
 		organizerKind: 'persona',
 		acceptedTerms: true,
+		acceptedPrivacy: true,
 		acceptedPeacefulUse: true,
 		...overrides
 	};
@@ -88,8 +97,46 @@ describe('validateSignUpInput', () => {
 		expect(() => validateSignUpInput(baseInput({ acceptedTerms: false }))).toThrow(AuthError);
 	});
 
+	it('rechaza si no se acepta la política de privacidad', () => {
+		expect(() => validateSignUpInput(baseInput({ acceptedPrivacy: false }))).toThrow(AuthError);
+	});
+
 	it('rechaza si no se acepta la declaración de uso pacífico', () => {
 		expect(() => validateSignUpInput(baseInput({ acceptedPeacefulUse: false }))).toThrow(AuthError);
+	});
+});
+
+function baseProfile(overrides: Partial<OrganizerPrivateProfile> = {}): OrganizerPrivateProfile {
+	return {
+		organizerId: 'org-1',
+		userId: 'user-1',
+		acceptedTermsAt: '2026-07-31T00:00:00.000Z',
+		acceptedPrivacyAt: '2026-07-31T00:00:00.000Z',
+		acceptedPeacefulUseAt: '2026-07-31T00:00:00.000Z',
+		acceptedTermsVersion: LEGAL_VERSIONS.terms,
+		acceptedPrivacyVersion: LEGAL_VERSIONS.privacy,
+		acceptedPeacefulUseVersion: LEGAL_VERSIONS.peacefulUse,
+		...overrides
+	};
+}
+
+describe('hasCompletedLegalAcceptance — gate antes de crear la primera convocatoria', () => {
+	it('sin perfil (undefined) se trata como pendiente', () => {
+		expect(hasCompletedLegalAcceptance(undefined)).toBe(false);
+	});
+
+	it('con las tres aceptaciones en la versión vigente, está completo', () => {
+		expect(hasCompletedLegalAcceptance(baseProfile())).toBe(true);
+	});
+
+	it('falta accepted_privacy_at (p. ej. altas por Google) -> pendiente', () => {
+		expect(hasCompletedLegalAcceptance(baseProfile({ acceptedPrivacyAt: '' }))).toBe(false);
+	});
+
+	it('la versión aceptada no coincide con la vigente -> pendiente aunque haya fecha', () => {
+		expect(hasCompletedLegalAcceptance(baseProfile({ acceptedTermsVersion: '2020-01-01' }))).toBe(
+			false
+		);
 	});
 });
 

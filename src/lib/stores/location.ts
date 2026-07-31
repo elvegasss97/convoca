@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { mockCities, type City } from '$lib/mock/cities';
+import { mockCities, type City } from '$lib/data/cities';
 
 /**
  * Ubicación elegida manualmente por la persona usuaria. Nunca se usa

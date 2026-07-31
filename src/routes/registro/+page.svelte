@@ -23,6 +23,7 @@
 	let organizerKind = $state<OrganizerKind>('persona');
 	let organizationName = $state('');
 	let acceptedTerms = $state(false);
+	let acceptedPrivacy = $state(false);
 	let acceptedPeacefulUse = $state(false);
 	let showPassword = $state(false);
 
@@ -65,7 +66,7 @@
 	const organizationNameValid = $derived(
 		!requiresOrganizationName || organizationName.trim().length > 0
 	);
-	const termsValid = $derived(acceptedTerms && acceptedPeacefulUse);
+	const termsValid = $derived(acceptedTerms && acceptedPrivacy && acceptedPeacefulUse);
 
 	const formValid = $derived(
 		displayNameValid &&
@@ -84,6 +85,7 @@
 		if (!passwordValid) return 'password';
 		if (!confirmPasswordValid) return 'confirm-password';
 		if (!acceptedTerms) return 'terms-checkbox';
+		if (!acceptedPrivacy) return 'privacy-checkbox';
 		if (!acceptedPeacefulUse) return 'peaceful-checkbox';
 		return null;
 	}
@@ -124,6 +126,7 @@
 				organizerKind,
 				organizationName: requiresOrganizationName ? organizationName : undefined,
 				acceptedTerms,
+				acceptedPrivacy,
 				acceptedPeacefulUse
 			});
 			if (session) {
@@ -420,6 +423,16 @@
 					Acepto las condiciones de uso de Convoca.
 				</label>
 
+				<label class="flex items-start gap-2.5 text-sm text-ink-700">
+					<input
+						id="privacy-checkbox"
+						type="checkbox"
+						bind:checked={acceptedPrivacy}
+						class="mt-0.5 size-4 rounded border-ink-300 text-brand-700 focus:ring-brand-500"
+					/>
+					He leído y acepto la política de privacidad de Convoca.
+				</label>
+
 				<label
 					class="flex items-start gap-2.5 rounded-2xl border p-3.5 text-sm font-medium text-brand-900 {showErrors &&
 					!acceptedPeacefulUse
@@ -435,7 +448,7 @@
 					Declaro que utilizaré Convoca únicamente para difundir acciones legales y pacíficas.
 				</label>
 				{#if showErrors && !termsValid}
-					<FieldError message="Debes aceptar ambas declaraciones para crear la cuenta." />
+					<FieldError message="Debes aceptar las tres declaraciones para crear la cuenta." />
 				{/if}
 
 				<button

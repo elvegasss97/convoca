@@ -46,7 +46,12 @@ export interface OrganizerPrivateProfile {
 	/** Nombre legal de la organización, cuando el tipo de organizador lo requiere. */
 	legalOrganizationName?: string;
 	acceptedTermsAt: string;
+	acceptedPrivacyAt: string;
 	acceptedPeacefulUseAt: string;
+	/** Versión de cada texto legal aceptada (ver `$lib/legal/versions.ts`). Vacío = nunca aceptado. */
+	acceptedTermsVersion: string;
+	acceptedPrivacyVersion: string;
+	acceptedPeacefulUseVersion: string;
 }
 
 export interface SignUpInput {
@@ -56,6 +61,7 @@ export interface SignUpInput {
 	organizerKind: OrganizerKind;
 	organizationName?: string;
 	acceptedTerms: boolean;
+	acceptedPrivacy: boolean;
 	acceptedPeacefulUse: boolean;
 }
 

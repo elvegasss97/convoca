@@ -4,7 +4,7 @@
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import type { Map as MapLibreMap, Marker as MapLibreMarker } from 'maplibre-gl';
 	import type { GeoPoint } from '$lib/types';
-	import { mockCities } from '$lib/mock/cities';
+	import { mockCities } from '$lib/data/cities';
 	import { geocodeAddress } from '$lib/utils/geocode';
 	import FieldError from './FieldError.svelte';
 
