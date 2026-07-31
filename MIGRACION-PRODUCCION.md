@@ -36,13 +36,13 @@ tocar nada. Ese commit es el punto de restauración. **No se ha hecho
 
 #### Autenticación mock
 
-| Elemento | Ubicación |
-|---|---|
-| Contrato de servicio (`AuthService`, `User`, `UserSession`, `OrganizerPrivateProfile`) | `src/lib/auth/types.ts` |
-| Implementación mock (localStorage) | `src/lib/auth/authService.ts` |
-| "Hash" de contraseña (SHA-256 puro en JS, sin backend) | `src/lib/auth/mockHash.ts` |
-| Estado de sesión reactivo compartido | `src/lib/auth/session.svelte.ts` |
-| Generador de ids sin `crypto.randomUUID` | `src/lib/utils/id.ts` |
+| Elemento                                                                               | Ubicación                        |
+| -------------------------------------------------------------------------------------- | -------------------------------- |
+| Contrato de servicio (`AuthService`, `User`, `UserSession`, `OrganizerPrivateProfile`) | `src/lib/auth/types.ts`          |
+| Implementación mock (localStorage)                                                     | `src/lib/auth/authService.ts`    |
+| "Hash" de contraseña (SHA-256 puro en JS, sin backend)                                 | `src/lib/auth/mockHash.ts`       |
+| Estado de sesión reactivo compartido                                                   | `src/lib/auth/session.svelte.ts` |
+| Generador de ids sin `crypto.randomUUID`                                               | `src/lib/utils/id.ts`            |
 
 La propia implementación ya se documenta a sí misma como insegura (comentarios
 `⚠️ NO ES SEGURO` en las cabeceras de `authService.ts` y `mockHash.ts`), pero
@@ -53,17 +53,17 @@ sigue siendo código que se ejecuta en el navegador de cualquier visitante.
 Todas bajo el prefijo `convoca:mock:v1:*` (namespace en
 `src/lib/utils/persistedArray.ts`), más una clave de sesión aparte:
 
-| Clave | Contenido | Sensibilidad |
-|---|---|---|
-| `convoca:mock:v1:auth-accounts` | Cuentas: email, rol, **hash + sal de contraseña** | Alta (aunque el hash sea "solo mock") |
-| `convoca:mock:v1:auth-session` | Sesión activa: usuario, token, expiración | Alta |
-| `convoca:mock:v1:auth-organizer-profiles` | Perfil privado del organizador (nombre legal de la organización) | Media |
-| `convoca:mock:v1:events` | Convocatorias (incluidas en borrador/pendientes) | Media |
-| `convoca:mock:v1:event-updates` | Actualizaciones de organizador | Baja |
-| `convoca:mock:v1:reports` | Reportes de convocatorias | Media |
-| `convoca:mock:v1:audit-logs` | Registro de decisiones de moderación | Media |
-| `convoca:mock:v1:organizers` | Perfil público de organizador | Baja (es público por diseño) |
-| `convoca:my-attendance` | Asistencia ("voy"/"me interesa") del propio navegador | Media (aunque no identifica a nadie más) |
+| Clave                                     | Contenido                                                        | Sensibilidad                             |
+| ----------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------- |
+| `convoca:mock:v1:auth-accounts`           | Cuentas: email, rol, **hash + sal de contraseña**                | Alta (aunque el hash sea "solo mock")    |
+| `convoca:mock:v1:auth-session`            | Sesión activa: usuario, token, expiración                        | Alta                                     |
+| `convoca:mock:v1:auth-organizer-profiles` | Perfil privado del organizador (nombre legal de la organización) | Media                                    |
+| `convoca:mock:v1:events`                  | Convocatorias (incluidas en borrador/pendientes)                 | Media                                    |
+| `convoca:mock:v1:event-updates`           | Actualizaciones de organizador                                   | Baja                                     |
+| `convoca:mock:v1:reports`                 | Reportes de convocatorias                                        | Media                                    |
+| `convoca:mock:v1:audit-logs`              | Registro de decisiones de moderación                             | Media                                    |
+| `convoca:mock:v1:organizers`              | Perfil público de organizador                                    | Baja (es público por diseño)             |
+| `convoca:my-attendance`                   | Asistencia ("voy"/"me interesa") del propio navegador            | Media (aunque no identifica a nadie más) |
 
 Los **documentos de verificación NUNCA se persisten** en localStorage (decisión
 tomada ya en una iteración anterior, ver comentario en
@@ -93,29 +93,29 @@ intención quede declarada y no dependa implícitamente del modo de Vite.
 
 `src/lib/mock/*.ts`: `events.ts` (18 convocatorias), `organizers.ts` (12
 organizadores), `updates.ts`, `documents.ts`, `reports.ts`, `auditLogs.ts`,
-`cities.ts`. Se usan como *seed* inicial de los servicios mock
+`cities.ts`. Se usan como _seed_ inicial de los servicios mock
 (`src/lib/services/*.ts`) y no tienen ninguna marca `PUBLIC_ENABLE_DEMO_DATA`
 todavía — la Fase 2 la añade.
 
 #### Funciones solo-desarrollo
 
-| Función | Archivo | Guard actual |
-|---|---|---|
+| Función                                                  | Archivo                                                                                   | Guard actual                |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------- | --------------------------- |
 | Botón "Reset datos (dev)" (borra localStorage y recarga) | `src/lib/components/dev/DevResetButton.svelte`, montado desde `src/routes/+layout.svelte` | `{#if import.meta.env.DEV}` |
-| Credenciales de demo visibles + autorrelleno | `src/routes/login/+page.svelte` | `{#if import.meta.env.DEV}` |
+| Credenciales de demo visibles + autorrelleno             | `src/routes/login/+page.svelte`                                                           | `{#if import.meta.env.DEV}` |
 
 #### Rutas por rol
 
-| Ruta | Rol requerido | Guard actual | Dónde |
-|---|---|---|---|
-| `/organizador` | `organizer` o `admin` | `+page.ts` → `redirect(303, /login?redirect=...)` si no cumple | `src/routes/organizador/+page.ts` |
-| `/moderacion` | `moderator` o `admin` | igual que arriba | `src/routes/moderacion/+page.ts` |
-| `/cuenta` | cualquier sesión | igual | `src/routes/cuenta/+page.ts` |
-| `/crear` | ninguno para rellenar; sí para enviar (con guardado de borrador) | comprobación en el propio componente | `src/routes/crear/+page.svelte` |
+| Ruta           | Rol requerido                                                    | Guard actual                                                   | Dónde                             |
+| -------------- | ---------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------- |
+| `/organizador` | `organizer` o `admin`                                            | `+page.ts` → `redirect(303, /login?redirect=...)` si no cumple | `src/routes/organizador/+page.ts` |
+| `/moderacion`  | `moderator` o `admin`                                            | igual que arriba                                               | `src/routes/moderacion/+page.ts`  |
+| `/cuenta`      | cualquier sesión                                                 | igual                                                          | `src/routes/cuenta/+page.ts`      |
+| `/crear`       | ninguno para rellenar; sí para enviar (con guardado de borrador) | comprobación en el propio componente                           | `src/routes/crear/+page.svelte`   |
 
 **Importante:** estos guards viven en `+page.ts` (código de **cliente**,
 la app corre con `ssr = false`, ver `src/routes/+layout.ts`). Protegen la
-*navegación dentro de la interfaz*, pero no protegen nada a nivel de datos:
+_navegación dentro de la interfaz_, pero no protegen nada a nivel de datos:
 hoy no hay ninguna API ni base de datos real que alguien pueda llamar
 directamente saltándose la UI. Esta es precisamente la brecha que cierran
 las políticas RLS de la Fase 4 — la autorización real tiene que vivir en
@@ -151,9 +151,145 @@ exclusión estaba listo, pero no había nada que excluir todavía.
   de esa misma interfaz sobre `@supabase/supabase-js` y cambia un único
   punto de ensamblado; los componentes (`login`, `registro`, `cuenta`,
   `UserMenu`...) no cambian porque solo conocen la interfaz.
-- `src/lib/mock/*.ts` — pasan a usarse **solo como *seed* de
+- `src/lib/mock/*.ts` — pasan a usarse **solo como _seed_ de
   desarrollo/staging** (Fase 2), nunca importados por código que se
   ejecute cuando `PUBLIC_ENABLE_DEMO_DATA=false`.
+
+---
+
+## FASE 2 — Variables de entorno y separación demo/producción
+
+### 1. Variables introducidas
+
+`.env.example` (versionado) documenta el contrato; `.env` (ignorado por
+Git) tiene valores reales de desarrollo:
+
+```
+PUBLIC_APP_ENV=development|staging|production
+PUBLIC_ENABLE_DEMO_DATA=true|false
+PUBLIC_ENABLE_DEV_TOOLS=true|false
+PUBLIC_SUPABASE_URL=
+PUBLIC_SUPABASE_ANON_KEY=
+```
+
+`src/lib/config/env.ts` centraliza su lectura (vía `$env/static/public`,
+sustituido en tiempo de compilación) y expone `APP_ENV`, `IS_PRODUCTION`,
+`IS_STAGING`, `IS_DEVELOPMENT`, `ENABLE_DEMO_DATA`, `ENABLE_DEV_TOOLS`.
+Defensa en profundidad: `ENABLE_DEMO_DATA`/`ENABLE_DEV_TOOLS` se calculan
+como `!IS_PRODUCTION && PUBLIC_ENABLE_..='true'`, así que aunque alguien
+configure mal las otras dos variables, `PUBLIC_APP_ENV=production` las
+fuerza a `false` de todas formas.
+
+### 2. Aislamiento de datos y cuentas de demostración
+
+Se movieron los datos de demostración fuera de los servicios y se cargan
+con `import()` dinámico condicionado a `ENABLE_DEMO_DATA`, con un patrón
+`ensureSeeded()`/`seedIfNeeded()` repetido en los cuatro servicios que
+antes importaban `$lib/mock/*` de forma estática:
+
+- `src/lib/services/eventsService.ts` (`$lib/mock/events`)
+- `src/lib/services/organizersService.ts` (`$lib/mock/organizers`, `$lib/mock/documents`)
+- `src/lib/services/updatesService.ts` (`$lib/mock/updates`)
+- `src/lib/services/moderationService.ts` (`$lib/mock/reports`, `$lib/mock/auditLogs`)
+
+Todos arrancan ahora con el array vacío (`loadPersisted(KEY, [])`) y solo
+se siembran con datos ficticios si `ENABLE_DEMO_DATA` es `true` **y**
+todavía no hay nada persistido. Con `ENABLE_DEMO_DATA=false`, la
+aplicación arranca completamente vacía, tal como pide la Fase 8 (dato
+verificado más abajo).
+
+Las cuentas de demostración (`organizador@convoca.demo`,
+`organizador2@convoca.demo`, `moderador@convoca.demo`, contraseña
+`Convoca123!`) se aislaron en `src/lib/auth/demoAccounts.ts`, consumido
+por `authService.ts` (siembra de cuentas) y `login/+page.svelte` (caja de
+"cuentas de demostración" + autorrelleno), ambos gated por
+`ENABLE_DEMO_DATA`/`ENABLE_DEV_TOOLS`.
+
+### 3. Hallazgo crítico durante la verificación: el `import()` condicional NO basta
+
+Mi primera implementación asumía que `if (ENABLE_DEMO_DATA) { await
+import('./demoAccounts') }`, con `ENABLE_DEMO_DATA` conocido en tiempo de
+compilación, bastaba para que el bundler eliminase esa rama entera —
+incluidos los datos— del build de producción. **Esto era falso** y solo
+se descubrió porque se hizo la comprobación empírica que pide la Fase 8
+(build real + `grep` del resultado) en vez de asumir que "debería
+funcionar":
+
+1. Se generó un build con `PUBLIC_APP_ENV=production`,
+   `PUBLIC_ENABLE_DEMO_DATA=false`.
+2. `grep -r "Convoca123" .svelte-kit/output` **encontró la contraseña de
+   demostración en texto plano** en un chunk público del cliente
+   (`_app/immutable/chunks/CbhJvH212.js`) y en el bundle de servidor.
+
+Causa raíz: Rollup crea un chunk físico para cualquier `import()` con
+especificador estático **antes** de saber si la rama que lo contiene es
+alcanzable en tiempo de ejecución; el `if` condicional no evita que el
+archivo se genere y se publique como un archivo estático más,
+descargable por cualquiera que conozca o adivine su URL — se ejecute o
+no ese código en el navegador.
+
+**Corrección aplicada:** la sustitución ahora ocurre en tiempo de
+_bundling_, no en tiempo de ejecución. `authService.ts` y
+`login/+page.svelte` importan un especificador virtual
+(`convoca:demo-accounts`, tipado en
+`src/lib/auth/demo-accounts-virtual.d.ts`) que `vite.config.ts` alía —
+vía `resolve.alias`, leyendo `PUBLIC_APP_ENV` con `loadEnv()` — a
+`demoAccounts.ts` (datos reales) o a `demoAccounts.empty.ts` (arrays
+vacíos, mismo tipo) según el modo. Con este mecanismo, el chunk que
+Rollup genera para producción **es** el archivo vacío: no hay ningún
+punto del pipeline en el que el archivo real llegue a existir en el
+output de producción.
+
+Se usó un especificador virtual (no `$lib/auth/demoAccounts`) porque un
+alias más específico no gana automáticamente sobre uno más genérico que
+lo contiene como prefijo: el propio plugin de SvelteKit registra `$lib`
+como alias, y en el array final de alias que resuelve Vite, `$lib` queda
+antes que cualquier alias más específico añadido después, así que
+`$lib/auth/demoAccounts` nunca llegaba a evaluarse. Un especificador sin
+ningún solapamiento (`convoca:demo-accounts`) elimina el problema de raíz.
+
+### 4. Verificación en vivo (Fase 8 adelantada para esta parte)
+
+Comprobado con builds reales, no solo con lectura de código:
+
+| Build                                                        | `grep` de `Convoca123!` / correos `*@convoca.demo` en `.svelte-kit/output` |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| `PUBLIC_APP_ENV=development`, `PUBLIC_ENABLE_DEMO_DATA=true` | **Presente** (esperado: es un build de desarrollo)                         |
+| `PUBLIC_APP_ENV=production`, `PUBLIC_ENABLE_DEMO_DATA=false` | **Ausente** (confirmado tras la corrección del punto 3)                    |
+
+También comprobado con builds reales (no solo lectura de código):
+`pnpm check` (0 errores, 15 avisos preexistentes no relacionados con
+esta fase, sobre `$state` referenciado localmente en componentes que no
+se han tocado), `pnpm lint` (limpio) y `pnpm build` (compila).
+
+### 5. `pnpm test`
+
+No existía ningún test runner. Se añadió `vitest` como dependencia de
+desarrollo y un script `test`. Se escribieron pruebas reales (no un
+placeholder) para la única lógica de autorización/visibilidad que existe
+hoy sin backend — pensada explícitamente como especificación de
+comportamiento a reproducir con políticas RLS reales en la Fase 4:
+
+- `src/lib/utils/filterEvents.test.ts`: filtrado por texto, categoría,
+  verificación y orden cronológico (función pura).
+- `src/lib/services/eventsService.test.ts`: una cuenta no puede editar una
+  convocatoria ajena aunque conozca su id (`OwnershipError`); una
+  convocatoria en borrador/pendiente/oculta/rechazada nunca aparece en el
+  listado público; una publicada sí aparece.
+
+`pnpm test` → 10/10 pruebas en verde.
+
+### 6. Lo que queda pendiente de esta fase (honesto)
+
+- Este seguía siendo, hasta este punto, un sistema **sin backend real**:
+  toda la persistencia sigue en `localStorage`, y la propiedad/autorización
+  solo se comprueba en el cliente. Eso no cambia hasta la Fase 3 (Supabase)
+  y la Fase 4 (RLS) — **no se declara nada de esto listo para producción
+  todavía.**
+- `organizersService.ts`, `updatesService.ts` y `moderationService.ts` no
+  tenían pruebas dedicadas (solo `eventsService.ts` y `filterEvents.ts`);
+  ampliar cobertura no era bloqueante para cerrar la Fase 2, pero queda
+  pendiente antes de la Fase 8 completa.
 
 ---
 

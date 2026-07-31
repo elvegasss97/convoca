@@ -1,12 +1,11 @@
 import type { Organizer, OrganizerKind, VerificationDocument } from '$lib/types';
-import { mockOrganizers } from '$lib/mock/organizers';
-import { mockVerificationDocuments } from '$lib/mock/documents';
 import { loadPersisted, savePersisted } from '$lib/utils/persistedArray';
 import { randomId } from '$lib/utils/id';
+import { ENABLE_DEMO_DATA } from '$lib/config/env';
 import { listEventsByOrganizer } from './eventsService';
 
 const ORGANIZERS_KEY = 'organizers';
-const organizers: Organizer[] = loadPersisted(ORGANIZERS_KEY, mockOrganizers);
+let organizers: Organizer[] = loadPersisted<Organizer>(ORGANIZERS_KEY, []);
 
 function persistOrganizers(): void {
 	savePersisted(ORGANIZERS_KEY, organizers);
@@ -20,17 +19,36 @@ function persistOrganizers(): void {
  * archivo en Supabase Storage con acceso restringido por RLS, nunca datos
  * de cliente.
  */
-const documents: VerificationDocument[] = [...mockVerificationDocuments];
+let documents: VerificationDocument[] = [];
+
+let seedingPromise: Promise<void> | null = null;
+
+function ensureSeeded(): Promise<void> {
+	if (!seedingPromise) seedingPromise = seedIfNeeded();
+	return seedingPromise;
+}
+
+async function seedIfNeeded(): Promise<void> {
+	if (organizers.length > 0 || !ENABLE_DEMO_DATA) return;
+	const [{ mockOrganizers }, { mockVerificationDocuments }] = await Promise.all([
+		import('$lib/mock/organizers'),
+		import('$lib/mock/documents')
+	]);
+	organizers = loadPersisted<Organizer>(ORGANIZERS_KEY, mockOrganizers);
+	documents = [...mockVerificationDocuments];
+}
 
 function delay<T>(value: T): Promise<T> {
 	return Promise.resolve(value);
 }
 
 export async function getOrganizer(id: string): Promise<Organizer | undefined> {
+	await ensureSeeded();
 	return delay(organizers.find((o) => o.id === id));
 }
 
 export async function listOrganizers(): Promise<Organizer[]> {
+	await ensureSeeded();
 	return delay(organizers);
 }
 
@@ -43,6 +61,7 @@ export interface NewOrganizerInput {
 
 /** Crea el perfil público de organizador asociado a una cuenta nueva (ver `$lib/auth`). */
 export async function createOrganizer(input: NewOrganizerInput): Promise<Organizer> {
+	await ensureSeeded();
 	const organizer: Organizer = {
 		...input,
 		id: `org-${randomId().slice(0, 8)}`,
@@ -58,6 +77,7 @@ export async function updateOrganizerProfile(
 	organizerId: string,
 	patch: Partial<Pick<Organizer, 'displayName' | 'bio'>>
 ): Promise<Organizer> {
+	await ensureSeeded();
 	const index = organizers.findIndex((o) => o.id === organizerId);
 	if (index === -1) throw new Error(`Organizador no encontrado: ${organizerId}`);
 	const updated = { ...organizers[index], ...patch };
@@ -67,6 +87,7 @@ export async function updateOrganizerProfile(
 }
 
 export async function deleteOrganizer(organizerId: string): Promise<void> {
+	await ensureSeeded();
 	const index = organizers.findIndex((o) => o.id === organizerId);
 	if (index === -1) return;
 	organizers.splice(index, 1);
@@ -75,14 +96,17 @@ export async function deleteOrganizer(organizerId: string): Promise<void> {
 
 /** Documentación privada del organizador: solo para el propio organizador y moderación. */
 export async function getOrganizerDocuments(organizerId: string): Promise<VerificationDocument[]> {
+	await ensureSeeded();
 	return delay(documents.filter((d) => d.organizerId === organizerId));
 }
 
 export async function listAllDocuments(): Promise<VerificationDocument[]> {
+	await ensureSeeded();
 	return delay(documents);
 }
 
 export async function getPendingDocuments(): Promise<VerificationDocument[]> {
+	await ensureSeeded();
 	return delay(documents.filter((d) => d.status === 'pending'));
 }
 
@@ -91,6 +115,7 @@ export async function reviewDocument(
 	status: 'approved' | 'rejected',
 	reviewerNote?: string
 ): Promise<VerificationDocument> {
+	await ensureSeeded();
 	const index = documents.findIndex((d) => d.id === documentId);
 	if (index === -1) throw new Error(`Documento no encontrado: ${documentId}`);
 	const updated: VerificationDocument = {

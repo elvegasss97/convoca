@@ -12,6 +12,7 @@ import { AuthError } from './types';
 import { hashPassword, generateSalt } from './mockHash';
 import { randomId } from '$lib/utils/id';
 import { loadPersisted, savePersisted } from '$lib/utils/persistedArray';
+import { ENABLE_DEMO_DATA } from '$lib/config/env';
 import {
 	createOrganizer,
 	updateOrganizerProfile,
@@ -51,22 +52,6 @@ const SESSION_STORAGE_KEY = 'convoca:mock:v1:auth-session';
 
 const REMEMBERED_SESSION_DAYS = 30;
 const DEFAULT_SESSION_HOURS = 12;
-
-/** Credenciales de las cuentas de demostración. Solo se muestran en modo desarrollo. */
-export const DEMO_PASSWORD = 'Convoca123!';
-export const DEMO_ACCOUNTS = [
-	{
-		email: 'organizador@convoca.demo',
-		role: 'organizer' as UserRole,
-		label: 'Organizador — Asociación Vecinal Lavapiés'
-	},
-	{
-		email: 'organizador2@convoca.demo',
-		role: 'organizer' as UserRole,
-		label: 'Organizador — Marea Verde Ríos Vivos'
-	},
-	{ email: 'moderador@convoca.demo', role: 'moderator' as UserRole, label: 'Moderador' }
-];
 
 let accounts: StoredAccount[] = loadPersisted<StoredAccount>(ACCOUNTS_KEY, []);
 let profiles: OrganizerPrivateProfile[] = loadPersisted<OrganizerPrivateProfile>(PROFILES_KEY, []);
@@ -161,43 +146,40 @@ function ensureSeeded(): Promise<void> {
 
 async function seedDemoAccounts(): Promise<void> {
 	if (!browser || accounts.length > 0) return;
+	// `if (!ENABLE_DEMO_DATA) return;` por sí solo NO basta para mantener la
+	// contraseña y los correos de demostración fuera del build de producción:
+	// Rollup igualmente empaqueta el módulo de un `import()` dinámico como un
+	// chunk físico, se ejecute o no esa rama. Por eso el import se hace contra
+	// el especificador virtual `convoca:demo-accounts`, que `vite.config.ts`
+	// alía a `demoAccounts.ts` (real) o a `demoAccounts.empty.ts` (vacío) según
+	// `PUBLIC_APP_ENV` — la sustitución ocurre en tiempo de bundling, así que
+	// en producción el chunk generado ya no contiene los datos reales.
+	if (!ENABLE_DEMO_DATA) return;
 
-	const [demo1, demo2, demoMod] = await Promise.all([
-		buildAccount({
-			id: 'user-org-1',
-			email: 'organizador@convoca.demo',
-			password: DEMO_PASSWORD,
-			role: 'organizer',
-			organizerId: 'org-1'
-		}),
-		buildAccount({
-			id: 'user-org-2',
-			email: 'organizador2@convoca.demo',
-			password: DEMO_PASSWORD,
-			role: 'organizer',
-			organizerId: 'org-2'
-		}),
-		buildAccount({
-			id: 'user-mod-1',
-			email: 'moderador@convoca.demo',
-			password: DEMO_PASSWORD,
-			role: 'moderator'
-		})
-	]);
+	const { DEMO_ACCOUNTS, DEMO_PASSWORD } = await import('convoca:demo-accounts');
 
-	accounts = [demo1, demo2, demoMod];
+	const built = await Promise.all(
+		DEMO_ACCOUNTS.map((demo) =>
+			buildAccount({
+				id: demo.id,
+				email: demo.email,
+				password: DEMO_PASSWORD,
+				role: demo.role,
+				organizerId: demo.organizerId
+			})
+		)
+	);
+
+	accounts = built;
 	persistAccounts();
 
 	const now = new Date().toISOString();
-	profiles = [
-		{
-			organizerId: 'org-1',
-			userId: 'user-org-1',
-			acceptedTermsAt: now,
-			acceptedPeacefulUseAt: now
-		},
-		{ organizerId: 'org-2', userId: 'user-org-2', acceptedTermsAt: now, acceptedPeacefulUseAt: now }
-	];
+	profiles = DEMO_ACCOUNTS.filter((demo) => demo.organizerId).map((demo) => ({
+		organizerId: demo.organizerId!,
+		userId: demo.id,
+		acceptedTermsAt: now,
+		acceptedPeacefulUseAt: now
+	}));
 	persistProfiles();
 }
 

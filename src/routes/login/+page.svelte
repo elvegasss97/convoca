@@ -2,8 +2,10 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { Eye, EyeOff, LogIn, Loader2, AlertCircle, Info } from '@lucide/svelte';
-	import { authService, DEMO_ACCOUNTS, DEMO_PASSWORD } from '$lib/auth/authService';
+	import { authService } from '$lib/auth/authService';
 	import { AuthError } from '$lib/auth/types';
+	import { ENABLE_DEV_TOOLS } from '$lib/config/env';
+	import type { DemoAccountSeed } from 'convoca:demo-accounts';
 
 	let email = $state('');
 	let password = $state('');
@@ -13,6 +15,18 @@
 	let errorMessage = $state<string | null>(null);
 
 	const redirectTo = $derived(page.url.searchParams.get('redirect') || '/organizador');
+
+	// Import dinámico y condicionado: si ENABLE_DEV_TOOLS es `false` en el
+	// build (siempre lo es en producción), esta rama se elimina entera y ni
+	// el email ni la contraseña de demostración llegan al bundle.
+	let demoAccounts = $state<DemoAccountSeed[]>([]);
+	let demoPassword = $state('');
+	if (ENABLE_DEV_TOOLS) {
+		import('convoca:demo-accounts').then((mod) => {
+			demoAccounts = mod.DEMO_ACCOUNTS;
+			demoPassword = mod.DEMO_PASSWORD;
+		});
+	}
 
 	async function submit(e: SubmitEvent) {
 		e.preventDefault();
@@ -31,7 +45,7 @@
 
 	function fillDemo(demoEmail: string) {
 		email = demoEmail;
-		password = DEMO_PASSWORD;
+		password = demoPassword;
 	}
 </script>
 
@@ -133,7 +147,7 @@
 		</p>
 	</form>
 
-	{#if import.meta.env.DEV}
+	{#if ENABLE_DEV_TOOLS && demoAccounts.length > 0}
 		<div
 			class="text-warning-800 mt-6 rounded-2xl border border-warning-300 bg-warning-50 p-4 text-xs"
 		>
@@ -141,7 +155,7 @@
 				<Info class="size-3.5" /> Cuentas de demostración (solo en desarrollo)
 			</p>
 			<ul class="mt-2 space-y-1.5">
-				{#each DEMO_ACCOUNTS as demo (demo.email)}
+				{#each demoAccounts as demo (demo.email)}
 					<li class="flex items-center justify-between gap-2">
 						<span>{demo.label}: <code class="rounded bg-white/60 px-1">{demo.email}</code></span>
 						<button
@@ -155,7 +169,7 @@
 				{/each}
 			</ul>
 			<p class="mt-2">
-				Contraseña para todas: <code class="rounded bg-white/60 px-1">{DEMO_PASSWORD}</code>
+				Contraseña para todas: <code class="rounded bg-white/60 px-1">{demoPassword}</code>
 			</p>
 		</div>
 	{/if}

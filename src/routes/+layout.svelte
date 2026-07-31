@@ -4,6 +4,7 @@
 	import TopBar from '$lib/components/nav/TopBar.svelte';
 	import MobileTabBar from '$lib/components/nav/MobileTabBar.svelte';
 	import DevResetButton from '$lib/components/dev/DevResetButton.svelte';
+	import { ENABLE_DEV_TOOLS } from '$lib/config/env';
 	import { pwaInfo } from 'virtual:pwa-info';
 
 	let { children } = $props();
@@ -29,7 +30,7 @@
 		{@render children()}
 	</main>
 	<MobileTabBar />
-	{#if import.meta.env.DEV}
+	{#if ENABLE_DEV_TOOLS}
 		<DevResetButton />
 	{/if}
 </div>

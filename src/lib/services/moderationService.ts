@@ -1,13 +1,13 @@
 import type { AuditLog, Event, ModerationAction, Report, ReportReason } from '$lib/types';
-import { mockReports } from '$lib/mock/reports';
-import { mockAuditLogs } from '$lib/mock/auditLogs';
 import { loadPersisted, savePersisted } from '$lib/utils/persistedArray';
+import { randomId } from '$lib/utils/id';
+import { ENABLE_DEMO_DATA } from '$lib/config/env';
 import { listPendingModeration, setEventStatus, getEvent } from './eventsService';
 
 const REPORTS_KEY = 'reports';
 const AUDIT_LOGS_KEY = 'audit-logs';
-const reports: Report[] = loadPersisted(REPORTS_KEY, mockReports);
-const auditLogs: AuditLog[] = loadPersisted(AUDIT_LOGS_KEY, mockAuditLogs);
+let reports: Report[] = loadPersisted<Report>(REPORTS_KEY, []);
+let auditLogs: AuditLog[] = loadPersisted<AuditLog>(AUDIT_LOGS_KEY, []);
 
 function persistReports(): void {
 	savePersisted(REPORTS_KEY, reports);
@@ -15,6 +15,23 @@ function persistReports(): void {
 
 function persistAuditLogs(): void {
 	savePersisted(AUDIT_LOGS_KEY, auditLogs);
+}
+
+let seedingPromise: Promise<void> | null = null;
+
+function ensureSeeded(): Promise<void> {
+	if (!seedingPromise) seedingPromise = seedIfNeeded();
+	return seedingPromise;
+}
+
+async function seedIfNeeded(): Promise<void> {
+	if (reports.length > 0 || auditLogs.length > 0 || !ENABLE_DEMO_DATA) return;
+	const [{ mockReports }, { mockAuditLogs }] = await Promise.all([
+		import('$lib/mock/reports'),
+		import('$lib/mock/auditLogs')
+	]);
+	reports = loadPersisted<Report>(REPORTS_KEY, mockReports);
+	auditLogs = loadPersisted<AuditLog>(AUDIT_LOGS_KEY, mockAuditLogs);
 }
 
 function delay<T>(value: T): Promise<T> {
@@ -31,6 +48,7 @@ export interface ReportedEventGroup {
 }
 
 export async function listReportedEvents(): Promise<ReportedEventGroup[]> {
+	await ensureSeeded();
 	const openReports = reports.filter((r) => r.status === 'open' || r.status === 'in_review');
 	const eventIds = [...new Set(openReports.map((r) => r.eventId))];
 
@@ -43,6 +61,7 @@ export async function listReportedEvents(): Promise<ReportedEventGroup[]> {
 }
 
 export async function listAuditLogForEvent(eventId: string): Promise<AuditLog[]> {
+	await ensureSeeded();
 	const results = auditLogs
 		.filter((l) => l.eventId === eventId)
 		.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -50,6 +69,7 @@ export async function listAuditLogForEvent(eventId: string): Promise<AuditLog[]>
 }
 
 export async function listAllAuditLogs(): Promise<AuditLog[]> {
+	await ensureSeeded();
 	const results = [...auditLogs].sort(
 		(a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
 	);
@@ -71,6 +91,7 @@ export async function applyModerationAction(
 	moderatorId: string,
 	note?: string
 ): Promise<Event> {
+	await ensureSeeded();
 	const nextStatus = actionToStatus[action];
 	const event = nextStatus
 		? await setEventStatus(eventId, nextStatus, note)
@@ -78,7 +99,7 @@ export async function applyModerationAction(
 	if (!event) throw new Error(`Convocatoria no encontrada: ${eventId}`);
 
 	const log: AuditLog = {
-		id: `log-${Math.random().toString(36).slice(2, 9)}`,
+		id: `log-${randomId().slice(0, 8)}`,
 		eventId,
 		action,
 		moderatorId,
@@ -103,6 +124,7 @@ export async function applyModerationAction(
 }
 
 export async function listReportsForEvent(eventId: string): Promise<Report[]> {
+	await ensureSeeded();
 	return delay(reports.filter((r) => r.eventId === eventId));
 }
 
@@ -111,8 +133,9 @@ export async function createReport(
 	reason: ReportReason,
 	details?: string
 ): Promise<Report> {
+	await ensureSeeded();
 	const report: Report = {
-		id: `rep-${Math.random().toString(36).slice(2, 9)}`,
+		id: `rep-${randomId().slice(0, 8)}`,
 		eventId,
 		reason,
 		details,

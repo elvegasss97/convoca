@@ -9,18 +9,40 @@
  * El array en memoria simula la tabla `events`. Los cambios se pierden al
  * recargar la página, igual que ocurriría con cualquier estado de cliente
  * no persistido; en producción esto será una tabla de Postgres.
+ *
+ * Los datos ficticios (`$lib/mock/events`) solo se cargan si
+ * `ENABLE_DEMO_DATA` es `true` (ver `$lib/config/env.ts`), y se importan de
+ * forma dinámica para que, cuando esa constante es `false` en tiempo de
+ * compilación (siempre lo es en producción), el bundler elimine la rama
+ * entera — ni el código ni los datos ficticios llegan al bundle de
+ * producción. Si no hay datos de demostración, el servicio arranca con la
+ * tabla vacía, tal cual arrancaría contra una base de datos real recién
+ * creada.
  */
 import type { Event, EventFiltersState, GeoPoint } from '$lib/types';
-import { mockEvents } from '$lib/mock/events';
 import { filterEvents } from '$lib/utils/filterEvents';
 import { loadPersisted, savePersisted } from '$lib/utils/persistedArray';
 import { randomId } from '$lib/utils/id';
+import { ENABLE_DEMO_DATA } from '$lib/config/env';
 
 const STORAGE_KEY = 'events';
-const events: Event[] = loadPersisted(STORAGE_KEY, mockEvents);
+let events: Event[] = loadPersisted<Event>(STORAGE_KEY, []);
 
 function persist(): void {
 	savePersisted(STORAGE_KEY, events);
+}
+
+let seedingPromise: Promise<void> | null = null;
+
+function ensureSeeded(): Promise<void> {
+	if (!seedingPromise) seedingPromise = seedIfNeeded();
+	return seedingPromise;
+}
+
+async function seedIfNeeded(): Promise<void> {
+	if (events.length > 0 || !ENABLE_DEMO_DATA) return;
+	const { mockEvents } = await import('$lib/mock/events');
+	events = loadPersisted<Event>(STORAGE_KEY, mockEvents);
 }
 
 const HIDDEN_FROM_PUBLIC = new Set<Event['status']>([
@@ -45,16 +67,19 @@ export interface ListPublicEventsOptions {
 
 /** Lista de convocatorias visibles públicamente, con filtros opcionales. */
 export async function listPublicEvents(options: ListPublicEventsOptions = {}): Promise<Event[]> {
+	await ensureSeeded();
 	const { filters = {}, origin } = options;
 	const results = filterEvents(events.filter(isPublic), filters, origin);
 	return delay(results);
 }
 
 export async function getEvent(idOrSlug: string): Promise<Event | undefined> {
+	await ensureSeeded();
 	return delay(events.find((e) => e.id === idOrSlug || e.slug === idOrSlug));
 }
 
 export async function listEventsByOrganizer(organizerId: string): Promise<Event[]> {
+	await ensureSeeded();
 	const results = events
 		.filter((e) => e.organizerId === organizerId)
 		.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
@@ -62,17 +87,19 @@ export async function listEventsByOrganizer(organizerId: string): Promise<Event[
 }
 
 export async function listPendingModeration(): Promise<Event[]> {
+	await ensureSeeded();
 	const results = events
 		.filter((e) => e.status === 'pending_review')
 		.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 	return delay(results);
 }
 
-/** Devuelve estadísticas agregadas para la cabecera de Inicio. */
+/** Devuelve estadísticas agregadas para la cabecera de Inicio. Nunca inventa cifras: es la suma real de `events`. */
 export async function getPublicStats(): Promise<{
 	eventCount: number;
 	estimatedAttendance: number;
 }> {
+	await ensureSeeded();
 	const publicEvents = events.filter(isPublic);
 	const eventCount = publicEvents.length;
 	const estimatedAttendance = publicEvents.reduce(
@@ -101,6 +128,7 @@ function generateId(): string {
 }
 
 export async function createEvent(input: NewEventInput): Promise<Event> {
+	await ensureSeeded();
 	const now = new Date().toISOString();
 	const id = generateId();
 	const event: Event = {
@@ -119,6 +147,7 @@ export async function createEvent(input: NewEventInput): Promise<Event> {
 }
 
 export async function updateEvent(id: string, patch: Partial<Event>): Promise<Event> {
+	await ensureSeeded();
 	const index = events.findIndex((e) => e.id === id);
 	if (index === -1) throw new Error(`Convocatoria no encontrada: ${id}`);
 	const updated: Event = { ...events[index], ...patch, updatedAt: new Date().toISOString() };
@@ -160,6 +189,7 @@ export async function updateEventAsOwner(
 	id: string,
 	patch: Partial<Event>
 ): Promise<Event> {
+	await ensureSeeded();
 	const event = events.find((e) => e.id === id);
 	if (!event) throw new Error(`Convocatoria no encontrada: ${id}`);
 	assertOwnership(event, userId);
@@ -180,6 +210,7 @@ export async function setArchivedAsOwner(
 
 /** Crea una copia en borrador de una convocatoria propia, con nuevo id y contadores a cero. */
 export async function duplicateEventAsOwner(userId: string, id: string): Promise<Event> {
+	await ensureSeeded();
 	const source = events.find((e) => e.id === id);
 	if (!source) throw new Error(`Convocatoria no encontrada: ${id}`);
 	assertOwnership(source, userId);
