@@ -52,7 +52,14 @@ type EventRow = {
 
 const EMPTY_ATTENDANCE: AttendanceCounts = { going: 0, interested: 0, isEstimate: true };
 
-const HIDDEN_FROM_PUBLIC = ['draft', 'pending_review', 'hidden', 'rejected'];
+// 'cancelled' se excluye del listado/mapa público por defecto: a diferencia
+// de 'completed' (que ya queda fuera del filtro temporal por defecto porque
+// su fecha ya pasó), una convocatoria cancelada puede tener fecha futura y
+// sin este filtro seguiría apareciendo mezclada con convocatorias activas,
+// indistinguible en la tarjeta (solo la ficha individual muestra el aviso
+// de cancelación). Sigue accesible por enlace directo (`getEvent`, más
+// abajo, no aplica este filtro) — no desaparece, solo deja de listarse.
+const HIDDEN_FROM_PUBLIC = ['draft', 'pending_review', 'hidden', 'rejected', 'cancelled'];
 
 export function rowToEvent(row: EventRow, attendance: AttendanceCounts = EMPTY_ATTENDANCE): Event {
 	return {
