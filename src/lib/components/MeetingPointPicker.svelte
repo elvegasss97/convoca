@@ -13,6 +13,8 @@
 		province?: string;
 		/** Dirección escrita en el paso anterior: al cambiar, se geocodifica y mueve el marcador. */
 		address?: string;
+		/** Código postal escrito en el paso anterior: se antepone a la dirección en la búsqueda para desambiguar calles con el mismo nombre en distintas localidades. */
+		postalCode?: string;
 		cityInvalid?: boolean;
 	}
 
@@ -22,6 +24,7 @@
 		// eslint-disable-next-line no-useless-assignment -- $bindable() default is read via the template/parent binding, not a dead write.
 		province = $bindable(''),
 		address = '',
+		postalCode = '',
 		cityInvalid = false
 	}: Props = $props();
 
@@ -84,11 +87,20 @@
 	// cambia solo la dirección a otra parte de España, no queda una ciudad
 	// obsoleta encadenada a la query rompiendo la búsqueda siguiente. No hay
 	// lista cerrada de ciudades: funciona en cualquier punto de España.
+	//
+	// El código postal, si se ha escrito, se antepone a la dirección: muchos
+	// nombres de calle se repiten en distintas localidades (Calle Mayor,
+	// Avenida de la Constitución...) y el código postal es la forma más
+	// fiable de desambiguar sin depender de una ciudad escrita a mano. A
+	// diferencia de "Ciudad", este campo nunca se autorrellena con el
+	// resultado, así que no puede quedar "atascado" con un valor de una
+	// búsqueda anterior sin que la persona lo haya escrito ella misma.
 	let geocodeTimer: ReturnType<typeof setTimeout> | undefined;
 	let activeController: AbortController | undefined;
 
 	$effect(() => {
 		const query = address.trim();
+		const postal = postalCode.trim();
 
 		clearTimeout(geocodeTimer);
 		activeController?.abort();
@@ -103,7 +115,17 @@
 			activeController = controller;
 			geocodeStatus = 'loading';
 
-			const fullQuery = `${query}, España`;
+			// Comprobado empíricamente contra Nominatim: aunque en el
+			// formulario el código postal se muestre primero (para que se
+			// rellene antes de escribir la calle), en la propia query de
+			// búsqueda tiene que ir DESPUÉS de la dirección — antepuesto,
+			// Nominatim lo trata como ruido y devuelve la coincidencia con
+			// más peso global ignorando el código postal (p. ej. "28801,
+			// Calle Mayor, España" resuelve a la Calle Mayor de Madrid en
+			// vez de la de Alcalá de Henares); pospuesto sí desambigua
+			// correctamente ("Calle Mayor, 28801, España" → Alcalá de
+			// Henares).
+			const fullQuery = postal ? `${query}, ${postal}, España` : `${query}, España`;
 
 			geocodeAddress(fullQuery, controller.signal)
 				.then((result) => {

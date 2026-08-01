@@ -70,6 +70,7 @@
 			// sustituye en cuanto se geocodifica una dirección o se toca el mapa.
 			cityName: '',
 			province: '',
+			postalCode: '',
 			meetingPoint: { lat: 40.4637, lng: -3.7492 },
 			meetingLabel: '',
 			meetingAddress: '',
@@ -561,6 +562,23 @@
 				</div>
 			{:else if steps[stepIndex].key === 'lugar'}
 				<div>
+					<label for="meeting-postal-code" class="mb-1 block text-sm font-medium text-ink-700"
+						>Código postal (opcional, recomendado)</label
+					>
+					<input
+						id="meeting-postal-code"
+						bind:value={form.postalCode}
+						placeholder="Ej. 28013"
+						inputmode="numeric"
+						maxlength="5"
+						class="w-full rounded-xl border-ink-200 text-sm focus:border-brand-500 focus:ring-brand-500"
+					/>
+					<p class="mt-1 text-xs text-ink-400">
+						Muchos nombres de calle se repiten en distintas localidades (Calle Mayor, Avenida de la
+						Constitución...). Indicar el código postal ayuda a encontrar la dirección exacta.
+					</p>
+				</div>
+				<div>
 					<label for="meeting-label" class="mb-1 block text-sm font-medium text-ink-700"
 						>Nombre del punto de encuentro</label
 					>
@@ -599,6 +617,7 @@
 					bind:point={form.meetingPoint}
 					bind:cityName={form.cityName}
 					bind:province={form.province}
+					postalCode={form.postalCode}
 					address={form.meetingAddress}
 					cityInvalid={showErrors && !cityValid}
 				/>
