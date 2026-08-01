@@ -220,7 +220,7 @@
 		if (!fitToEvents || list.length === 0) return;
 		if (list.length === 1) {
 			const p = list[0].meetingPoint.point;
-			map.easeTo({ center: [p.lng, p.lat], zoom: 11.5, duration: 0 });
+			map.easeTo({ center: [p.lng, p.lat], zoom: 14.5, duration: 0 });
 			return;
 		}
 		const lngs = list.map((e) => e.meetingPoint.point.lng);
@@ -230,7 +230,7 @@
 				[Math.min(...lngs), Math.min(...lats)],
 				[Math.max(...lngs), Math.max(...lats)]
 			],
-			{ padding: 48, maxZoom: 12, duration: 0 }
+			{ padding: 48, maxZoom: 14.5, duration: 0 }
 		);
 	});
 
