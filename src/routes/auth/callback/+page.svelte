@@ -5,6 +5,7 @@
 	import { Loader2, AlertCircle } from '@lucide/svelte';
 	import { supabase } from '$lib/supabase/client';
 	import { safeRedirect } from '$lib/utils/safeRedirect';
+	import Seo from '$lib/components/Seo.svelte';
 
 	/**
 	 * Destino de "Continuar con Google" (flujo PKCE, redirección de página
@@ -74,9 +75,7 @@
 	});
 </script>
 
-<svelte:head>
-	<title>Iniciando sesión — Convoca</title>
-</svelte:head>
+<Seo title="Iniciando sesión" description="Completando el inicio de sesión en Convoca." noindex />
 
 <div class="mx-auto flex max-w-md flex-col items-center gap-3 px-4 py-16 text-center">
 	{#if status === 'working'}

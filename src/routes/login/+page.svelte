@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import Seo from '$lib/components/Seo.svelte';
 	import { Eye, EyeOff, LogIn, Loader2, AlertCircle } from '@lucide/svelte';
 	import { authService } from '$lib/auth/authService';
 	import { AuthError } from '$lib/auth/types';
@@ -33,9 +34,11 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Iniciar sesión — Convoca</title>
-</svelte:head>
+<Seo
+	title="Iniciar sesión"
+	description="Accede a tu cuenta de organizador en Convoca para publicar y gestionar tus convocatorias."
+	noindex
+/>
 
 <div class="mx-auto max-w-md px-4 py-10 sm:px-6">
 	<h1 class="font-display text-2xl font-semibold text-ink-900">Iniciar sesión</h1>

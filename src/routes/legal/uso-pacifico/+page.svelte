@@ -13,6 +13,7 @@
 
 <LegalPageShell
 	title="Declaración de uso pacífico"
+	description="Convoca solo admite convocatorias legales y pacíficas: qué queda prohibido y cómo actuamos ante contenido que incite a la violencia."
 	updatedAt={LEGAL_VERSIONS.peacefulUse}
 	{sections}
 >

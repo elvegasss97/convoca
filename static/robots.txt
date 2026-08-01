@@ -1,3 +1,12 @@
-# allow crawling everything by default
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /cuenta
+Disallow: /organizador
+Disallow: /moderacion
+Disallow: /login
+Disallow: /registro
+Disallow: /recuperar-cuenta
+Disallow: /aceptar-condiciones
+Disallow: /auth/
+
+Sitemap: https://convoca.cloud/sitemap.xml

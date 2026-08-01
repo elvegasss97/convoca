@@ -2,7 +2,9 @@
 	import { page } from '$app/state';
 	import { ArrowLeft, CalendarDays, MapPin, Route, Share2, Flag, Info } from '@lucide/svelte';
 	import type { PageData } from './$types';
+	import Seo from '$lib/components/Seo.svelte';
 	import { categoryLabels, themeLabel, priorCommunicationLabels } from '$lib/labels';
+	import { eventJsonLd, eventOgImagePath, truncate } from '$lib/seo';
 	import {
 		formatEventDate,
 		formatEventTime,
@@ -35,12 +37,25 @@
 
 	let shareOpen = $state(false);
 	let reportOpen = $state(false);
+
+	const seoTitle = $derived(`${event.title} en ${event.meetingPoint.city}`);
+	const seoDescription = $derived(
+		truncate(
+			`Consulta la fecha, ubicación, organizador y detalles de ${event.title} en Convoca. ${event.description}`
+		)
+	);
+	const NOT_PUBLIC_STATES = new Set(['draft', 'pending_review', 'hidden', 'rejected']);
+	const seoNoindex = $derived(NOT_PUBLIC_STATES.has(event.status));
 </script>
 
-<svelte:head>
-	<title>{event.title} — Convoca</title>
-	<meta name="description" content={event.description} />
-</svelte:head>
+<Seo
+	title={seoTitle}
+	description={seoDescription}
+	image={eventOgImagePath(event)}
+	type="article"
+	noindex={seoNoindex}
+	jsonLd={eventJsonLd(event, data.organizer, page.url.pathname)}
+/>
 
 <div class="mx-auto max-w-6xl px-4 pt-4 pb-24 sm:px-6 md:pb-10">
 	<a
@@ -104,6 +119,10 @@
 					{priorCommunicationLabels[event.priorCommunication]}
 				</span>
 			</div>
+
+			<p class="text-xs text-ink-400">
+				Publicada el {formatEventDate(event.createdAt)}
+			</p>
 
 			<div class="overflow-hidden rounded-2xl border border-ink-100 shadow-card">
 				<EventMap

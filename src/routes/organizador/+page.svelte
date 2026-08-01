@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Seo from '$lib/components/Seo.svelte';
 	import {
 		Pencil,
 		MessageSquareText,
@@ -115,9 +116,11 @@
 	]);
 </script>
 
-<svelte:head>
-	<title>Panel del organizador — Convoca</title>
-</svelte:head>
+<Seo
+	title="Panel del organizador"
+	description="Gestiona tus convocatorias publicadas en Convoca."
+	noindex
+/>
 
 <div class="mx-auto max-w-4xl px-4 pt-4 pb-24 sm:px-6 md:pb-10">
 	<div>

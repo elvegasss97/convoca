@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import Seo from '$lib/components/Seo.svelte';
 	import { Eye, EyeOff, UserPlus, Loader2, AlertCircle, MailCheck, Send } from '@lucide/svelte';
 	import type { OrganizerKind } from '$lib/types';
 	import { organizerKindLabels } from '$lib/labels';
@@ -174,9 +175,11 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Crear cuenta de organizador — Convoca</title>
-</svelte:head>
+<Seo
+	title="Crear cuenta de organizador"
+	description="Crea tu cuenta gratuita de organizador en Convoca para publicar convocatorias ciudadanas y gestionarlas desde un único panel."
+	noindex
+/>
 
 <div class="mx-auto max-w-md px-4 py-10 sm:px-6">
 	<h1 class="font-display text-2xl font-semibold text-ink-900">Crear cuenta de organizador</h1>

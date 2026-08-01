@@ -3,9 +3,12 @@
 	import { page } from '$app/state';
 	import { ArrowLeft } from '@lucide/svelte';
 	import { RELATED_LEGAL_LINKS } from '$lib/legal/links';
+	import Seo from '$lib/components/Seo.svelte';
 
 	interface Props {
 		title: string;
+		/** Meta description específica de este documento legal (150-160 caracteres). */
+		description: string;
 		/** Fecha de entrada en vigor de la versión actual. */
 		updatedAt: string;
 		/** Para el índice: debe coincidir con los `id` de los `<h2>` del contenido. */
@@ -13,7 +16,7 @@
 		children: Snippet;
 	}
 
-	let { title, updatedAt, sections, children }: Props = $props();
+	let { title, description, updatedAt, sections, children }: Props = $props();
 
 	// No se lista el propio documento entre sus "relacionados" — ni el enlace
 	// exacto a esta página ni un ancla dentro de ella.
@@ -24,9 +27,7 @@
 	);
 </script>
 
-<svelte:head>
-	<title>{title} — Convoca</title>
-</svelte:head>
+<Seo {title} {description} />
 
 <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
 	<div class="print:hidden">

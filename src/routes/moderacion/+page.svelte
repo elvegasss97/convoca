@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Seo from '$lib/components/Seo.svelte';
 	import {
 		ShieldCheck,
 		FileClock,
@@ -150,9 +151,11 @@
 	});
 </script>
 
-<svelte:head>
-	<title>Panel de moderación — Convoca</title>
-</svelte:head>
+<Seo
+	title="Panel de moderación"
+	description="Panel interno de moderación de contenido de Convoca."
+	noindex
+/>
 
 <div class="mx-auto max-w-5xl px-4 pt-4 pb-16 sm:px-6">
 	<div class="flex items-center gap-2">

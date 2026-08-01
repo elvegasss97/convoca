@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import Seo from '$lib/components/Seo.svelte';
 	import { ShieldCheck, Loader2 } from '@lucide/svelte';
 	import { acceptLegalTerms } from '$lib/auth/authService';
 	import type { PageData } from './$types';
@@ -29,9 +30,11 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Antes de continuar — Convoca</title>
-</svelte:head>
+<Seo
+	title="Antes de continuar"
+	description="Acepta las condiciones de uso de Convoca antes de publicar tu primera convocatoria."
+	noindex
+/>
 
 <div class="mx-auto max-w-lg px-4 py-10 sm:px-6">
 	<div class="flex flex-col items-center gap-2 text-center">

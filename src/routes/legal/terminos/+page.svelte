@@ -19,7 +19,12 @@
 	];
 </script>
 
-<LegalPageShell title="Términos de uso" updatedAt={LEGAL_VERSIONS.terms} {sections}>
+<LegalPageShell
+	title="Términos de uso"
+	description="Condiciones de uso de Convoca: quién puede crear convocatorias, qué normas rigen la participación y qué ocurre si se incumplen."
+	updatedAt={LEGAL_VERSIONS.terms}
+	{sections}
+>
 	<section>
 		<h2 id="que-es-convoca">1. Qué es Convoca</h2>
 		<p>

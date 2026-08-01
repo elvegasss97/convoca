@@ -16,7 +16,12 @@
 	];
 </script>
 
-<LegalPageShell title="Política de privacidad" updatedAt={LEGAL_VERSIONS.privacy} {sections}>
+<LegalPageShell
+	title="Política de privacidad"
+	description="Qué datos trata Convoca, con qué finalidad, cuánto tiempo se conservan y cómo ejercer tus derechos de acceso, rectificación y supresión."
+	updatedAt={LEGAL_VERSIONS.privacy}
+	{sections}
+>
 	<section>
 		<h2 id="responsable">1. Responsable del tratamiento</h2>
 		<p>
@@ -70,10 +75,14 @@
 				nuestros proveedores de infraestructura, con fines de seguridad y para el funcionamiento del servicio.
 			</li>
 			<li>
-				<strong>Ubicación:</strong> Convoca nunca accede a tu ubicación en tiempo real ni te geolocaliza.
-				La única "ubicación" que se trata es la ciudad o el punto de encuentro que tú u otras personas
-				organizadoras escriben manualmente al publicar una convocatoria, o la ciudad que elijas para explorar
-				el mapa.
+				<strong>Ubicación:</strong> por defecto, la única "ubicación" que se trata es la ciudad o el
+				punto de encuentro que tú u otras personas organizadoras escribís manualmente al publicar
+				una convocatoria, o la ciudad que elijas para explorar el mapa. Si pulsas voluntariamente el
+				botón "Usar mi ubicación" del selector de ciudad, tu navegador te pedirá permiso y, si lo
+				concedes, usamos tu posición aproximada <strong>una sola vez</strong> para centrar el mapa — nunca
+				se guarda, ni en nuestros servidores ni en tu dispositivo, ni se comparte con nadie, y no volvemos
+				a acceder a ella hasta que pulses el botón de nuevo. Convoca nunca te geolocaliza en segundo plano
+				ni de forma automática al abrir la página.
 			</li>
 		</ul>
 	</section>

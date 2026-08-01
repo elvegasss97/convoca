@@ -79,7 +79,7 @@
 		{#if organizerName}
 			<div class="flex items-center gap-1.5 text-xs text-ink-600">
 				<span class="truncate">{organizerName}</span>
-				<VerificationBadge level={event.verification.level} />
+				<VerificationBadge level={event.verification.level} interactive={false} />
 			</div>
 		{/if}
 

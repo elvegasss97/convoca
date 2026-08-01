@@ -11,7 +11,12 @@
 	];
 </script>
 
-<LegalPageShell title="Aviso legal" updatedAt={LEGAL_VERSIONS.terms} {sections}>
+<LegalPageShell
+	title="Aviso legal"
+	description="Identificación del titular de Convoca, condiciones de acceso y responsabilidad sobre el contenido publicado por las personas usuarias."
+	updatedAt={LEGAL_VERSIONS.terms}
+	{sections}
+>
 	<section>
 		<h2 id="titular">1. Titular del sitio</h2>
 		<p>
@@ -25,8 +30,8 @@
 			</li>
 			<li>Contacto: <a href="mailto:convocahelp@outlook.es">convocahelp@outlook.es</a></li>
 			<li>
-				NIF y domicilio: <strong>pendientes de completar</strong> — se añadirán a este documento antes
-				de un lanzamiento público real.
+				NIF y domicilio: <strong>[DATOS DEL TITULAR PENDIENTES DE COMPLETAR]</strong> — se añadirán a
+				este documento antes de un lanzamiento público real.
 			</li>
 		</ul>
 	</section>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
+	import Seo from '$lib/components/Seo.svelte';
 	import {
 		ArrowLeft,
 		ArrowRight,
@@ -12,7 +13,8 @@
 		ShieldCheck,
 		Send,
 		Loader2,
-		AlertCircle
+		AlertCircle,
+		AlertTriangle
 	} from '@lucide/svelte';
 	import type { EventCategory, EventTheme, PriorCommunicationStatus } from '$lib/types';
 	import { categoryLabels, themeLabels, themeLabel, priorCommunicationLabels } from '$lib/labels';
@@ -334,9 +336,10 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Crear convocatoria — Convoca</title>
-</svelte:head>
+<Seo
+	title="Crear convocatoria"
+	description="Publica tu manifestación, concentración, recogida de firmas o acción vecinal en Convoca en unos pocos pasos. Gratis, sin necesidad de exponer datos personales sensibles."
+/>
 
 <div class="mx-auto max-w-2xl px-4 pt-4 pb-24 sm:px-6 md:pb-10">
 	{#if done}
@@ -745,6 +748,18 @@
 							<Info class="mt-0.5 size-4 shrink-0 text-brand-600" />
 							<span>{priorCommunicationLabels[form.priorCommunication]}</span>
 						</div>
+					</div>
+
+					<div
+						class="flex items-start gap-2.5 rounded-2xl border border-warning-300 bg-warning-50 p-3.5 text-sm text-warning-700"
+					>
+						<AlertTriangle class="mt-0.5 size-4 shrink-0" strokeWidth={2.25} />
+						<ul class="list-disc space-y-1 pl-4">
+							<li>No incluyas datos personales sensibles (tuyos o de terceros) en el texto.</li>
+							<li>No suplantes a ninguna organización, colectivo o administración.</li>
+							<li>No uses Convoca para amenazas, violencia ni actividades ilegales.</li>
+							<li>Confirma que toda la información de esta convocatoria es correcta.</li>
+						</ul>
 					</div>
 
 					<p class="text-xs text-ink-400">

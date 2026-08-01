@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import Seo from '$lib/components/Seo.svelte';
 	import {
 		Mail,
 		Loader2,
@@ -70,9 +71,11 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Recuperar cuenta — Convoca</title>
-</svelte:head>
+<Seo
+	title="Recuperar cuenta"
+	description="Recupera el acceso a tu cuenta de organizador en Convoca."
+	noindex
+/>
 
 <div class="mx-auto max-w-md px-4 py-10 sm:px-6">
 	{#if !recoveryMode}

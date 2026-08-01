@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import Seo from '$lib/components/Seo.svelte';
 	import {
 		LogOut,
 		Trash2,
@@ -63,9 +64,11 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Mi cuenta — Convoca</title>
-</svelte:head>
+<Seo
+	title="Mi cuenta"
+	description="Gestiona los datos de tu cuenta de organizador en Convoca."
+	noindex
+/>
 
 <div class="mx-auto max-w-2xl px-4 py-8 sm:px-6">
 	<h1 class="font-display text-2xl font-semibold text-ink-900">Mi cuenta</h1>

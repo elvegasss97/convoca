@@ -72,11 +72,13 @@
 		<div class="relative flex-1">
 			<Search
 				class="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-400"
+				aria-hidden="true"
 			/>
 			<input
 				type="search"
 				bind:value={filters.query}
 				placeholder="Buscar por título o ciudad…"
+				aria-label="Buscar convocatorias por título o ciudad"
 				class="w-full rounded-full border-ink-200 bg-white py-2.5 pr-3 pl-10 text-sm shadow-sm focus:border-brand-500 focus:ring-brand-500"
 			/>
 		</div>
