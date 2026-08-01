@@ -420,7 +420,14 @@
 						bind:checked={acceptedTerms}
 						class="mt-0.5 size-4 rounded border-ink-300 text-brand-700 focus:ring-brand-500"
 					/>
-					Acepto las condiciones de uso de Convoca.
+					Acepto las
+					<a
+						href="/legal/terminos"
+						target="_blank"
+						rel="noopener noreferrer"
+						onclick={(e) => e.stopPropagation()}
+						class="underline hover:text-brand-700">condiciones de uso</a
+					> de Convoca.
 				</label>
 
 				<label class="flex items-start gap-2.5 text-sm text-ink-700">
@@ -430,7 +437,14 @@
 						bind:checked={acceptedPrivacy}
 						class="mt-0.5 size-4 rounded border-ink-300 text-brand-700 focus:ring-brand-500"
 					/>
-					He leído y acepto la política de privacidad de Convoca.
+					He leído y acepto la
+					<a
+						href="/legal/privacidad"
+						target="_blank"
+						rel="noopener noreferrer"
+						onclick={(e) => e.stopPropagation()}
+						class="underline hover:text-brand-700">política de privacidad</a
+					> de Convoca.
 				</label>
 
 				<label
@@ -445,7 +459,15 @@
 						bind:checked={acceptedPeacefulUse}
 						class="mt-0.5 size-4 rounded border-brand-300 text-brand-700 focus:ring-brand-500"
 					/>
-					Declaro que utilizaré Convoca únicamente para difundir acciones legales y pacíficas.
+					Declaro que utilizaré Convoca únicamente para difundir acciones legales y pacíficas, conforme
+					a la
+					<a
+						href="/legal/uso-pacifico"
+						target="_blank"
+						rel="noopener noreferrer"
+						onclick={(e) => e.stopPropagation()}
+						class="underline hover:text-brand-800">declaración de uso pacífico</a
+					>.
 				</label>
 				{#if showErrors && !termsValid}
 					<FieldError message="Debes aceptar las tres declaraciones para crear la cuenta." />
