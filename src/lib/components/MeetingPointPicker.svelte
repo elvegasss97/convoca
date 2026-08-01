@@ -4,7 +4,7 @@
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import type { Map as MapLibreMap, Marker as MapLibreMarker } from 'maplibre-gl';
 	import type { GeoPoint } from '$lib/types';
-	import { geocodeAddress } from '$lib/utils/geocode';
+	import { geocodeAddress, geocodePostalCodeBounds, type GeoBounds } from '$lib/utils/geocode';
 	import FieldError from './FieldError.svelte';
 
 	interface Props {
@@ -88,15 +88,20 @@
 	// obsoleta encadenada a la query rompiendo la búsqueda siguiente. No hay
 	// lista cerrada de ciudades: funciona en cualquier punto de España.
 	//
-	// El código postal, si se ha escrito, se antepone a la dirección: muchos
-	// nombres de calle se repiten en distintas localidades (Calle Mayor,
-	// Avenida de la Constitución...) y el código postal es la forma más
-	// fiable de desambiguar sin depender de una ciudad escrita a mano. A
-	// diferencia de "Ciudad", este campo nunca se autorrellena con el
-	// resultado, así que no puede quedar "atascado" con un valor de una
-	// búsqueda anterior sin que la persona lo haya escrito ella misma.
+	// El código postal, si se ha escrito, NO se mete como texto en la query:
+	// comprobado en vivo contra Nominatim que para nombres de calle muy
+	// repetidos (p. ej. "Plaza de la Constitución") lo trata como una pista
+	// débil y lo ignora, devolviendo el resultado de mayor peso global en
+	// otra provincia aunque el código postal esté ahí. En vez de eso, se
+	// resuelve primero el área del código postal (`geocodePostalCodeBounds`)
+	// y se usa como `bounded=1`: un filtro estricto que Nominatim sí respeta
+	// siempre. A diferencia de "Ciudad", este campo nunca se autorrellena
+	// con el resultado, así que no puede quedar "atascado" con un valor de
+	// una búsqueda anterior sin que la persona lo haya escrito ella misma.
 	let geocodeTimer: ReturnType<typeof setTimeout> | undefined;
 	let activeController: AbortController | undefined;
+	let cachedPostalCode: string | undefined;
+	let cachedBounds: GeoBounds | null = null;
 
 	$effect(() => {
 		const query = address.trim();
@@ -110,41 +115,38 @@
 			return;
 		}
 
-		geocodeTimer = setTimeout(() => {
+		geocodeTimer = setTimeout(async () => {
 			const controller = new AbortController();
 			activeController = controller;
 			geocodeStatus = 'loading';
 
-			// Comprobado empíricamente contra Nominatim: aunque en el
-			// formulario el código postal se muestre primero (para que se
-			// rellene antes de escribir la calle), en la propia query de
-			// búsqueda tiene que ir DESPUÉS de la dirección — antepuesto,
-			// Nominatim lo trata como ruido y devuelve la coincidencia con
-			// más peso global ignorando el código postal (p. ej. "28801,
-			// Calle Mayor, España" resuelve a la Calle Mayor de Madrid en
-			// vez de la de Alcalá de Henares); pospuesto sí desambigua
-			// correctamente ("Calle Mayor, 28801, España" → Alcalá de
-			// Henares).
-			const fullQuery = postal ? `${query}, ${postal}, España` : `${query}, España`;
-
-			geocodeAddress(fullQuery, controller.signal)
-				.then((result) => {
-					if (controller.signal.aborted) return;
-					if (!result) {
-						geocodeStatus = 'not-found';
-						return;
+			try {
+				let bounds: GeoBounds | undefined;
+				if (/^\d{5}$/.test(postal)) {
+					if (postal !== cachedPostalCode) {
+						cachedPostalCode = postal;
+						cachedBounds = await geocodePostalCodeBounds(postal, controller.signal);
 					}
-					point = result.point;
-					if (result.city) cityName = result.city;
-					if (result.province) province = result.province;
-					marker?.setLngLat([result.point.lng, result.point.lat]);
-					map?.easeTo({ center: [result.point.lng, result.point.lat], zoom: 16 });
-					geocodeStatus = 'found';
-				})
-				.catch((err: unknown) => {
-					if (err instanceof DOMException && err.name === 'AbortError') return;
-					geocodeStatus = 'error';
-				});
+					bounds = cachedBounds ?? undefined;
+				}
+				if (controller.signal.aborted) return;
+
+				const result = await geocodeAddress(`${query}, España`, controller.signal, bounds);
+				if (controller.signal.aborted) return;
+				if (!result) {
+					geocodeStatus = 'not-found';
+					return;
+				}
+				point = result.point;
+				if (result.city) cityName = result.city;
+				if (result.province) province = result.province;
+				marker?.setLngLat([result.point.lng, result.point.lat]);
+				map?.easeTo({ center: [result.point.lng, result.point.lat], zoom: 16 });
+				geocodeStatus = 'found';
+			} catch (err: unknown) {
+				if (err instanceof DOMException && err.name === 'AbortError') return;
+				geocodeStatus = 'error';
+			}
 		}, 700);
 	});
 
