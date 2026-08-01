@@ -13,9 +13,11 @@
 	interface Props {
 		filters: EventFiltersState;
 		resultsCount: number;
+		/** Se llama también al pulsar "Limpiar", además de resetear `filters` — usado para restaurar el filtro temporal del mapa a "Ver todas". */
+		onClearAll?: () => void;
 	}
 
-	let { filters = $bindable(), resultsCount }: Props = $props();
+	let { filters = $bindable(), resultsCount, onClearAll }: Props = $props();
 
 	let sheetOpen = $state(false);
 
@@ -53,6 +55,7 @@
 
 	function resetFilters() {
 		filters = { ...DEFAULT_FILTERS, query: filters.query };
+		onClearAll?.();
 	}
 
 	const activeCount = $derived(

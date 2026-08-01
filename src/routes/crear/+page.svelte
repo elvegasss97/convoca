@@ -19,12 +19,14 @@
 	import { mockCities } from '$lib/data/cities';
 	import { createEvent } from '$lib/services/eventsService';
 	import { getOrganizer } from '$lib/services/organizersService';
+	import { createChannel } from '$lib/services/channelsService';
 	import { authState } from '$lib/auth/session.svelte';
 	import { getMyOrganizerPrivateProfile, hasCompletedLegalAcceptance } from '$lib/auth/authService';
 	import { formatEventDate, formatDuration } from '$lib/utils/date';
 	import CategoryGlyph from '$lib/components/CategoryGlyph.svelte';
 	import MeetingPointPicker from '$lib/components/MeetingPointPicker.svelte';
 	import FieldError from '$lib/components/FieldError.svelte';
+	import ChannelsEditor, { type ChannelDraft } from '$lib/components/ChannelsEditor.svelte';
 
 	const steps = [
 		{ key: 'tipo', title: 'Tipo de acción' },
@@ -35,6 +37,7 @@
 		{ key: 'recorrido', title: 'Recorrido opcional' },
 		{ key: 'normas', title: 'Normas y declaración' },
 		{ key: 'comunicacion', title: 'Comunicación previa' },
+		{ key: 'canales', title: 'Canales de coordinación' },
 		{ key: 'preview', title: 'Vista previa' }
 	] as const;
 
@@ -70,7 +73,8 @@
 			routeDescription: '',
 			rulesText: 'Concentración pacífica y respetuosa.\nSe ruega no dejar residuos en el lugar.',
 			peacefulDeclaration: false,
-			priorCommunication: 'not_required' as PriorCommunicationStatus
+			priorCommunication: 'not_required' as PriorCommunicationStatus,
+			channels: [] as ChannelDraft[]
 		};
 	}
 	type DraftForm = ReturnType<typeof defaultFormFactory>;
@@ -295,6 +299,24 @@
 				rules: rulesList,
 				peacefulDeclaration: form.peacefulDeclaration
 			});
+
+			// Los canales necesitan el id del evento, que no existe hasta que se
+			// crea: se guardan aparte justo después, no bloquean la creación de
+			// la convocatoria si alguno fallara (se avisa, pero done ya se marca).
+			const validChannels = form.channels.filter((c) => c.url.trim());
+			for (const draft of validChannels) {
+				try {
+					await createChannel(created.id, {
+						platform: draft.platform,
+						channelType: draft.channelType,
+						label: draft.label,
+						url: draft.url
+					});
+				} catch (channelErr) {
+					console.error('No se pudo guardar un canal de coordinación', channelErr);
+				}
+			}
+
 			clearDraft();
 			done = { slug: created.slug };
 		} catch (err) {
@@ -669,6 +691,8 @@
 					delegación de gobierno u otra autoridad competente. Esta plataforma solo ayuda a difundir la
 					convocatoria.
 				</div>
+			{:else if steps[stepIndex].key === 'canales'}
+				<ChannelsEditor bind:channels={form.channels} />
 			{:else if steps[stepIndex].key === 'preview'}
 				<div class="space-y-4">
 					<div class="overflow-hidden rounded-2xl border border-ink-100">

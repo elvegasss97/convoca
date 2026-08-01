@@ -3,6 +3,11 @@
 	import type { Event } from '$lib/types';
 	import { categoryLabels, themeLabel } from '$lib/labels';
 	import { formatEventDateShort, formatEventTime } from '$lib/utils/date';
+	import {
+		getEventTimeCategory,
+		describeEventTimingForCard,
+		TIME_CATEGORY_COLORS
+	} from '$lib/utils/eventTiming';
 	import VerificationBadge from './VerificationBadge.svelte';
 	import AttendanceCounter from './AttendanceCounter.svelte';
 	import CategoryGlyph from './CategoryGlyph.svelte';
@@ -13,6 +18,11 @@
 	}
 
 	let { event, organizerName }: Props = $props();
+
+	const timing = $derived(getEventTimeCategory(event.startAt));
+	const timeColor = $derived(
+		TIME_CATEGORY_COLORS[timing.category === 'invalid' ? 'past' : timing.category]
+	);
 </script>
 
 <a
@@ -51,6 +61,10 @@
 			<span class="flex items-center gap-1">
 				<MapPin class="size-3.5" />
 				{event.meetingPoint.city}
+			</span>
+			<span class="flex items-center gap-1 font-medium" style={`color: ${timeColor}`}>
+				<span class="size-2 rounded-full" style={`background-color: ${timeColor}`}></span>
+				{describeEventTimingForCard(timing)}
 			</span>
 		</div>
 

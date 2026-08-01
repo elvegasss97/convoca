@@ -10,6 +10,11 @@ const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
 
 export default defineConfig(
 	includeIgnoreFile(gitignorePath),
+	{
+		// Copia literal (sin modificar) de maplibre-gl/dist — no es código
+		// propio, ver el comentario en EventMap.svelte sobre por qué vive aquí.
+		ignores: ['static/vendor/**']
+	},
 	js.configs.recommended,
 	ts.configs.recommended,
 	svelte.configs.recommended,

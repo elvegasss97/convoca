@@ -5,10 +5,12 @@
 	import type { PageData } from './$types';
 	import { DEFAULT_FILTERS } from '$lib/types';
 	import { filterEvents } from '$lib/utils/filterEvents';
+	import { getEventTimeCategory } from '$lib/utils/eventTiming';
 	import { selectedCity } from '$lib/stores/location';
 	import EventFilters from '$lib/components/EventFilters.svelte';
 	import EventCard from '$lib/components/EventCard.svelte';
 	import EventMap from '$lib/components/EventMap.svelte';
+	import MapTimeFilterBar, { type MapTimeFilter } from '$lib/components/MapTimeFilterBar.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -18,12 +20,50 @@
 	let filters = $state({ ...DEFAULT_FILTERS });
 
 	const view = $derived(page.url.searchParams.get('vista') === 'mapa' ? 'mapa' : 'lista');
-	const filteredEvents = $derived(filterEvents(data.events, filters, $selectedCity.point));
+
+	const VALID_TIME_FILTERS = new Set([
+		'all',
+		'today',
+		'this_week',
+		'upcoming_weeks',
+		'over_month',
+		'past'
+	]);
+	const timeFilter = $derived.by((): MapTimeFilter => {
+		const raw = page.url.searchParams.get('tiempo');
+		return raw && VALID_TIME_FILTERS.has(raw) ? (raw as MapTimeFilter) : 'all';
+	});
+
+	// Filtro temporal separado de `filters` (EventFiltersState/filterEvents ya
+	// existente, chips "Hoy/Este finde/..."): esta es la categorización nueva
+	// pedida para el mapa (hoy/esta semana/próximas semanas/más de un mes),
+	// con semántica y límites distintos. Se aplica igual en mapa y listado
+	// ("sincroniza mapa y listado" / "conserva el filtro al cambiar de vista")
+	// porque ambos parten del mismo `filteredEvents`.
+	const timeFilteredEvents = $derived.by(() => {
+		const base = filterEvents(data.events, filters, $selectedCity.point);
+		if (timeFilter === 'all') {
+			return base.filter((e) => getEventTimeCategory(e.startAt).category !== 'past');
+		}
+		return base.filter((e) => {
+			const result = getEventTimeCategory(e.startAt);
+			const category = result.category === 'invalid' ? 'past' : result.category;
+			return category === timeFilter;
+		});
+	});
+	const filteredEvents = $derived(timeFilteredEvents);
 
 	function setView(next: 'lista' | 'mapa') {
 		const url = new URL(page.url);
 		if (next === 'mapa') url.searchParams.set('vista', 'mapa');
 		else url.searchParams.delete('vista');
+		goto(url, { replaceState: true, noScroll: true, keepFocus: true });
+	}
+
+	function setTimeFilter(next: MapTimeFilter) {
+		const url = new URL(page.url);
+		if (next === 'all') url.searchParams.delete('tiempo');
+		else url.searchParams.set('tiempo', next);
 		goto(url, { replaceState: true, noScroll: true, keepFocus: true });
 	}
 </script>
@@ -100,8 +140,20 @@
 		</div>
 	</div>
 
+	<div class="mb-3">
+		<MapTimeFilterBar
+			value={timeFilter}
+			onChange={setTimeFilter}
+			resultsCount={filteredEvents.length}
+		/>
+	</div>
+
 	<div class="mb-5">
-		<EventFilters bind:filters resultsCount={filteredEvents.length} />
+		<EventFilters
+			bind:filters
+			resultsCount={filteredEvents.length}
+			onClearAll={() => setTimeFilter('all')}
+		/>
 	</div>
 
 	{#if view === 'lista'}
@@ -116,7 +168,7 @@
 				<p class="text-sm text-ink-500">No hay convocatorias que coincidan con estos filtros.</p>
 			</div>
 		{/if}
-	{:else}
+	{:else if filteredEvents.length > 0}
 		<div class="overflow-hidden rounded-2xl border border-ink-100 shadow-card">
 			<EventMap
 				events={filteredEvents}
@@ -124,7 +176,12 @@
 				zoom={11.5}
 				heightClass="h-[70vh]"
 				fitToEvents
+				showLegend
 			/>
+		</div>
+	{:else}
+		<div class="rounded-2xl border border-dashed border-ink-200 bg-white py-16 text-center">
+			<p class="text-sm text-ink-500">No hay convocatorias que coincidan con estos filtros.</p>
 		</div>
 	{/if}
 </div>

@@ -9,29 +9,15 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
-	// Allows to automatically instantiate createClient with right options
-	// instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
 	__InternalSupabase: {
 		PostgrestVersion: '14.15';
 	};
 	public: {
 		Tables: {
 			attendance_rate_limits: {
-				Row: {
-					called_at: string;
-					dedup_token: string;
-					id: number;
-				};
-				Insert: {
-					called_at?: string;
-					dedup_token: string;
-					id?: never;
-				};
-				Update: {
-					called_at?: string;
-					dedup_token?: string;
-					id?: never;
-				};
+				Row: { called_at: string; dedup_token: string; id: number };
+				Insert: { called_at?: string; dedup_token: string; id?: never };
+				Update: { called_at?: string; dedup_token?: string; id?: never };
 				Relationships: [];
 			};
 			attendance_responses: {
@@ -72,6 +58,7 @@ export type Database = {
 			audit_logs: {
 				Row: {
 					action: string;
+					channel_id: string | null;
 					created_at: string;
 					event_id: string;
 					id: string;
@@ -80,6 +67,7 @@ export type Database = {
 				};
 				Insert: {
 					action: string;
+					channel_id?: string | null;
 					created_at?: string;
 					event_id: string;
 					id?: string;
@@ -88,6 +76,7 @@ export type Database = {
 				};
 				Update: {
 					action?: string;
+					channel_id?: string | null;
 					created_at?: string;
 					event_id?: string;
 					id?: string;
@@ -96,7 +85,99 @@ export type Database = {
 				};
 				Relationships: [
 					{
+						foreignKeyName: 'audit_logs_channel_id_fkey';
+						columns: ['channel_id'];
+						isOneToOne: false;
+						referencedRelation: 'event_communication_channels';
+						referencedColumns: ['id'];
+					},
+					{
 						foreignKeyName: 'audit_logs_event_id_fkey';
+						columns: ['event_id'];
+						isOneToOne: false;
+						referencedRelation: 'events';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			channel_reports: {
+				Row: {
+					channel_id: string;
+					created_at: string;
+					details: string | null;
+					id: string;
+					reason: string;
+					reported_by_user_id: string | null;
+					resolved_at: string | null;
+					status: string;
+				};
+				Insert: {
+					channel_id: string;
+					created_at?: string;
+					details?: string | null;
+					id?: string;
+					reason: string;
+					reported_by_user_id?: string | null;
+					resolved_at?: string | null;
+					status?: string;
+				};
+				Update: {
+					channel_id?: string;
+					created_at?: string;
+					details?: string | null;
+					id?: string;
+					reason?: string;
+					reported_by_user_id?: string | null;
+					resolved_at?: string | null;
+					status?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'channel_reports_channel_id_fkey';
+						columns: ['channel_id'];
+						isOneToOne: false;
+						referencedRelation: 'event_communication_channels';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			event_communication_channels: {
+				Row: {
+					channel_type: string;
+					created_at: string;
+					event_id: string;
+					id: string;
+					is_hidden: boolean;
+					label: string | null;
+					platform: string;
+					updated_at: string;
+					url: string;
+				};
+				Insert: {
+					channel_type: string;
+					created_at?: string;
+					event_id: string;
+					id?: string;
+					is_hidden?: boolean;
+					label?: string | null;
+					platform: string;
+					updated_at?: string;
+					url: string;
+				};
+				Update: {
+					channel_type?: string;
+					created_at?: string;
+					event_id?: string;
+					id?: string;
+					is_hidden?: boolean;
+					label?: string | null;
+					platform?: string;
+					updated_at?: string;
+					url?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'event_communication_channels_event_id_fkey';
 						columns: ['event_id'];
 						isOneToOne: false;
 						referencedRelation: 'events';
@@ -331,24 +412,9 @@ export type Database = {
 				Relationships: [];
 			};
 			profiles: {
-				Row: {
-					created_at: string;
-					id: string;
-					role: string;
-					updated_at: string;
-				};
-				Insert: {
-					created_at?: string;
-					id: string;
-					role?: string;
-					updated_at?: string;
-				};
-				Update: {
-					created_at?: string;
-					id?: string;
-					role?: string;
-					updated_at?: string;
-				};
+				Row: { created_at: string; id: string; role: string; updated_at: string };
+				Insert: { created_at?: string; id: string; role?: string; updated_at?: string };
+				Update: { created_at?: string; id?: string; role?: string; updated_at?: string };
 				Relationships: [];
 			};
 			reports: {
@@ -456,11 +522,7 @@ export type Database = {
 		Functions: {
 			get_attendance_counts: {
 				Args: { p_event_ids?: string[] };
-				Returns: {
-					event_id: string;
-					going_count: number;
-					interested_count: number;
-				}[];
+				Returns: { event_id: string; going_count: number; interested_count: number }[];
 			};
 			is_moderator_or_admin: { Args: never; Returns: boolean };
 			purge_old_attendance_rate_limits: { Args: never; Returns: undefined };

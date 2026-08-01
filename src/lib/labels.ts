@@ -1,4 +1,7 @@
 import type {
+	ChannelPlatform,
+	ChannelReportReason,
+	ChannelType,
 	EventCategory,
 	EventStatus,
 	EventTheme,
@@ -119,5 +122,30 @@ export const moderationActionLabels: Record<ModerationAction, string> = {
 	request_changes: 'Solicitar cambios',
 	hide: 'Ocultar',
 	reject: 'Rechazar',
-	reinstate: 'Restaurar'
+	reinstate: 'Restaurar',
+	hide_channel: 'Ocultar canal',
+	unhide_channel: 'Restaurar canal'
+};
+
+export const channelPlatformLabels: Record<ChannelPlatform, string> = {
+	whatsapp: 'WhatsApp',
+	telegram: 'Telegram',
+	other: 'Otro enlace oficial'
+};
+
+export const channelTypeLabels: Record<ChannelType, string> = {
+	group: 'Grupo',
+	channel: 'Canal',
+	community: 'Comunidad',
+	other: 'Otro'
+};
+
+export const channelReportReasonLabels: Record<ChannelReportReason, string> = {
+	enlace_roto: 'Enlace roto',
+	spam: 'Spam',
+	estafa: 'Estafa',
+	suplantacion: 'Suplantación',
+	no_pertenece_organizador: 'No pertenece a la organización',
+	contenido_violento_ilegal: 'Contenido violento o ilegal',
+	otro: 'Otro motivo'
 };

@@ -2,6 +2,13 @@
 	import { X, Pencil } from '@lucide/svelte';
 	import type { Event } from '$lib/types';
 	import { updateEventAsOwner } from '$lib/services/eventsService';
+	import {
+		listChannelsForEvent,
+		createChannel,
+		updateChannel,
+		deleteChannel
+	} from '$lib/services/channelsService';
+	import ChannelsEditor, { type ChannelDraft } from '$lib/components/ChannelsEditor.svelte';
 
 	interface Props {
 		open: boolean;
@@ -18,18 +25,64 @@
 	let objective = $state(event.objective);
 	let submitting = $state(false);
 	let submitError = $state<string | null>(null);
+	let channels = $state<ChannelDraft[]>([]);
 
 	$effect(() => {
 		if (open) {
 			title = event.title;
 			description = event.description;
 			objective = event.objective;
+			listChannelsForEvent(event.id)
+				.then((existing) => {
+					channels = existing.map((c) => ({
+						localId: crypto.randomUUID(),
+						existingId: c.id,
+						platform: c.platform,
+						channelType: c.channelType,
+						label: c.label ?? '',
+						url: c.url
+					}));
+				})
+				.catch(() => {
+					channels = [];
+				});
 		}
 	});
 
 	function close() {
 		open = false;
 		onClose();
+	}
+
+	/**
+	 * Diferencia el estado local contra lo que había al abrir el diálogo:
+	 * altas (sin `existingId`), ediciones (`existingId` presente y sigue en
+	 * la lista) y bajas (`existingId` que ya no está en la lista local).
+	 */
+	async function syncChannels() {
+		const currentIds = new Set(channels.filter((c) => c.existingId).map((c) => c.existingId));
+		const original = await listChannelsForEvent(event.id);
+
+		for (const original_ of original) {
+			if (!currentIds.has(original_.id)) {
+				await deleteChannel(original_.id);
+			}
+		}
+
+		for (const draft of channels) {
+			if (!draft.url.trim()) continue;
+			const payload = {
+				platform: draft.platform,
+				channelType: draft.channelType,
+				label: draft.label,
+				url: draft.url
+			};
+			if (draft.existingId) {
+				await updateChannel(draft.existingId, payload);
+			} else {
+				await createChannel(event.id, payload);
+			}
+		}
 	}
 
 	async function submit(e: SubmitEvent) {
@@ -47,6 +100,7 @@
 						? 'El organizador ha editado el contenido de la convocatoria.'
 						: event.statusNote
 			});
+			await syncChannels();
 			onSaved(updated);
 			close();
 		} catch (err) {
@@ -64,7 +118,7 @@
 	>
 		<button class="absolute inset-0" aria-label="Cerrar" onclick={close}></button>
 		<div
-			class="relative w-full max-w-lg rounded-t-3xl bg-white p-5 shadow-card-hover sm:rounded-3xl"
+			class="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-5 shadow-card-hover sm:rounded-3xl"
 		>
 			<div class="flex items-center justify-between">
 				<h2 class="flex items-center gap-2 font-display text-lg font-semibold text-ink-900">
@@ -114,6 +168,11 @@
 						se mostrará un aviso a las personas interesadas.
 					</p>
 				{/if}
+
+				<div class="border-t border-ink-100 pt-3">
+					<ChannelsEditor bind:channels />
+				</div>
+
 				{#if submitError}
 					<p class="text-critical-600 text-sm">{submitError}</p>
 				{/if}

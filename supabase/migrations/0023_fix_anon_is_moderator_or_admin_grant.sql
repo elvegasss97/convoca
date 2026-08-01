@@ -1,0 +1,22 @@
+-- 0023_fix_anon_is_moderator_or_admin_grant.sql
+--
+-- Bug real preexistente encontrado en pruebas (no introducido por esta
+-- fase): `event_updates_select_visible` (0004_event_updates.sql) es una
+-- única política `to anon, authenticated` cuyo `using` llama a
+-- `public.is_moderator_or_admin()`. Postgres exige permiso EXECUTE sobre
+-- cualquier función referenciada en una política aplicable al rol que
+-- ejecuta la consulta — y `anon` nunca tuvo ese permiso (0001_extensions_and_helpers.sql
+-- solo lo concedía a `authenticated`). Resultado verificado en vivo:
+-- cualquier visitante sin sesión que abriera la ficha pública de una
+-- convocatoria recibía un error 500 ("permission denied for function
+-- is_moderator_or_admin") al cargar `event_updates` — rompía la página por
+-- completo para el público general, que es la inmensa mayoría de quien
+-- visita un enlace de Convoca.
+--
+-- La función es segura de conceder a `anon`: `security definer`, solo lee
+-- el rol de `auth.uid()` en `profiles` y usa `coalesce(..., false)`, así
+-- que sin sesión (auth.uid() nulo) siempre devuelve `false` — no expone
+-- ningún dato, es exactamente el resultado que ya se esperaba para
+-- visitantes anónimos.
+
+grant execute on function public.is_moderator_or_admin() to anon;

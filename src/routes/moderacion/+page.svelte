@@ -14,11 +14,18 @@
 	} from '@lucide/svelte';
 	import type { PageData } from './$types';
 	import type { AuditLog, Event, ModerationAction } from '$lib/types';
-	import { categoryLabels, reportReasonLabels, moderationActionLabels } from '$lib/labels';
+	import {
+		categoryLabels,
+		reportReasonLabels,
+		moderationActionLabels,
+		channelPlatformLabels,
+		channelReportReasonLabels
+	} from '$lib/labels';
 	import { formatEventDate, formatEventTime, formatRelativeTime } from '$lib/utils/date';
 	import { applyModerationAction, listAllAuditLogs } from '$lib/services/moderationService';
 	import { reviewDocument } from '$lib/services/organizersService';
 	import { getEvent } from '$lib/services/eventsService';
+	import { setChannelHidden, listReportedChannels } from '$lib/services/channelsService';
 	import StatusPill from '$lib/components/StatusPill.svelte';
 	import VerificationBadge from '$lib/components/VerificationBadge.svelte';
 	import NoteDialog from '$lib/components/NoteDialog.svelte';
@@ -31,6 +38,7 @@
 	let reported = $state(data.reported);
 	let auditLog = $state(data.auditLog);
 	let pendingDocuments = $state(data.pendingDocuments);
+	let reportedChannels = $state(data.reportedChannels);
 
 	const orgNameById = $derived(new Map(data.organizers.map((o) => [o.id, o.displayName])));
 
@@ -43,11 +51,18 @@
 
 	let activeTab = $state<(typeof tabs)[number]['key']>('pendientes');
 
-	let actionTarget = $state<{ event: Event; action: ModerationAction } | null>(null);
+	/**
+	 * `hide_channel`/`unhide_channel` no son acciones de este flujo (operan
+	 * sobre un canal, no sobre `{ event, action }`) — tienen su propia
+	 * confirmación en la pestaña "Canales reportados", vía `setChannelHidden`.
+	 */
+	type EventModerationAction = Exclude<ModerationAction, 'hide_channel' | 'unhide_channel'>;
+
+	let actionTarget = $state<{ event: Event; action: EventModerationAction } | null>(null);
 	let actionOpen = $state(false);
 
 	const actionCopy: Record<
-		ModerationAction,
+		EventModerationAction,
 		{ title: string; confirmLabel: string; tone: 'brand' | 'critical'; requireNote: boolean }
 	> = {
 		approve: {
@@ -82,7 +97,7 @@
 		}
 	};
 
-	function openAction(event: Event, action: ModerationAction) {
+	function openAction(event: Event, action: EventModerationAction) {
 		actionTarget = { event, action };
 		actionOpen = true;
 	}
@@ -95,6 +110,22 @@
 		pending = pending.filter((e) => e.id !== event.id);
 		reported = reported.filter((g) => g.event.id !== event.id);
 		auditLog = await listAllAuditLogs();
+	}
+
+	/**
+	 * Oculta solo el canal reportado (nunca toda la convocatoria) y descarta
+	 * los reportes abiertos contra él. Queda registrado en `audit_logs`
+	 * (`hide_channel`, ver `channelsService.setChannelHidden`).
+	 */
+	async function hideReportedChannel(channelId: string) {
+		await setChannelHidden(channelId, true, MODERATOR_ID);
+		reportedChannels = await listReportedChannels();
+	}
+
+	/** El reporte puede ser un falso positivo: descartarlo sin ocultar nada. */
+	async function dismissChannelReport(channelId: string) {
+		await setChannelHidden(channelId, false, MODERATOR_ID, 'Reporte descartado tras revisión.');
+		reportedChannels = await listReportedChannels();
 	}
 
 	async function reviewDoc(documentId: string, status: 'approved' | 'rejected') {
@@ -292,6 +323,51 @@
 					{/each}
 				</div>
 			{/if}
+
+			<div class="mt-6 border-t border-ink-100 pt-4">
+				<h3 class="font-display text-sm font-semibold text-ink-900">Canales reportados</h3>
+				{#if reportedChannels.length === 0}
+					<p class="py-6 text-center text-sm text-ink-400">No hay canales con reportes abiertos.</p>
+				{:else}
+					<div class="mt-2 space-y-3">
+						{#each reportedChannels as group (group.channel.id)}
+							<div class="border-critical-200 rounded-2xl border bg-critical-50/40 p-4">
+								<p class="font-display text-sm font-semibold text-ink-900">
+									{channelPlatformLabels[group.channel.platform]}
+									{#if group.channel.label}· {group.channel.label}{/if}
+								</p>
+								<p class="truncate text-xs text-ink-500">{group.channel.url}</p>
+								<div class="mt-2 space-y-1.5">
+									{#each group.reports as report (report.id)}
+										<div class="rounded-xl bg-white px-3 py-2 text-sm">
+											<p class="font-medium text-critical-700">
+												{channelReportReasonLabels[report.reason]}
+											</p>
+											{#if report.details}<p class="text-xs text-ink-500">{report.details}</p>{/if}
+										</div>
+									{/each}
+								</div>
+								<div class="mt-3 flex flex-wrap gap-2 border-t border-critical-100 pt-3">
+									<button
+										type="button"
+										onclick={() => dismissChannelReport(group.channel.id)}
+										class="flex items-center gap-1.5 rounded-full bg-brand-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-800"
+									>
+										<Check class="size-3.5" /> Descartar reporte
+									</button>
+									<button
+										type="button"
+										onclick={() => hideReportedChannel(group.channel.id)}
+										class="flex items-center gap-1.5 rounded-full border border-warning-300 px-3 py-1.5 text-xs font-semibold text-warning-700 hover:bg-warning-50"
+									>
+										<EyeOff class="size-3.5" /> Ocultar solo el canal
+									</button>
+								</div>
+							</div>
+						{/each}
+					</div>
+				{/if}
+			</div>
 		{:else if activeTab === 'documentacion'}
 			{#if pendingDocuments.length === 0}
 				<p class="py-10 text-center text-sm text-ink-400">

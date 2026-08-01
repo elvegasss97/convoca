@@ -83,7 +83,26 @@ export type ReportReason =
 
 export type ReportStatus = 'open' | 'in_review' | 'resolved' | 'dismissed';
 
-export type ModerationAction = 'approve' | 'request_changes' | 'hide' | 'reject' | 'reinstate';
+export type ModerationAction =
+	| 'approve'
+	| 'request_changes'
+	| 'hide'
+	| 'reject'
+	| 'reinstate'
+	| 'hide_channel'
+	| 'unhide_channel';
+
+export type ChannelPlatform = 'whatsapp' | 'telegram' | 'other';
+export type ChannelType = 'group' | 'channel' | 'community' | 'other';
+
+export type ChannelReportReason =
+	| 'enlace_roto'
+	| 'spam'
+	| 'estafa'
+	| 'suplantacion'
+	| 'no_pertenece_organizador'
+	| 'contenido_violento_ilegal'
+	| 'otro';
 
 // ---------------------------------------------------------------------------
 // Geografía
@@ -198,6 +217,28 @@ export interface Event {
 }
 
 // ---------------------------------------------------------------------------
+// Canales de coordinación (WhatsApp / Telegram / otro)
+// ---------------------------------------------------------------------------
+
+/**
+ * Enlace opcional de coordinación de una convocatoria. Público solo cuando
+ * `!isHidden` y la convocatoria está en un estado público (ver
+ * `channels_select_public` en `supabase/migrations/0021_communication_channels.sql`).
+ * Convoca nunca registra quién abre o pulsa uno de estos enlaces.
+ */
+export interface CommunicationChannel {
+	id: string;
+	eventId: string;
+	platform: ChannelPlatform;
+	channelType: ChannelType;
+	label?: string;
+	url: string;
+	isHidden: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
+// ---------------------------------------------------------------------------
 // Asistencia
 // ---------------------------------------------------------------------------
 
@@ -276,6 +317,19 @@ export interface AuditLog {
 	moderatorId: string;
 	note?: string;
 	createdAt: string;
+	/** Presente solo en acciones `hide_channel`/`unhide_channel`. */
+	channelId?: string;
+}
+
+/** Reporte de un canal de coordinación. Nunca público, ni para quien reporta ni para el organizador. */
+export interface ChannelReport {
+	id: string;
+	channelId: string;
+	reason: ChannelReportReason;
+	details?: string;
+	status: ReportStatus;
+	createdAt: string;
+	resolvedAt?: string;
 }
 
 // ---------------------------------------------------------------------------

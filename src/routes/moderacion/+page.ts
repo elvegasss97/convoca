@@ -7,6 +7,7 @@ import {
 	listAllAuditLogs
 } from '$lib/services/moderationService';
 import { getPendingDocuments, listOrganizers } from '$lib/services/organizersService';
+import { listReportedChannels } from '$lib/services/channelsService';
 
 export const load: PageLoad = async ({ url }) => {
 	const session = await authService.getSession();
@@ -17,13 +18,15 @@ export const load: PageLoad = async ({ url }) => {
 		redirect(303, `/login?redirect=${encodeURIComponent(url.pathname)}`);
 	}
 
-	const [pending, reported, auditLog, pendingDocuments, organizers] = await Promise.all([
-		listPendingReview(),
-		listReportedEvents(),
-		listAllAuditLogs(),
-		getPendingDocuments(),
-		listOrganizers()
-	]);
+	const [pending, reported, auditLog, pendingDocuments, organizers, reportedChannels] =
+		await Promise.all([
+			listPendingReview(),
+			listReportedEvents(),
+			listAllAuditLogs(),
+			getPendingDocuments(),
+			listOrganizers(),
+			listReportedChannels()
+		]);
 
-	return { session, pending, reported, auditLog, pendingDocuments, organizers };
+	return { session, pending, reported, auditLog, pendingDocuments, organizers, reportedChannels };
 };

@@ -18,6 +18,7 @@
 	import EventMap from '$lib/components/EventMap.svelte';
 	import ShareDialog from '$lib/components/ShareDialog.svelte';
 	import ReportDialog from '$lib/components/ReportDialog.svelte';
+	import ChannelsSection from '$lib/components/ChannelsSection.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -122,6 +123,8 @@
 					<p><strong class="font-semibold">Recorrido:</strong> {event.route.description}</p>
 				</div>
 			{/if}
+
+			<ChannelsSection channels={data.channels} />
 
 			<section>
 				<h2 class="font-display text-lg font-semibold text-ink-900">Descripción</h2>
