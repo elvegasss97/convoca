@@ -14,9 +14,26 @@
 		zoom?: number;
 		heightClass?: string;
 		route?: RouteLine;
+		/**
+		 * Encuadra el mapa a los puntos de `events` en vez de usar `center`/`zoom`
+		 * fijos. Pensado para listados (p. ej. Inicio, donde `center` es la
+		 * ciudad seleccionada arriba y puede no tener nada que ver con dónde
+		 * están las convocatorias mostradas — bug real encontrado en staging:
+		 * una convocatoria en Albacete no se veía con "Madrid" seleccionada,
+		 * pese a que sí estaba en los datos). La página de detalle de una
+		 * convocatoria (un único punto, siempre el suyo) no debe activarlo.
+		 */
+		fitToEvents?: boolean;
 	}
 
-	let { events, center, zoom = 5.6, heightClass = 'h-[60vh]', route }: Props = $props();
+	let {
+		events,
+		center,
+		zoom = 5.6,
+		heightClass = 'h-[60vh]',
+		route,
+		fitToEvents = false
+	}: Props = $props();
 
 	let container: HTMLDivElement;
 	let map: MapLibreMap | undefined;
@@ -199,6 +216,22 @@
 		if (!ready || !map) return;
 		const source = map.getSource('events') as GeoJSONSource | undefined;
 		source?.setData(toGeoJSON(list));
+
+		if (!fitToEvents || list.length === 0) return;
+		if (list.length === 1) {
+			const p = list[0].meetingPoint.point;
+			map.easeTo({ center: [p.lng, p.lat], zoom: 11.5, duration: 0 });
+			return;
+		}
+		const lngs = list.map((e) => e.meetingPoint.point.lng);
+		const lats = list.map((e) => e.meetingPoint.point.lat);
+		map.fitBounds(
+			[
+				[Math.min(...lngs), Math.min(...lats)],
+				[Math.max(...lngs), Math.max(...lats)]
+			],
+			{ padding: 48, maxZoom: 12, duration: 0 }
+		);
 	});
 
 	onDestroy(() => {

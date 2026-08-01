@@ -123,6 +123,7 @@
 				center={$selectedCity.point}
 				zoom={11.5}
 				heightClass="h-[70vh]"
+				fitToEvents
 			/>
 		</div>
 	{/if}
