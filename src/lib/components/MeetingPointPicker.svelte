@@ -4,7 +4,6 @@
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import type { Map as MapLibreMap, Marker as MapLibreMarker } from 'maplibre-gl';
 	import type { GeoPoint } from '$lib/types';
-	import { mockCities } from '$lib/data/cities';
 	import { geocodeAddress } from '$lib/utils/geocode';
 	import FieldError from './FieldError.svelte';
 
@@ -79,31 +78,17 @@
 		});
 	});
 
-	// Atajo de conveniencia: si aún no se ha escrito una dirección y la
-	// ciudad coincide con una de las sugeridas, centra el mapa ahí como punto
-	// de partida. No es una restricción: cualquier otra ciudad de España
-	// funciona igual en cuanto se escribe la dirección (ver geocodificación
-	// más abajo).
-	$effect(() => {
-		const name = cityName.trim();
-		if (address.trim().length >= 5) return;
-		const city = mockCities.find((c) => c.name === name);
-		if (!city || !map || !marker) return;
-		point = { ...city.point };
-		marker.setLngLat([city.point.lng, city.point.lat]);
-		map.easeTo({ center: [city.point.lng, city.point.lat], zoom: 13 });
-	});
-
-	// Geocodifica la dirección (con la ciudad escrita como contexto, si la
-	// hay) y, si la encuentra, mueve el marcador, recentra el mapa y rellena
-	// ciudad/provincia automáticamente a partir del resultado. No hay lista
-	// cerrada de ciudades: funciona en cualquier punto de España.
+	// Geocodifica la dirección tal cual se escribe, sin añadir la ciudad como
+	// contexto: el campo "Ciudad" se rellena a partir del resultado (más
+	// abajo), así que si se deja la ciudad de una búsqueda anterior y se
+	// cambia solo la dirección a otra parte de España, no queda una ciudad
+	// obsoleta encadenada a la query rompiendo la búsqueda siguiente. No hay
+	// lista cerrada de ciudades: funciona en cualquier punto de España.
 	let geocodeTimer: ReturnType<typeof setTimeout> | undefined;
 	let activeController: AbortController | undefined;
 
 	$effect(() => {
 		const query = address.trim();
-		const cityContext = cityName.trim();
 
 		clearTimeout(geocodeTimer);
 		activeController?.abort();
@@ -118,7 +103,7 @@
 			activeController = controller;
 			geocodeStatus = 'loading';
 
-			const fullQuery = cityContext ? `${query}, ${cityContext}, España` : `${query}, España`;
+			const fullQuery = `${query}, España`;
 
 			geocodeAddress(fullQuery, controller.signal)
 				.then((result) => {
@@ -153,7 +138,6 @@
 		<label for="city-input" class="mb-1 block text-sm font-medium text-ink-700">Ciudad</label>
 		<input
 			id="city-input"
-			list="known-cities"
 			bind:value={cityName}
 			placeholder="Escribe cualquier ciudad o pueblo de España"
 			aria-invalid={cityInvalid}
@@ -161,11 +145,6 @@
 				? 'border-critical-400 focus:border-critical-500'
 				: 'border-ink-200 focus:border-brand-500'}"
 		/>
-		<datalist id="known-cities">
-			{#each mockCities as city (city.name)}
-				<option value={city.name}></option>
-			{/each}
-		</datalist>
 		{#if cityInvalid}
 			<FieldError message="Indica la ciudad o pueblo." />
 		{/if}

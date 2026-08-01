@@ -16,7 +16,6 @@
 	} from '@lucide/svelte';
 	import type { EventCategory, EventTheme, PriorCommunicationStatus } from '$lib/types';
 	import { categoryLabels, themeLabels, themeLabel, priorCommunicationLabels } from '$lib/labels';
-	import { mockCities } from '$lib/data/cities';
 	import { createEvent } from '$lib/services/eventsService';
 	import { getOrganizer } from '$lib/services/organizersService';
 	import { createChannel } from '$lib/services/channelsService';
@@ -64,9 +63,14 @@
 			startDate: '',
 			startTime: '18:00',
 			durationMinutes: 60,
-			cityName: mockCities[0].name,
-			province: mockCities[0].province,
-			meetingPoint: { ...mockCities[0].point },
+			// Sin ciudad preseleccionada: el buscador de direcciones (ver
+			// MeetingPointPicker) debe cubrir toda España desde el principio, no
+			// sesgarse hacia una ciudad por defecto. El punto de partida del mapa
+			// es el centro geográfico aproximado de España peninsular; se
+			// sustituye en cuanto se geocodifica una dirección o se toca el mapa.
+			cityName: '',
+			province: '',
+			meetingPoint: { lat: 40.4637, lng: -3.7492 },
 			meetingLabel: '',
 			meetingAddress: '',
 			hasRoute: false,
