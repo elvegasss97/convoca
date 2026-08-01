@@ -595,31 +595,14 @@
 						<FieldError message="Indica el nombre del punto de encuentro." />
 					{/if}
 				</div>
-				<div>
-					<label for="meeting-address" class="mb-1 block text-sm font-medium text-ink-700"
-						>Dirección</label
-					>
-					<input
-						id="meeting-address"
-						bind:value={form.meetingAddress}
-						placeholder="Ej. Plaza Mayor, s/n"
-						aria-invalid={showErrors && !meetingAddressValid}
-						class="w-full rounded-xl text-sm focus:ring-brand-500 {showErrors &&
-						!meetingAddressValid
-							? 'border-critical-400 focus:border-critical-500'
-							: 'border-ink-200 focus:border-brand-500'}"
-					/>
-					{#if showErrors && !meetingAddressValid}
-						<FieldError message="Indica la dirección." />
-					{/if}
-				</div>
 				<MeetingPointPicker
 					bind:point={form.meetingPoint}
 					bind:cityName={form.cityName}
 					bind:province={form.province}
+					bind:address={form.meetingAddress}
 					postalCode={form.postalCode}
-					address={form.meetingAddress}
 					cityInvalid={showErrors && !cityValid}
+					addressInvalid={showErrors && !meetingAddressValid}
 				/>
 			{:else if steps[stepIndex].key === 'recorrido'}
 				<label class="flex items-center gap-2.5 text-sm font-medium text-ink-800">
