@@ -1,5 +1,5 @@
 import tailwindcss from '@tailwindcss/vite';
-import adapter from '@sveltejs/adapter-auto';
+import adapter from '@sveltejs/adapter-vercel';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { defineConfig } from 'vitest/config';
@@ -45,9 +45,11 @@ export default defineConfig(() => {
 						filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 				},
 
-				// adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.
-				// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
-				// See https://svelte.dev/docs/kit/adapters for more information about adapters.
+				// Despliegue fijado a Vercel (staging primero, ver MIGRACION-PRODUCCION.md).
+				// Runtime Node por defecto: toda la app tiene `ssr = false`
+				// (src/routes/+layout.ts) y no hay ningún +server.ts/hooks.server.ts,
+				// así que no hay código de servidor real que se beneficie de edge —
+				// el runtime por defecto es el más simple y suficiente aquí.
 				adapter: adapter()
 			})
 		],
