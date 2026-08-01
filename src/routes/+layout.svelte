@@ -6,10 +6,17 @@
 	import { ENABLE_DEV_TOOLS } from '$lib/config/env';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import type { Component } from 'svelte';
+	import { page } from '$app/state';
 
 	let { children } = $props();
 
 	const webManifestLink = $derived(pwaInfo?.webManifest.linkTag ?? '');
+
+	// Las páginas /legal/* son documentos de referencia, no pantallas de la
+	// app: el selector de ciudad y la barra de pestañas móvil (que además
+	// puede tapar el final del texto en pantallas pequeñas) no aportan nada
+	// ahí y sí distraen. LegalPageShell ya pone su propio "Volver a Convoca".
+	const isLegalRoute = $derived(page.url.pathname.startsWith('/legal'));
 
 	/**
 	 * `import()` dinámico en vez de estático, guardado por el mismo `if
@@ -44,11 +51,13 @@
 </svelte:head>
 
 <div class="flex min-h-dvh flex-col bg-ink-50">
-	<TopBar />
-	<main class="flex-1 pb-20 md:pb-0">
+	<TopBar minimal={isLegalRoute} />
+	<main class="flex-1 {isLegalRoute ? '' : 'pb-20 md:pb-0'}">
 		{@render children()}
 	</main>
-	<MobileTabBar />
+	{#if !isLegalRoute}
+		<MobileTabBar />
+	{/if}
 	{#if DevResetButton}
 		<DevResetButton />
 	{/if}

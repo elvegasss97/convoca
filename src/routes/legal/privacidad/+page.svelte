@@ -1,11 +1,24 @@
 <script lang="ts">
 	import LegalPageShell from '$lib/components/legal/LegalPageShell.svelte';
 	import { LEGAL_VERSIONS } from '$lib/legal/versions';
+
+	const sections = [
+		{ id: 'responsable', label: '1. Responsable del tratamiento' },
+		{ id: 'que-datos', label: '2. Qué datos recogemos y para qué' },
+		{ id: 'base-legal', label: '3. Base legal' },
+		{ id: 'con-quien-compartimos', label: '4. Con quién compartimos datos' },
+		{ id: 'conservacion', label: '5. Cuánto tiempo conservamos tus datos' },
+		{ id: 'tus-derechos', label: '6. Tus derechos' },
+		{ id: 'menores', label: '7. Menores de edad' },
+		{ id: 'seguridad', label: '8. Seguridad' },
+		{ id: 'cookies', label: '9. Cookies' },
+		{ id: 'cambios', label: '10. Cambios en esta política' }
+	];
 </script>
 
-<LegalPageShell title="Política de privacidad" updatedAt={LEGAL_VERSIONS.privacy}>
+<LegalPageShell title="Política de privacidad" updatedAt={LEGAL_VERSIONS.privacy} {sections}>
 	<section>
-		<h2>1. Responsable del tratamiento</h2>
+		<h2 id="responsable">1. Responsable del tratamiento</h2>
 		<p>
 			Elias Vega, persona física responsable de Convoca (proyecto en fase de prototipo, sin una
 			sociedad mercantil constituida a día de hoy).
@@ -20,7 +33,7 @@
 	</section>
 
 	<section>
-		<h2>2. Qué datos recogemos y para qué</h2>
+		<h2 id="que-datos">2. Qué datos recogemos y para qué</h2>
 		<ul>
 			<li>
 				<strong>Cuenta:</strong> correo electrónico y contraseña (nunca almacenamos la contraseña en claro;
@@ -34,17 +47,18 @@
 			<li>
 				<strong>Perfil de organizador (privado):</strong> nombre legal de la organización y, si los aportas
 				voluntariamente, documentos de verificación de identidad u organización. Guardados en almacenamiento
-				privado, solo accesibles por ti y por el equipo de moderación. Para poder ofrecer niveles de verificación
-				fiables.
+				privado, solo accesibles por ti y por las personas responsables de moderación. Para poder ofrecer
+				niveles de verificación fiables.
 			</li>
 			<li>
 				<strong>Convocatorias:</strong> título, descripción, categoría, fecha, punto de encuentro y demás
 				datos que decidas publicar. Es contenido que tú mismo eliges hacer público.
 			</li>
 			<li>
-				<strong>Confirmaciones de asistencia ("voy" / "me interesa"):</strong> guardadas de forma anónima,
-				sin vincularlas a tu identidad ni a tu cuenta — solo a un identificador técnico del navegador
-				para evitar confirmaciones duplicadas. Nunca elaboramos una lista de personas asistentes.
+				<strong>Confirmaciones de asistencia ("voy" / "me interesa"):</strong> guardadas mediante un identificador
+				técnico seudónimo de tu navegador, nunca vinculadas a tu identidad, a tu cuenta ni a tu inicio
+				de sesión con Google, y usadas únicamente para evitar confirmaciones duplicadas. Nunca elaboramos
+				una lista de personas asistentes ni mostramos quién ha confirmado.
 			</li>
 			<li>
 				<strong>Reportes y moderación:</strong> si reportas una convocatoria o un canal, guardamos el
@@ -65,7 +79,7 @@
 	</section>
 
 	<section>
-		<h2>3. Base legal</h2>
+		<h2 id="base-legal">3. Base legal</h2>
 		<ul>
 			<li>
 				<strong>Ejecución de un contrato:</strong> los datos de cuenta y perfil, para poder prestarte
@@ -87,7 +101,7 @@
 	</section>
 
 	<section>
-		<h2>4. Con quién compartimos datos</h2>
+		<h2 id="con-quien-compartimos">4. Con quién compartimos datos</h2>
 		<p>
 			No vendemos tus datos. Los compartimos únicamente con los proveedores que necesitamos para
 			operar Convoca, en calidad de encargados del tratamiento, bajo contrato:
@@ -110,7 +124,7 @@
 	</section>
 
 	<section>
-		<h2>5. Cuánto tiempo conservamos tus datos</h2>
+		<h2 id="conservacion">5. Cuánto tiempo conservamos tus datos</h2>
 		<p>
 			Mientras mantengas tu cuenta activa. Si la eliminas, borramos o anonimizamos tus datos
 			personales en un plazo razonable, salvo la información que debamos conservar por obligación
@@ -120,7 +134,7 @@
 	</section>
 
 	<section>
-		<h2>6. Tus derechos</h2>
+		<h2 id="tus-derechos">6. Tus derechos</h2>
 		<p>
 			Puedes ejercer en cualquier momento tus derechos de acceso, rectificación, supresión,
 			oposición, limitación y portabilidad de tus datos, escribiendo a
@@ -132,7 +146,7 @@
 	</section>
 
 	<section>
-		<h2>7. Menores de edad</h2>
+		<h2 id="menores">7. Menores de edad</h2>
 		<p>
 			Convoca no está dirigido a menores de 18 años y no debes registrarte si no los has cumplido.
 			Si detectamos una cuenta de una persona menor de edad, la eliminaremos.
@@ -140,7 +154,7 @@
 	</section>
 
 	<section>
-		<h2>8. Seguridad</h2>
+		<h2 id="seguridad">8. Seguridad</h2>
 		<p>
 			Aplicamos medidas técnicas para proteger tus datos: las contraseñas nunca se guardan en claro,
 			las conexiones van cifradas (HTTPS), y el acceso a los datos en nuestra base de datos está
@@ -150,7 +164,7 @@
 	</section>
 
 	<section>
-		<h2>9. Cookies</h2>
+		<h2 id="cookies">9. Cookies</h2>
 		<p>
 			Convoca usa únicamente cookies técnicas necesarias para mantener tu sesión iniciada. Si usas
 			"Continuar con Google", Google puede establecer sus propias cookies conforme a su propia
@@ -159,7 +173,7 @@
 	</section>
 
 	<section>
-		<h2>10. Cambios en esta política</h2>
+		<h2 id="cambios">10. Cambios en esta política</h2>
 		<p>
 			Si cambiamos esta política de forma sustancial, se te pedirá que la vuelvas a aceptar la
 			próxima vez que uses funciones que lo requieran.
