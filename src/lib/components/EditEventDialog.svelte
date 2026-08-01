@@ -17,6 +17,7 @@
 	let description = $state(event.description);
 	let objective = $state(event.objective);
 	let submitting = $state(false);
+	let submitError = $state<string | null>(null);
 
 	$effect(() => {
 		if (open) {
@@ -34,6 +35,7 @@
 	async function submit(e: SubmitEvent) {
 		e.preventDefault();
 		submitting = true;
+		submitError = null;
 		try {
 			const updated = await updateEventAsOwner(userId, event.id, {
 				title: title.trim(),
@@ -47,6 +49,9 @@
 			});
 			onSaved(updated);
 			close();
+		} catch (err) {
+			console.error('No se pudo guardar la convocatoria', err);
+			submitError = 'No se han podido guardar los cambios. Inténtalo de nuevo.';
 		} finally {
 			submitting = false;
 		}
@@ -108,6 +113,9 @@
 						Como esta convocatoria ya está publicada, guardar cambios la marcará como "Modificada" y
 						se mostrará un aviso a las personas interesadas.
 					</p>
+				{/if}
+				{#if submitError}
+					<p class="text-critical-600 text-sm">{submitError}</p>
 				{/if}
 				<button
 					type="submit"
