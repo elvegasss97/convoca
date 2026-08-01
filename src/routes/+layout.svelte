@@ -3,6 +3,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import TopBar from '$lib/components/nav/TopBar.svelte';
 	import MobileTabBar from '$lib/components/nav/MobileTabBar.svelte';
+	import Footer from '$lib/components/nav/Footer.svelte';
 	import { ENABLE_DEV_TOOLS } from '$lib/config/env';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import type { Component } from 'svelte';
@@ -54,6 +55,7 @@
 	<TopBar minimal={isLegalRoute} />
 	<main class="flex-1 {isLegalRoute ? '' : 'pb-20 md:pb-0'}">
 		{@render children()}
+		<Footer />
 	</main>
 	{#if !isLegalRoute}
 		<MobileTabBar />
