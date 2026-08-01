@@ -11,6 +11,7 @@
 	import VerificationBadge from './VerificationBadge.svelte';
 	import AttendanceCounter from './AttendanceCounter.svelte';
 	import CategoryGlyph from './CategoryGlyph.svelte';
+	import StatusPill from './StatusPill.svelte';
 
 	interface Props {
 		event: Event;
@@ -51,7 +52,14 @@
 	</div>
 
 	<div class="flex flex-1 flex-col gap-2.5 p-4">
-		<h3 class="font-display text-base leading-snug font-semibold text-ink-900">{event.title}</h3>
+		<div class="flex items-start justify-between gap-2">
+			<h3 class="font-display text-base leading-snug font-semibold text-ink-900">
+				{event.title}
+			</h3>
+			{#if event.status !== 'published'}
+				<StatusPill status={event.status} />
+			{/if}
+		</div>
 
 		<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-500">
 			<span class="flex items-center gap-1">
