@@ -10,6 +10,7 @@ import { getPendingDocuments, listOrganizers } from '$lib/services/organizersSer
 import { listReportedChannels } from '$lib/services/channelsService';
 import { listPublicEvents } from '$lib/services/eventsService';
 import { listConcerns, listConcernProposals } from '$lib/services/concernsService';
+import { listTopics, listPendingMeasureAlternatives } from '$lib/services/topicsService';
 
 /**
  * Forzado a CSR: `authService.getSession()` lee la sesión de Supabase desde
@@ -41,7 +42,9 @@ export const load: PageLoad = async ({ url }) => {
 		reportedChannels,
 		concerns,
 		concernProposals,
-		publicEvents
+		publicEvents,
+		topics,
+		pendingAlternatives
 	] = await Promise.all([
 		listPendingReview(),
 		listReportedEvents(),
@@ -51,7 +54,9 @@ export const load: PageLoad = async ({ url }) => {
 		listReportedChannels(),
 		listConcerns(),
 		listConcernProposals(),
-		listPublicEvents()
+		listPublicEvents(),
+		listTopics(),
+		listPendingMeasureAlternatives()
 	]);
 
 	return {
@@ -64,6 +69,8 @@ export const load: PageLoad = async ({ url }) => {
 		reportedChannels,
 		concerns,
 		concernProposals,
-		publicEvents
+		publicEvents,
+		topics,
+		pendingAlternatives
 	};
 };

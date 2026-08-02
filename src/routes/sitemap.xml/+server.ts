@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types';
 import { listPublicEvents } from '$lib/services/eventsService';
 import { listPublishedConcerns } from '$lib/services/concernsService';
+import { listPublishedTopics } from '$lib/services/topicsService';
 import { SITE_URL } from '$lib/seo';
 
 /**
@@ -13,6 +14,8 @@ const STATIC_PATHS = [
 	{ path: '/', changefreq: 'hourly', priority: '1.0' },
 	{ path: '/crear', changefreq: 'weekly', priority: '0.7' },
 	{ path: '/pulso', changefreq: 'daily', priority: '0.8' },
+	{ path: '/pulso/escucha', changefreq: 'daily', priority: '0.7' },
+	{ path: '/pulso/soluciones', changefreq: 'daily', priority: '0.7' },
 	{ path: '/legal/aviso-legal', changefreq: 'yearly', priority: '0.2' },
 	{ path: '/legal/privacidad', changefreq: 'yearly', priority: '0.2' },
 	{ path: '/legal/terminos', changefreq: 'yearly', priority: '0.2' },
@@ -24,7 +27,11 @@ function xmlEscape(value: string): string {
 }
 
 export const GET: RequestHandler = async () => {
-	const [events, concerns] = await Promise.all([listPublicEvents(), listPublishedConcerns()]);
+	const [events, concerns, topics] = await Promise.all([
+		listPublicEvents(),
+		listPublishedConcerns(),
+		listPublishedTopics()
+	]);
 
 	const staticEntries = STATIC_PATHS.map(
 		({ path, changefreq, priority }) => `\t<url>
@@ -52,9 +59,18 @@ export const GET: RequestHandler = async () => {
 \t</url>`
 	);
 
+	const topicEntries = topics.map(
+		(topic) => `\t<url>
+\t\t<loc>${xmlEscape(`${SITE_URL}/pulso/soluciones/${topic.slug}`)}</loc>
+\t\t<lastmod>${topic.updatedAt.slice(0, 10)}</lastmod>
+\t\t<changefreq>weekly</changefreq>
+\t\t<priority>0.6</priority>
+\t</url>`
+	);
+
 	const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticEntries, ...eventEntries, ...concernEntries].join('\n')}
+${[...staticEntries, ...eventEntries, ...concernEntries, ...topicEntries].join('\n')}
 </urlset>
 `;
 

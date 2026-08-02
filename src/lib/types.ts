@@ -438,3 +438,324 @@ export interface ConcernProposal {
 	createdAt: string;
 	updatedAt: string;
 }
+
+// ---------------------------------------------------------------------------
+// Pulso ciudadano — Temas ("Preocupaciones → Soluciones")
+// ---------------------------------------------------------------------------
+
+export type TopicStatus = 'draft' | 'open' | 'reviewed' | 'archived';
+
+export interface TopicSource {
+	id: string;
+	topicId: string;
+	label: string;
+	url?: string;
+	note?: string;
+	sortOrder: number;
+	createdAt: string;
+}
+
+export interface TopicDataPoint {
+	id: string;
+	topicId: string;
+	label: string;
+	value: string;
+	/** Explicación breve de la cifra, distinta del valor mostrado en la tarjeta. */
+	explanation?: string;
+	/** Ámbito temporal de la cifra (p. ej. "2022-2024"). */
+	timeScope?: string;
+	sourceId?: string;
+	sortOrder: number;
+	createdAt: string;
+}
+
+export interface Topic {
+	id: string;
+	slug: string;
+	title: string;
+	summary: string;
+	/** undefined = "categoría pendiente", un estado legítimo mientras no haya contenido real. Reutiliza las categorías de Pulso. */
+	category?: ConcernCategory;
+	coverImageUrl?: string;
+	status: TopicStatus;
+	/** Nombre del documento/plan (p. ej. "Plan Vivienda 2036"), distinto del título corto del tema. */
+	documentTitle?: string;
+	problemIntro: string;
+	/** Desglose económico largo (líneas presupuestarias, escenarios, distribución temporal). Se muestra expandible, igual que problemIntro. */
+	budgetNarrative?: string;
+	/** Reglas de comprobación (evaluación anual/bienal/intermedia/final, condiciones para ampliar/modificar/suspender una medida). Se muestra en su propio acordeón. */
+	evaluationRules?: string;
+	/** Cifra de inversión en formato ya legible (p. ej. "10.000–12.000 M€/año"). Nunca calculada aquí. */
+	investmentRange?: string;
+	/** Esfuerzo relativo ya formateado (p. ej. "0,6 % del PIB"). */
+	investmentGdpPercent?: string;
+	/** Objetivo de referencia del plan (p. ej. "Parque público cercano al 5 % en 2036"). */
+	referenceGoal?: string;
+	/** "Qué podría salir mal" a nivel de todo el tema. */
+	risksOverview: string[];
+	/** "Cómo sabríamos si funciona" a nivel de todo el tema. */
+	successIndicators: string[];
+	version: string;
+	publishedAt?: string;
+	createdBy?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface TopicMeasureAxis {
+	id: string;
+	topicId: string;
+	title: string;
+	sortOrder: number;
+	createdAt: string;
+}
+
+export type MeasureStance = 'favor' | 'en_contra' | 'modificaria';
+export type MeasurePriority = 'alta' | 'media' | 'baja';
+
+export interface TopicMeasure {
+	id: string;
+	topicId: string;
+	axisId?: string;
+	title: string;
+	/** Resumen breve para la tarjeta colapsada, distinto de la explicación completa. */
+	summary?: string;
+	/** Problema concreto que esta medida intenta resolver. */
+	problemAddressed?: string;
+	explanation: string;
+	/** "Funcionamiento": cómo se llevaría a la práctica. */
+	howItWorks?: string;
+	responsibleScope?: string;
+	estimatedCost?: string;
+	timeframe?: string;
+	argumentsFor?: string;
+	risks?: string;
+	/** "Indicadores para medirla", propios de esta medida. */
+	indicators: string[];
+	sortOrder: number;
+	isPublished: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export type MeasureStanceCounts = Record<MeasureStance, number>;
+
+export interface MeasureResults {
+	measureId: string;
+	counts: MeasureStanceCounts;
+	totalResponses: number;
+}
+
+export interface MyMeasureResponse {
+	measureId: string;
+	stance: MeasureStance;
+	priority?: MeasurePriority;
+}
+
+/**
+ * `pending`/`approved`/`rejected` = flujo simple ya existente (alternativa
+ * rápida o modificación general, sin ronda). El resto = "propuesta
+ * desarrollada" dentro de una ronda de participación.
+ */
+export type TopicMeasureAlternativeStatus =
+	| 'pending'
+	| 'approved'
+	| 'rejected'
+	| 'draft'
+	| 'enviada'
+	| 'pendiente_revision'
+	| 'necesita_cambios'
+	| 'publicada'
+	| 'en_estudio'
+	| 'incorporada_total'
+	| 'incorporada_parcial'
+	| 'no_incorporada'
+	| 'archivada';
+
+export interface TopicMeasureAlternative {
+	id: string;
+	topicId: string;
+	/** undefined = alternativa general sobre el tema completo, no ligada a una medida concreta. */
+	measureId?: string;
+	/** undefined = flujo simple ya existente. Presente = "propuesta desarrollada" ligada a una ronda. */
+	roundId?: string;
+	proposerUserId: string;
+	title: string;
+	description: string;
+	status: TopicMeasureAlternativeStatus;
+	/** "Parte de la medida que modificaría" (propuesta desarrollada). */
+	measurePart?: string;
+	/** "Motivo" del cambio propuesto (propuesta desarrollada). */
+	reason?: string;
+	expectedEffect?: string;
+	acknowledgedRisks?: string;
+	sourceUrl?: string;
+	/** Respuesta editorial pública de Convoca, cuando exista. */
+	editorialResponse?: string;
+	/** Versión del tema con la que se relaciona la decisión editorial. */
+	linkedVersionLabel?: string;
+	reviewerNote?: string;
+	reviewedBy?: string;
+	reviewedAt?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface TopicTimelinePhase {
+	id: string;
+	topicId: string;
+	title: string;
+	description: string;
+	/** Sub-elementos de la fase (p. ej. las actuaciones de "Primeros 100 días"), para mostrarlos por separado. */
+	items: string[];
+	sortOrder: number;
+	createdAt: string;
+	updatedAt: string;
+}
+
+/**
+ * Riesgo general de un tema (no de una medida concreta), con 4 partes.
+ * Los campos opcionales quedan sin rellenar mientras no se proporcione ese
+ * contenido: nunca se inventan.
+ */
+export interface TopicRisk {
+	id: string;
+	topicId: string;
+	title: string;
+	/** "En qué consiste" el riesgo. */
+	description?: string;
+	/** "Qué señales" permitirían detectarlo. */
+	signals?: string;
+	/** "Cómo reducirlo". */
+	mitigation?: string;
+	/** "Qué decisión debería tomarse" si el riesgo ocurre. */
+	decisionTrigger?: string;
+	sortOrder: number;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface TopicVersion {
+	id: string;
+	topicId: string;
+	versionLabel: string;
+	note?: string;
+	publishedBy?: string;
+	publishedAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Participación ciudadana (rondas)
+// ---------------------------------------------------------------------------
+
+export type ParticipationRoundStatus = 'draft' | 'open' | 'paused' | 'closed';
+
+export interface ParticipationRound {
+	id: string;
+	topicId: string;
+	versionLabel: string;
+	status: ParticipationRoundStatus;
+	opensAt?: string;
+	closesAt?: string;
+	createdBy?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export type MeasurePosition = 'favor' | 'con_cambios' | 'en_contra' | 'mas_info';
+export type MeasureUrgency =
+	'inmediata' | 'primeros_anos' | 'medio_plazo' | 'no_aplicar' | 'sin_opinion';
+
+export interface MeasureParticipationResponse {
+	id: string;
+	roundId: string;
+	measureId: string;
+	userId: string;
+	position: MeasurePosition;
+	reasonCode?: string;
+	reasonOther?: string;
+	comment?: string;
+	urgency?: MeasureUrgency;
+	quickChange?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export type GeneralPosition = 'favor' | 'con_cambios' | 'en_contra' | 'mas_info';
+export type InvestmentOpinion = 'insuficiente' | 'adecuada' | 'excesiva' | 'sin_info';
+export type PacePreference =
+	'urgentes_primero' | 'progresiva_inicial' | 'gradual_decada' | 'no_apoyo' | 'sin_opinion';
+
+export interface GeneralParticipationResponse {
+	id: string;
+	roundId: string;
+	userId: string;
+	generalPosition: GeneralPosition;
+	investmentOpinion: InvestmentOpinion;
+	pacePreference: PacePreference;
+	unaddressedProblem?: string;
+	measuresConsideredCount: number;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface ResponsePriority {
+	id: string;
+	roundId: string;
+	userId: string;
+	measureId: string;
+	rank: 1 | 2 | 3;
+	createdAt: string;
+}
+
+export type HousingSituation =
+	| 'alquiler'
+	| 'propiedad'
+	| 'buscando'
+	| 'con_familiares'
+	| 'vivienda_publica'
+	| 'otra'
+	| 'prefiere_no_responder';
+
+export interface ParticipantContext {
+	id: string;
+	roundId: string;
+	userId: string;
+	community?: string;
+	housingSituation?: HousingSituation;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export type MeasurePositionCounts = Record<MeasurePosition, number>;
+export type MeasureUrgencyCounts = Partial<Record<MeasureUrgency, number>>;
+export type MeasureReasonCounts = Record<string, number>;
+
+export interface MeasureParticipationResults {
+	measureId: string;
+	positionCounts: MeasurePositionCounts;
+	urgencyCounts: MeasureUrgencyCounts;
+	reasonCounts: MeasureReasonCounts;
+	totalResponses: number;
+}
+
+export interface PriorityResult {
+	measureId: string;
+	timesTop3: number;
+	avgRank: number;
+}
+
+export interface GeneralParticipationResults {
+	generalPosition: Partial<Record<GeneralPosition, number>>;
+	investmentOpinion: Partial<Record<InvestmentOpinion, number>>;
+	pacePreference: Partial<Record<PacePreference, number>>;
+}
+
+export interface ParticipationSummary {
+	uniqueParticipants: number;
+	totalMeasureResponses: number;
+	totalGeneralResponses: number;
+	proposalsReceived: number;
+	proposalsPublished: number;
+	lastUpdatedAt?: string;
+}

@@ -10,10 +10,21 @@ import type {
 	EventCategory,
 	EventStatus,
 	EventTheme,
+	GeneralPosition,
+	HousingSituation,
+	InvestmentOpinion,
+	MeasurePosition,
+	MeasurePriority,
+	MeasureStance,
+	MeasureUrgency,
 	ModerationAction,
 	OrganizerKind,
+	PacePreference,
+	ParticipationRoundStatus,
 	PriorCommunicationStatus,
 	ReportReason,
+	TopicMeasureAlternativeStatus,
+	TopicStatus,
 	VerificationLevel
 } from '$lib/types';
 import type { UserRole } from '$lib/auth/types';
@@ -204,4 +215,146 @@ export const concernProposalStatusLabels: Record<ConcernProposalStatus, string> 
 	pending: 'Pendiente de revisión',
 	approved: 'Aprobada',
 	rejected: 'Rechazada'
+};
+
+// ---------------------------------------------------------------------------
+// Pulso ciudadano — Temas ("Preocupaciones → Soluciones")
+// ---------------------------------------------------------------------------
+
+export const topicStatusLabels: Record<TopicStatus, string> = {
+	draft: 'Borrador',
+	open: 'Abierto a participación',
+	reviewed: 'Revisado',
+	archived: 'Archivado'
+};
+
+export const measureStanceLabels: Record<MeasureStance, string> = {
+	favor: 'A favor',
+	en_contra: 'En contra',
+	modificaria: 'La modificaría'
+};
+
+export const measurePriorityLabels: Record<MeasurePriority, string> = {
+	alta: 'Prioridad alta',
+	media: 'Prioridad media',
+	baja: 'Prioridad baja'
+};
+
+/** Categoría pendiente: mientras no se entregue contenido real, no se inventa una categoría. */
+export const TOPIC_CATEGORY_PENDING_LABEL = 'Categoría pendiente';
+
+export const topicMeasureAlternativeStatusLabels: Record<TopicMeasureAlternativeStatus, string> = {
+	pending: 'Pendiente de revisión',
+	approved: 'Aprobada',
+	rejected: 'Rechazada',
+	draft: 'Borrador',
+	enviada: 'Enviada',
+	pendiente_revision: 'Pendiente de revisión',
+	necesita_cambios: 'Necesita cambios',
+	publicada: 'Publicada',
+	en_estudio: 'En estudio',
+	incorporada_total: 'Incorporada totalmente',
+	incorporada_parcial: 'Incorporada parcialmente',
+	no_incorporada: 'No incorporada',
+	archivada: 'Archivada'
+};
+
+// ---------------------------------------------------------------------------
+// Pulso ciudadano — Participación ciudadana (rondas)
+// ---------------------------------------------------------------------------
+
+export const participationRoundStatusLabels: Record<ParticipationRoundStatus, string> = {
+	draft: 'Borrador',
+	open: 'Abierta',
+	paused: 'Pausada',
+	closed: 'Cerrada'
+};
+
+export const measurePositionLabels: Record<MeasurePosition, string> = {
+	favor: 'A favor',
+	con_cambios: 'La apoyaría con cambios',
+	en_contra: 'En contra',
+	mas_info: 'Necesito más información'
+};
+
+export const measureUrgencyLabels: Record<MeasureUrgency, string> = {
+	inmediata: 'De forma inmediata',
+	primeros_anos: 'Durante los primeros años',
+	medio_plazo: 'A medio plazo',
+	no_aplicar: 'No debería aplicarse',
+	sin_opinion: 'No tengo una opinión formada'
+};
+
+export const generalPositionLabels: Record<GeneralPosition, string> = {
+	favor: 'A favor',
+	con_cambios: 'Lo apoyaría con cambios',
+	en_contra: 'En contra',
+	mas_info: 'Necesito más información'
+};
+
+export const investmentOpinionLabels: Record<InvestmentOpinion, string> = {
+	insuficiente: 'Insuficiente',
+	adecuada: 'Aproximadamente adecuada',
+	excesiva: 'Excesiva',
+	sin_info: 'No tengo información suficiente'
+};
+
+export const pacePreferenceLabels: Record<PacePreference, string> = {
+	urgentes_primero: 'Priorizar medidas urgentes desde el principio',
+	progresiva_inicial: 'Aplicación progresiva durante los primeros años',
+	gradual_decada: 'Aplicación más gradual durante toda la década',
+	no_apoyo: 'No apoyo su aplicación',
+	sin_opinion: 'No tengo una opinión formada'
+};
+
+export const housingSituationLabels: Record<HousingSituation, string> = {
+	alquiler: 'Vivo de alquiler',
+	propiedad: 'Tengo una vivienda en propiedad',
+	buscando: 'Estoy buscando vivienda',
+	con_familiares: 'Vivo con familiares',
+	vivienda_publica: 'Vivo en vivienda pública o protegida',
+	otra: 'Tengo otra situación',
+	prefiere_no_responder: 'Prefiero no responder'
+};
+
+/** Motivos por posición ante una medida. `otro` siempre disponible con texto libre asociado (`reasonOther`). */
+export const measureReasonOptionsByPosition: Record<
+	MeasurePosition,
+	{ code: string; label: string }[]
+> = {
+	favor: [
+		{ code: 'mejora_acceso', label: 'Puede mejorar el acceso a la vivienda' },
+		{ code: 'bien_orientada', label: 'Está bien orientada' },
+		{ code: 'viable', label: 'Me parece viable' },
+		{ code: 'inversion_adecuada', label: 'Considero adecuada la inversión' },
+		{ code: 'necesidad_urgente', label: 'Responde a una necesidad urgente' },
+		{ code: 'otro', label: 'Otro motivo' }
+	],
+	con_cambios: [
+		{ code: 'cambiar_presupuesto', label: 'Cambiaría el presupuesto' },
+		{ code: 'cambiar_plazos', label: 'Cambiaría los plazos' },
+		{ code: 'cambiar_beneficiarios', label: 'Cambiaría quién puede beneficiarse' },
+		{ code: 'anadir_controles', label: 'Añadiría más controles' },
+		{ code: 'cambiar_ambito_territorial', label: 'Modificaría su aplicación territorial' },
+		{ code: 'cambiar_funcionamiento', label: 'Cambiaría parte de su funcionamiento' },
+		{ code: 'otro', label: 'Otro cambio' }
+	],
+	en_contra: [
+		{ code: 'coste_excesivo', label: 'Coste excesivo' },
+		{ code: 'dificil_aplicar', label: 'Difícil de aplicar' },
+		{ code: 'efectos_negativos', label: 'Puede generar efectos negativos' },
+		{ code: 'no_justa', label: 'No me parece justa' },
+		{ code: 'faltan_pruebas', label: 'Faltan pruebas o datos' },
+		{ code: 'no_resuelve_problema', label: 'No resuelve el problema principal' },
+		{ code: 'otro', label: 'Otro motivo' }
+	],
+	mas_info: [
+		{ code: 'no_entiendo_funcionamiento', label: 'No entiendo suficientemente el funcionamiento' },
+		{ code: 'faltan_datos', label: 'Faltan datos' },
+		{ code: 'faltan_fuentes', label: 'Faltan fuentes' },
+		{ code: 'costes_no_claros', label: 'No están claros los costes' },
+		{ code: 'riesgos_no_claros', label: 'No están claros los riesgos' },
+		{ code: 'consecuencias_no_claras', label: 'No están claras las consecuencias' },
+		{ code: 'otro', label: 'Otra información' }
+	]
 };

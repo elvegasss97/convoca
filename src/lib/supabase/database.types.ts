@@ -494,6 +494,44 @@ export type Database = {
 					}
 				];
 			};
+			measure_responses: {
+				Row: {
+					created_at: string;
+					id: string;
+					measure_id: string;
+					priority: string | null;
+					stance: string;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					measure_id: string;
+					priority?: string | null;
+					stance: string;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					measure_id?: string;
+					priority?: string | null;
+					stance?: string;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'measure_responses_measure_id_fkey';
+						columns: ['measure_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_measures';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			organizer_private_profiles: {
 				Row: {
 					accepted_peaceful_use_at: string | null;
@@ -630,6 +668,774 @@ export type Database = {
 					}
 				];
 			};
+			topic_concerns: {
+				Row: { concern_id: string; created_at: string; sort_order: number; topic_id: string };
+				Insert: {
+					concern_id: string;
+					created_at?: string;
+					sort_order?: number;
+					topic_id: string;
+				};
+				Update: {
+					concern_id?: string;
+					created_at?: string;
+					sort_order?: number;
+					topic_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_concerns_concern_id_fkey';
+						columns: ['concern_id'];
+						isOneToOne: false;
+						referencedRelation: 'concerns';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'topic_concerns_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topic_data_points: {
+				Row: {
+					created_at: string;
+					id: string;
+					label: string;
+					value: string;
+					explanation: string | null;
+					time_scope: string | null;
+					source_id: string | null;
+					sort_order: number;
+					topic_id: string;
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					label: string;
+					value: string;
+					explanation?: string | null;
+					time_scope?: string | null;
+					source_id?: string | null;
+					sort_order?: number;
+					topic_id: string;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					label?: string;
+					value?: string;
+					explanation?: string | null;
+					time_scope?: string | null;
+					source_id?: string | null;
+					sort_order?: number;
+					topic_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_data_points_source_id_fkey';
+						columns: ['source_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_sources';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'topic_data_points_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topic_measure_alternatives: {
+				Row: {
+					acknowledged_risks: string | null;
+					created_at: string;
+					description: string;
+					editorial_response: string | null;
+					expected_effect: string | null;
+					id: string;
+					linked_version_label: string | null;
+					measure_id: string | null;
+					measure_part: string | null;
+					proposer_user_id: string;
+					reason: string | null;
+					reviewed_at: string | null;
+					reviewed_by: string | null;
+					reviewer_note: string | null;
+					round_id: string | null;
+					source_url: string | null;
+					status: string;
+					title: string;
+					topic_id: string;
+					updated_at: string;
+				};
+				Insert: {
+					acknowledged_risks?: string | null;
+					created_at?: string;
+					description: string;
+					editorial_response?: string | null;
+					expected_effect?: string | null;
+					id?: string;
+					linked_version_label?: string | null;
+					measure_id?: string | null;
+					measure_part?: string | null;
+					proposer_user_id: string;
+					reason?: string | null;
+					reviewed_at?: string | null;
+					reviewed_by?: string | null;
+					reviewer_note?: string | null;
+					round_id?: string | null;
+					source_url?: string | null;
+					status?: string;
+					title: string;
+					topic_id: string;
+					updated_at?: string;
+				};
+				Update: {
+					acknowledged_risks?: string | null;
+					created_at?: string;
+					description?: string;
+					editorial_response?: string | null;
+					expected_effect?: string | null;
+					id?: string;
+					linked_version_label?: string | null;
+					measure_id?: string | null;
+					measure_part?: string | null;
+					proposer_user_id?: string;
+					reason?: string | null;
+					reviewed_at?: string | null;
+					reviewed_by?: string | null;
+					reviewer_note?: string | null;
+					round_id?: string | null;
+					source_url?: string | null;
+					status?: string;
+					title?: string;
+					topic_id?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_measure_alternatives_measure_id_fkey';
+						columns: ['measure_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_measures';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'topic_measure_alternatives_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'topic_measure_alternatives_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'participation_rounds';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			participation_rounds: {
+				Row: {
+					closes_at: string | null;
+					created_at: string;
+					created_by: string | null;
+					id: string;
+					opens_at: string | null;
+					status: string;
+					topic_id: string;
+					updated_at: string;
+					version_label: string;
+				};
+				Insert: {
+					closes_at?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					id?: string;
+					opens_at?: string | null;
+					status?: string;
+					topic_id: string;
+					updated_at?: string;
+					version_label: string;
+				};
+				Update: {
+					closes_at?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					id?: string;
+					opens_at?: string | null;
+					status?: string;
+					topic_id?: string;
+					updated_at?: string;
+					version_label?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'participation_rounds_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			measure_participation_responses: {
+				Row: {
+					comment: string | null;
+					created_at: string;
+					id: string;
+					measure_id: string;
+					position_value: string;
+					quick_change: string | null;
+					reason_code: string | null;
+					reason_other: string | null;
+					round_id: string;
+					updated_at: string;
+					urgency: string | null;
+					user_id: string;
+				};
+				Insert: {
+					comment?: string | null;
+					created_at?: string;
+					id?: string;
+					measure_id: string;
+					position_value: string;
+					quick_change?: string | null;
+					reason_code?: string | null;
+					reason_other?: string | null;
+					round_id: string;
+					updated_at?: string;
+					urgency?: string | null;
+					user_id: string;
+				};
+				Update: {
+					comment?: string | null;
+					created_at?: string;
+					id?: string;
+					measure_id?: string;
+					position_value?: string;
+					quick_change?: string | null;
+					reason_code?: string | null;
+					reason_other?: string | null;
+					round_id?: string;
+					updated_at?: string;
+					urgency?: string | null;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'measure_participation_responses_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'participation_rounds';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'measure_participation_responses_measure_id_fkey';
+						columns: ['measure_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_measures';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			general_participation_responses: {
+				Row: {
+					created_at: string;
+					general_position: string;
+					id: string;
+					investment_opinion: string;
+					measures_considered_count: number;
+					pace_preference: string;
+					round_id: string;
+					unaddressed_problem: string | null;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					created_at?: string;
+					general_position: string;
+					id?: string;
+					investment_opinion: string;
+					measures_considered_count?: number;
+					pace_preference: string;
+					round_id: string;
+					unaddressed_problem?: string | null;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					created_at?: string;
+					general_position?: string;
+					id?: string;
+					investment_opinion?: string;
+					measures_considered_count?: number;
+					pace_preference?: string;
+					round_id?: string;
+					unaddressed_problem?: string | null;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'general_participation_responses_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'participation_rounds';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			response_priorities: {
+				Row: {
+					created_at: string;
+					id: string;
+					measure_id: string;
+					rank: number;
+					round_id: string;
+					user_id: string;
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					measure_id: string;
+					rank: number;
+					round_id: string;
+					user_id: string;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					measure_id?: string;
+					rank?: number;
+					round_id?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'response_priorities_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'participation_rounds';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'response_priorities_measure_id_fkey';
+						columns: ['measure_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_measures';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			participant_contexts: {
+				Row: {
+					community: string | null;
+					created_at: string;
+					housing_situation: string | null;
+					id: string;
+					round_id: string;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					community?: string | null;
+					created_at?: string;
+					housing_situation?: string | null;
+					id?: string;
+					round_id: string;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					community?: string | null;
+					created_at?: string;
+					housing_situation?: string | null;
+					id?: string;
+					round_id?: string;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'participant_contexts_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'participation_rounds';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topic_measures: {
+				Row: {
+					arguments_for: string | null;
+					axis_id: string | null;
+					created_at: string;
+					estimated_cost: string | null;
+					explanation: string;
+					how_it_works: string | null;
+					id: string;
+					indicators: string[];
+					is_published: boolean;
+					problem_addressed: string | null;
+					responsible_scope: string | null;
+					risks: string | null;
+					sort_order: number;
+					summary: string | null;
+					timeframe: string | null;
+					title: string;
+					topic_id: string;
+					updated_at: string;
+				};
+				Insert: {
+					arguments_for?: string | null;
+					axis_id?: string | null;
+					created_at?: string;
+					estimated_cost?: string | null;
+					explanation?: string;
+					how_it_works?: string | null;
+					id?: string;
+					indicators?: string[];
+					is_published?: boolean;
+					problem_addressed?: string | null;
+					responsible_scope?: string | null;
+					risks?: string | null;
+					sort_order?: number;
+					summary?: string | null;
+					timeframe?: string | null;
+					title: string;
+					topic_id: string;
+					updated_at?: string;
+				};
+				Update: {
+					arguments_for?: string | null;
+					axis_id?: string | null;
+					created_at?: string;
+					estimated_cost?: string | null;
+					explanation?: string;
+					how_it_works?: string | null;
+					id?: string;
+					indicators?: string[];
+					is_published?: boolean;
+					problem_addressed?: string | null;
+					responsible_scope?: string | null;
+					risks?: string | null;
+					sort_order?: number;
+					summary?: string | null;
+					timeframe?: string | null;
+					title?: string;
+					topic_id?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_measures_axis_id_fkey';
+						columns: ['axis_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_measure_axes';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'topic_measures_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topic_measure_axes: {
+				Row: {
+					created_at: string;
+					id: string;
+					sort_order: number;
+					title: string;
+					topic_id: string;
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					sort_order?: number;
+					title: string;
+					topic_id: string;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					sort_order?: number;
+					title?: string;
+					topic_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_measure_axes_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topic_measure_sources: {
+				Row: { created_at: string; measure_id: string; source_id: string };
+				Insert: { created_at?: string; measure_id: string; source_id: string };
+				Update: { created_at?: string; measure_id?: string; source_id?: string };
+				Relationships: [
+					{
+						foreignKeyName: 'topic_measure_sources_measure_id_fkey';
+						columns: ['measure_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_measures';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'topic_measure_sources_source_id_fkey';
+						columns: ['source_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_sources';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topic_timeline_phases: {
+				Row: {
+					created_at: string;
+					description: string;
+					id: string;
+					items: string[];
+					sort_order: number;
+					title: string;
+					topic_id: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					description?: string;
+					id?: string;
+					items?: string[];
+					sort_order?: number;
+					title: string;
+					topic_id: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					description?: string;
+					id?: string;
+					items?: string[];
+					sort_order?: number;
+					title?: string;
+					topic_id?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_timeline_phases_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topic_risks: {
+				Row: {
+					created_at: string;
+					decision_trigger: string | null;
+					description: string | null;
+					id: string;
+					mitigation: string | null;
+					signals: string | null;
+					sort_order: number;
+					title: string;
+					topic_id: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					decision_trigger?: string | null;
+					description?: string | null;
+					id?: string;
+					mitigation?: string | null;
+					signals?: string | null;
+					sort_order?: number;
+					title: string;
+					topic_id: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					decision_trigger?: string | null;
+					description?: string | null;
+					id?: string;
+					mitigation?: string | null;
+					signals?: string | null;
+					sort_order?: number;
+					title?: string;
+					topic_id?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_risks_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topic_versions: {
+				Row: {
+					id: string;
+					note: string | null;
+					published_at: string;
+					published_by: string | null;
+					topic_id: string;
+					version_label: string;
+				};
+				Insert: {
+					id?: string;
+					note?: string | null;
+					published_at?: string;
+					published_by?: string | null;
+					topic_id: string;
+					version_label: string;
+				};
+				Update: {
+					id?: string;
+					note?: string | null;
+					published_at?: string;
+					published_by?: string | null;
+					topic_id?: string;
+					version_label?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_versions_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topic_sources: {
+				Row: {
+					created_at: string;
+					id: string;
+					label: string;
+					note: string | null;
+					sort_order: number;
+					topic_id: string;
+					url: string | null;
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					label: string;
+					note?: string | null;
+					sort_order?: number;
+					topic_id: string;
+					url?: string | null;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					label?: string;
+					note?: string | null;
+					sort_order?: number;
+					topic_id?: string;
+					url?: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_sources_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topics: {
+				Row: {
+					budget_narrative: string | null;
+					category: string | null;
+					cover_image_url: string | null;
+					created_at: string;
+					created_by: string | null;
+					document_title: string | null;
+					evaluation_rules: string | null;
+					id: string;
+					investment_gdp_percent: string | null;
+					investment_range: string | null;
+					problem_intro: string;
+					published_at: string | null;
+					reference_goal: string | null;
+					risks_overview: string[];
+					slug: string;
+					status: string;
+					success_indicators: string[];
+					summary: string;
+					title: string;
+					updated_at: string;
+					version: string;
+				};
+				Insert: {
+					budget_narrative?: string | null;
+					category?: string | null;
+					cover_image_url?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					document_title?: string | null;
+					evaluation_rules?: string | null;
+					id?: string;
+					investment_gdp_percent?: string | null;
+					investment_range?: string | null;
+					problem_intro?: string;
+					published_at?: string | null;
+					reference_goal?: string | null;
+					risks_overview?: string[];
+					slug: string;
+					status?: string;
+					success_indicators?: string[];
+					summary?: string;
+					title: string;
+					updated_at?: string;
+					version?: string;
+				};
+				Update: {
+					budget_narrative?: string | null;
+					category?: string | null;
+					cover_image_url?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					document_title?: string | null;
+					evaluation_rules?: string | null;
+					id?: string;
+					investment_gdp_percent?: string | null;
+					investment_range?: string | null;
+					problem_intro?: string;
+					published_at?: string | null;
+					reference_goal?: string | null;
+					risks_overview?: string[];
+					slug?: string;
+					status?: string;
+					success_indicators?: string[];
+					summary?: string;
+					title?: string;
+					updated_at?: string;
+					version?: string;
+				};
+				Relationships: [];
+			};
 			verification_documents: {
 				Row: {
 					event_id: string | null;
@@ -701,8 +1507,16 @@ export type Database = {
 				Returns: { concern_id: string; level: number; response_count: number }[];
 			};
 			get_pulso_participant_count: { Args: never; Returns: number };
+			get_measure_results: {
+				Args: { p_measure_ids?: string[] };
+				Returns: { measure_id: string; stance: string; response_count: number }[];
+			};
 			set_concern_response: {
 				Args: { p_concern_id: string; p_level: number };
+				Returns: undefined;
+			};
+			set_measure_response: {
+				Args: { p_measure_id: string; p_stance: string; p_priority?: string | null };
 				Returns: undefined;
 			};
 			is_moderator_or_admin: { Args: never; Returns: boolean };
@@ -711,6 +1525,72 @@ export type Database = {
 			set_attendance: {
 				Args: { p_dedup_token: string; p_event_id: string; p_response?: string };
 				Returns: undefined;
+			};
+			set_measure_participation_response: {
+				Args: {
+					p_round_id: string;
+					p_measure_id: string;
+					p_position: string;
+					p_reason_code?: string | null;
+					p_reason_other?: string | null;
+					p_comment?: string | null;
+					p_urgency?: string | null;
+					p_quick_change?: string | null;
+				};
+				Returns: undefined;
+			};
+			set_general_participation_response: {
+				Args: {
+					p_round_id: string;
+					p_general_position: string;
+					p_investment_opinion: string;
+					p_pace_preference: string;
+					p_unaddressed_problem?: string | null;
+				};
+				Returns: undefined;
+			};
+			set_response_priorities: {
+				Args: { p_round_id: string; p_measure_ids: string[] };
+				Returns: undefined;
+			};
+			set_participant_context: {
+				Args: {
+					p_round_id: string;
+					p_community?: string | null;
+					p_housing_situation?: string | null;
+				};
+				Returns: undefined;
+			};
+			get_measure_position_counts: {
+				Args: { p_round_id: string; p_measure_ids?: string[] };
+				Returns: { measure_id: string; position_value: string; response_count: number }[];
+			};
+			get_measure_urgency_counts: {
+				Args: { p_round_id: string; p_measure_ids?: string[] };
+				Returns: { measure_id: string; urgency: string; response_count: number }[];
+			};
+			get_measure_reason_counts: {
+				Args: { p_round_id: string; p_measure_ids?: string[] };
+				Returns: { measure_id: string; reason_code: string; response_count: number }[];
+			};
+			get_general_participation_results: {
+				Args: { p_round_id: string };
+				Returns: { dimension: string; value: string; response_count: number }[];
+			};
+			get_priority_results: {
+				Args: { p_round_id: string };
+				Returns: { measure_id: string; times_top3: number; avg_rank: number }[];
+			};
+			get_participation_summary: {
+				Args: { p_round_id: string };
+				Returns: {
+					unique_participants: number;
+					total_measure_responses: number;
+					total_general_responses: number;
+					proposals_received: number;
+					proposals_published: number;
+					last_updated_at: string | null;
+				}[];
 			};
 		};
 		Enums: {

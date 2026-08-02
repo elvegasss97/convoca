@@ -108,10 +108,12 @@
 
 <div class="mx-auto max-w-3xl px-4 pt-4 pb-24 sm:px-6 md:pb-10">
 	<a
-		href="/pulso"
+		href={`/pulso/escucha/${concern.category}`}
 		class="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-ink-500 hover:text-ink-800"
 	>
-		<ArrowLeft class="size-4" /> Volver a Pulso ciudadano
+		<ArrowLeft class="size-4" /> Volver a la escucha sobre {concernCategoryLabels[
+			concern.category
+		].toLowerCase()}
 	</a>
 
 	<div class="flex items-center gap-2">

@@ -47,7 +47,7 @@ interface ConcernRow {
 	updated_at: string;
 }
 
-function rowToConcern(row: ConcernRow): Concern {
+export function rowToConcern(row: ConcernRow): Concern {
 	return {
 		id: row.id,
 		slug: row.slug,

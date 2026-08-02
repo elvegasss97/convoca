@@ -12,9 +12,12 @@
 		X as XIcon,
 		MapPin,
 		CalendarDays,
-		Activity
+		Activity,
+		Lightbulb,
+		Plus
 	} from '@lucide/svelte';
 	import PulsoModerationPanel from '$lib/components/pulso/PulsoModerationPanel.svelte';
+	import TopicCard from '$lib/components/pulso/TopicCard.svelte';
 	import type { PageData } from './$types';
 	import type { AuditLog, Event, ModerationAction } from '$lib/types';
 	import {
@@ -44,6 +47,8 @@
 	let reportedChannels = $state(data.reportedChannels);
 	let concerns = $state(data.concerns);
 	let concernProposals = $state(data.concernProposals);
+	let topics = $state(data.topics);
+	const pendingAlternativesCount = $derived(data.pendingAlternatives.length);
 
 	const orgNameById = $derived(new Map(data.organizers.map((o) => [o.id, o.displayName])));
 
@@ -52,6 +57,7 @@
 		{ key: 'reportadas', label: 'Reportadas', icon: Flag },
 		{ key: 'documentacion', label: 'Documentación', icon: FileCheck2 },
 		{ key: 'pulso', label: 'Pulso ciudadano', icon: Activity },
+		{ key: 'temas', label: 'Temas', icon: Lightbulb },
 		{ key: 'registro', label: 'Registro de decisiones', icon: ScrollText }
 	] as const;
 
@@ -200,6 +206,10 @@
 				{:else if tab.key === 'pulso' && concernProposals.filter((p) => p.status === 'pending').length > 0}
 					<span class="rounded-full bg-warning-100 px-1.5 text-xs font-bold text-warning-700">
 						{concernProposals.filter((p) => p.status === 'pending').length}
+					</span>
+				{:else if tab.key === 'temas' && pendingAlternativesCount > 0}
+					<span class="rounded-full bg-warning-100 px-1.5 text-xs font-bold text-warning-700">
+						{pendingAlternativesCount}
 					</span>
 				{/if}
 			</button>
@@ -424,6 +434,31 @@
 				events={data.publicEvents}
 				moderatorId={MODERATOR_ID}
 			/>
+		{:else if activeTab === 'temas'}
+			<div>
+				<a
+					href="/moderacion/temas/nuevo"
+					class="flex w-fit items-center gap-1.5 rounded-full bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800"
+				>
+					<Plus class="size-4" /> Nuevo tema
+				</a>
+				{#if pendingAlternativesCount > 0}
+					<p class="mt-3 text-sm text-warning-700">
+						{pendingAlternativesCount}
+						{pendingAlternativesCount === 1 ? 'alternativa pendiente' : 'alternativas pendientes'} de
+						revisión — entra en el tema correspondiente para aprobarla o rechazarla.
+					</p>
+				{/if}
+				{#if topics.length > 0}
+					<div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+						{#each topics as topic (topic.id)}
+							<TopicCard {topic} showStatus href={`/moderacion/temas/${topic.id}`} />
+						{/each}
+					</div>
+				{:else}
+					<p class="mt-4 py-10 text-center text-sm text-ink-400">Todavía no hay temas creados.</p>
+				{/if}
+			</div>
 		{:else if activeTab === 'registro'}
 			{#if auditLog.length === 0}
 				<p class="py-10 text-center text-sm text-ink-400">Todavía no hay decisiones registradas.</p>
