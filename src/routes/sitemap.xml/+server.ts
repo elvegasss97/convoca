@@ -1,5 +1,6 @@
 import type { RequestHandler } from './$types';
 import { listPublicEvents } from '$lib/services/eventsService';
+import { listPublishedConcerns } from '$lib/services/concernsService';
 import { SITE_URL } from '$lib/seo';
 
 /**
@@ -11,6 +12,7 @@ import { SITE_URL } from '$lib/seo';
 const STATIC_PATHS = [
 	{ path: '/', changefreq: 'hourly', priority: '1.0' },
 	{ path: '/crear', changefreq: 'weekly', priority: '0.7' },
+	{ path: '/pulso', changefreq: 'daily', priority: '0.8' },
 	{ path: '/legal/aviso-legal', changefreq: 'yearly', priority: '0.2' },
 	{ path: '/legal/privacidad', changefreq: 'yearly', priority: '0.2' },
 	{ path: '/legal/terminos', changefreq: 'yearly', priority: '0.2' },
@@ -22,7 +24,7 @@ function xmlEscape(value: string): string {
 }
 
 export const GET: RequestHandler = async () => {
-	const events = await listPublicEvents();
+	const [events, concerns] = await Promise.all([listPublicEvents(), listPublishedConcerns()]);
 
 	const staticEntries = STATIC_PATHS.map(
 		({ path, changefreq, priority }) => `\t<url>
@@ -41,9 +43,18 @@ export const GET: RequestHandler = async () => {
 \t</url>`
 	);
 
+	const concernEntries = concerns.map(
+		(concern) => `\t<url>
+\t\t<loc>${xmlEscape(`${SITE_URL}/pulso/${concern.slug}`)}</loc>
+\t\t<lastmod>${concern.updatedAt.slice(0, 10)}</lastmod>
+\t\t<changefreq>daily</changefreq>
+\t\t<priority>0.6</priority>
+\t</url>`
+	);
+
 	const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticEntries, ...eventEntries].join('\n')}
+${[...staticEntries, ...eventEntries, ...concernEntries].join('\n')}
 </urlset>
 `;
 

@@ -7,6 +7,9 @@ import {
 } from '$lib/auth/authService';
 import { safeRedirect } from '$lib/utils/safeRedirect';
 
+/** Forzado a CSR: ver el mismo comentario en `src/routes/moderacion/+page.ts`. */
+export const ssr = false;
+
 /**
  * Paso obligatorio antes de crear la primera convocatoria (ver
  * `/crear/+page.svelte`, que redirige aquí desde `submit()` si la cuenta

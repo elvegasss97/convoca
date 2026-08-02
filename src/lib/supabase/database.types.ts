@@ -141,6 +141,178 @@ export type Database = {
 					}
 				];
 			};
+			concern_events: {
+				Row: { concern_id: string; created_at: string; event_id: string };
+				Insert: { concern_id: string; created_at?: string; event_id: string };
+				Update: { concern_id?: string; created_at?: string; event_id?: string };
+				Relationships: [
+					{
+						foreignKeyName: 'concern_events_concern_id_fkey';
+						columns: ['concern_id'];
+						isOneToOne: false;
+						referencedRelation: 'concerns';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'concern_events_event_id_fkey';
+						columns: ['event_id'];
+						isOneToOne: false;
+						referencedRelation: 'events';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			concern_proposals: {
+				Row: {
+					category: string;
+					created_at: string;
+					description: string;
+					id: string;
+					proposed_question: string;
+					proposer_user_id: string;
+					reason: string;
+					resulting_concern_id: string | null;
+					reviewed_at: string | null;
+					reviewed_by: string | null;
+					reviewer_note: string | null;
+					scope_type: string;
+					scope_value: string | null;
+					status: string;
+					title: string;
+					updated_at: string;
+				};
+				Insert: {
+					category: string;
+					created_at?: string;
+					description?: string;
+					id?: string;
+					proposed_question: string;
+					proposer_user_id: string;
+					reason: string;
+					resulting_concern_id?: string | null;
+					reviewed_at?: string | null;
+					reviewed_by?: string | null;
+					reviewer_note?: string | null;
+					scope_type?: string;
+					scope_value?: string | null;
+					status?: string;
+					title: string;
+					updated_at?: string;
+				};
+				Update: {
+					category?: string;
+					created_at?: string;
+					description?: string;
+					id?: string;
+					proposed_question?: string;
+					proposer_user_id?: string;
+					reason?: string;
+					resulting_concern_id?: string | null;
+					reviewed_at?: string | null;
+					reviewed_by?: string | null;
+					reviewer_note?: string | null;
+					scope_type?: string;
+					scope_value?: string | null;
+					status?: string;
+					title?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'concern_proposals_resulting_concern_id_fkey';
+						columns: ['resulting_concern_id'];
+						isOneToOne: false;
+						referencedRelation: 'concerns';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			concern_responses: {
+				Row: {
+					concern_id: string;
+					created_at: string;
+					id: string;
+					level: number;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					concern_id: string;
+					created_at?: string;
+					id?: string;
+					level: number;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					concern_id?: string;
+					created_at?: string;
+					id?: string;
+					level?: number;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'concern_responses_concern_id_fkey';
+						columns: ['concern_id'];
+						isOneToOne: false;
+						referencedRelation: 'concerns';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			concerns: {
+				Row: {
+					category: string;
+					closes_at: string | null;
+					created_at: string;
+					created_by: string | null;
+					description: string;
+					id: string;
+					publisher_label: string;
+					question: string;
+					scope_type: string;
+					scope_value: string | null;
+					slug: string;
+					starts_at: string;
+					status: string;
+					updated_at: string;
+				};
+				Insert: {
+					category: string;
+					closes_at?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					description?: string;
+					id?: string;
+					publisher_label?: string;
+					question: string;
+					scope_type?: string;
+					scope_value?: string | null;
+					slug: string;
+					starts_at?: string;
+					status?: string;
+					updated_at?: string;
+				};
+				Update: {
+					category?: string;
+					closes_at?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					description?: string;
+					id?: string;
+					publisher_label?: string;
+					question?: string;
+					scope_type?: string;
+					scope_value?: string | null;
+					slug?: string;
+					starts_at?: string;
+					status?: string;
+					updated_at?: string;
+				};
+				Relationships: [];
+			};
 			event_communication_channels: {
 				Row: {
 					channel_type: string;
@@ -523,6 +695,15 @@ export type Database = {
 			get_attendance_counts: {
 				Args: { p_event_ids?: string[] };
 				Returns: { event_id: string; going_count: number; interested_count: number }[];
+			};
+			get_concern_results: {
+				Args: { p_concern_ids?: string[] };
+				Returns: { concern_id: string; level: number; response_count: number }[];
+			};
+			get_pulso_participant_count: { Args: never; Returns: number };
+			set_concern_response: {
+				Args: { p_concern_id: string; p_level: number };
+				Returns: undefined;
 			};
 			is_moderator_or_admin: { Args: never; Returns: boolean };
 			purge_old_attendance_rate_limits: { Args: never; Returns: undefined };

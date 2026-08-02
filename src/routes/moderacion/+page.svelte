@@ -11,8 +11,10 @@
 		EyeOff,
 		X as XIcon,
 		MapPin,
-		CalendarDays
+		CalendarDays,
+		Activity
 	} from '@lucide/svelte';
+	import PulsoModerationPanel from '$lib/components/pulso/PulsoModerationPanel.svelte';
 	import type { PageData } from './$types';
 	import type { AuditLog, Event, ModerationAction } from '$lib/types';
 	import {
@@ -40,6 +42,8 @@
 	let auditLog = $state(data.auditLog);
 	let pendingDocuments = $state(data.pendingDocuments);
 	let reportedChannels = $state(data.reportedChannels);
+	let concerns = $state(data.concerns);
+	let concernProposals = $state(data.concernProposals);
 
 	const orgNameById = $derived(new Map(data.organizers.map((o) => [o.id, o.displayName])));
 
@@ -47,6 +51,7 @@
 		{ key: 'pendientes', label: 'Pendientes', icon: FileClock },
 		{ key: 'reportadas', label: 'Reportadas', icon: Flag },
 		{ key: 'documentacion', label: 'Documentación', icon: FileCheck2 },
+		{ key: 'pulso', label: 'Pulso ciudadano', icon: Activity },
 		{ key: 'registro', label: 'Registro de decisiones', icon: ScrollText }
 	] as const;
 
@@ -192,6 +197,10 @@
 					<span class="rounded-full bg-warning-100 px-1.5 text-xs font-bold text-warning-700"
 						>{pendingDocuments.length}</span
 					>
+				{:else if tab.key === 'pulso' && concernProposals.filter((p) => p.status === 'pending').length > 0}
+					<span class="rounded-full bg-warning-100 px-1.5 text-xs font-bold text-warning-700">
+						{concernProposals.filter((p) => p.status === 'pending').length}
+					</span>
 				{/if}
 			</button>
 		{/each}
@@ -408,6 +417,13 @@
 					{/each}
 				</div>
 			{/if}
+		{:else if activeTab === 'pulso'}
+			<PulsoModerationPanel
+				bind:concerns
+				bind:proposals={concernProposals}
+				events={data.publicEvents}
+				moderatorId={MODERATOR_ID}
+			/>
 		{:else if activeTab === 'registro'}
 			{#if auditLog.length === 0}
 				<p class="py-10 text-center text-sm text-ink-400">Todavía no hay decisiones registradas.</p>

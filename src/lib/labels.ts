@@ -2,6 +2,11 @@ import type {
 	ChannelPlatform,
 	ChannelReportReason,
 	ChannelType,
+	ConcernCategory,
+	ConcernLevel,
+	ConcernProposalStatus,
+	ConcernScopeType,
+	ConcernStatus,
 	EventCategory,
 	EventStatus,
 	EventTheme,
@@ -148,4 +153,55 @@ export const channelReportReasonLabels: Record<ChannelReportReason, string> = {
 	no_pertenece_organizador: 'No pertenece a la organización',
 	contenido_violento_ilegal: 'Contenido violento o ilegal',
 	otro: 'Otro motivo'
+};
+
+// ---------------------------------------------------------------------------
+// Pulso ciudadano
+// ---------------------------------------------------------------------------
+
+export const concernCategoryLabels: Record<ConcernCategory, string> = {
+	vivienda: 'Vivienda',
+	sanidad: 'Sanidad',
+	empleo: 'Empleo',
+	educacion: 'Educación',
+	seguridad: 'Seguridad',
+	coste_vida: 'Coste de vida',
+	transporte: 'Transporte',
+	medioambiente: 'Medioambiente'
+};
+
+export const concernScopeTypeLabels: Record<ConcernScopeType, string> = {
+	nacional: 'Toda España',
+	comunidad_autonoma: 'Comunidad autónoma',
+	provincia: 'Provincia',
+	municipio: 'Municipio'
+};
+
+export const concernStatusLabels: Record<ConcernStatus, string> = {
+	draft: 'Borrador',
+	published: 'Publicada',
+	archived: 'Despublicada'
+};
+
+/** Escala de respuesta de Pulso ciudadano: 1 = Nada, 5 = Es prioritario. */
+export const concernLevelLabels: Record<ConcernLevel, string> = {
+	1: 'Nada',
+	2: 'Poco',
+	3: 'Bastante',
+	4: 'Mucho',
+	5: 'Es prioritario'
+};
+
+export const concernLevelShortLabels: Record<ConcernLevel, string> = {
+	1: 'Nada',
+	2: 'Poco',
+	3: 'Bastante',
+	4: 'Mucho',
+	5: 'Prioritario'
+};
+
+export const concernProposalStatusLabels: Record<ConcernProposalStatus, string> = {
+	pending: 'Pendiente de revisión',
+	approved: 'Aprobada',
+	rejected: 'Rechazada'
 };

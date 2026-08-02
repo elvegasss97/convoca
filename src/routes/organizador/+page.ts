@@ -3,6 +3,9 @@ import type { PageLoad } from './$types';
 import { authService } from '$lib/auth/authService';
 import { getOrganizerDashboard } from '$lib/services/organizersService';
 
+/** Forzado a CSR: ver el mismo comentario en `src/routes/moderacion/+page.ts`. */
+export const ssr = false;
+
 export const load: PageLoad = async ({ url }) => {
 	const session = await authService.getSession();
 

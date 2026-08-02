@@ -6,9 +6,16 @@
 		onClose: () => void;
 		title: string;
 		url: string;
+		note?: string;
 	}
 
-	let { open = $bindable(), onClose, title, url }: Props = $props();
+	let {
+		open = $bindable(),
+		onClose,
+		title,
+		url,
+		note = 'Compartir esta convocatoria no revela tu asistencia ni tu identidad.'
+	}: Props = $props();
 
 	let copied = $state(false);
 
@@ -109,7 +116,7 @@
 			</div>
 
 			<p class="mt-4 text-xs text-ink-400">
-				Compartir esta convocatoria no revela tu asistencia ni tu identidad.
+				{note}
 			</p>
 		</div>
 	</div>

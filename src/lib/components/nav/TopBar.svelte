@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Compass, PlusCircle, LayoutDashboard } from '@lucide/svelte';
+	import { Compass, PlusCircle, LayoutDashboard, Activity } from '@lucide/svelte';
 	import { authState } from '$lib/auth/session.svelte';
 	import LocationPicker from './LocationPicker.svelte';
 	import UserMenu from './UserMenu.svelte';
@@ -15,6 +15,7 @@
 	const links = $derived(
 		[
 			{ href: '/', label: 'Descubrir', icon: Compass },
+			{ href: '/pulso', label: 'Pulso ciudadano', icon: Activity },
 			authState.session?.user.role === 'organizer'
 				? { href: '/organizador', label: 'Panel del organizador', icon: LayoutDashboard }
 				: null

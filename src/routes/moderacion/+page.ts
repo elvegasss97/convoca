@@ -8,6 +8,20 @@ import {
 } from '$lib/services/moderationService';
 import { getPendingDocuments, listOrganizers } from '$lib/services/organizersService';
 import { listReportedChannels } from '$lib/services/channelsService';
+import { listPublicEvents } from '$lib/services/eventsService';
+import { listConcerns, listConcernProposals } from '$lib/services/concernsService';
+
+/**
+ * Forzado a CSR: `authService.getSession()` lee la sesión de Supabase desde
+ * `localStorage` (ver `$lib/supabase/client.ts`), inaccesible en el
+ * servidor (no hay `hooks.server.ts` con cookies de sesión). Con SSR activo
+ * a nivel global (`src/routes/+layout.ts`), esta comprobación siempre
+ * fallaría en el servidor y redirigiría a `/login` incluso a una persona
+ * moderadora con sesión real, en cualquier recarga directa de esta ruta.
+ * No hay contenido público que indexar aquí (`noindex` en el `<Seo>` de
+ * abajo), así que desactivar SSR no cuesta nada de SEO.
+ */
+export const ssr = false;
 
 export const load: PageLoad = async ({ url }) => {
 	const session = await authService.getSession();
@@ -18,15 +32,38 @@ export const load: PageLoad = async ({ url }) => {
 		redirect(303, `/login?redirect=${encodeURIComponent(url.pathname)}`);
 	}
 
-	const [pending, reported, auditLog, pendingDocuments, organizers, reportedChannels] =
-		await Promise.all([
-			listPendingReview(),
-			listReportedEvents(),
-			listAllAuditLogs(),
-			getPendingDocuments(),
-			listOrganizers(),
-			listReportedChannels()
-		]);
+	const [
+		pending,
+		reported,
+		auditLog,
+		pendingDocuments,
+		organizers,
+		reportedChannels,
+		concerns,
+		concernProposals,
+		publicEvents
+	] = await Promise.all([
+		listPendingReview(),
+		listReportedEvents(),
+		listAllAuditLogs(),
+		getPendingDocuments(),
+		listOrganizers(),
+		listReportedChannels(),
+		listConcerns(),
+		listConcernProposals(),
+		listPublicEvents()
+	]);
 
-	return { session, pending, reported, auditLog, pendingDocuments, organizers, reportedChannels };
+	return {
+		session,
+		pending,
+		reported,
+		auditLog,
+		pendingDocuments,
+		organizers,
+		reportedChannels,
+		concerns,
+		concernProposals,
+		publicEvents
+	};
 };

@@ -1,6 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Compass, Map, PlusCircle, LayoutDashboard, ShieldCheck, LogIn } from '@lucide/svelte';
+	import {
+		Compass,
+		Map,
+		Activity,
+		PlusCircle,
+		LayoutDashboard,
+		ShieldCheck,
+		LogIn
+	} from '@lucide/svelte';
 	import { authState } from '$lib/auth/session.svelte';
 
 	const search = $derived(page.url.search);
@@ -50,6 +58,13 @@
 			label: 'Mapa',
 			icon: Map,
 			match: (p: string, s: string) => p === '/' && s.includes('vista=mapa'),
+			accent: false
+		},
+		{
+			href: '/pulso',
+			label: 'Pulso',
+			icon: Activity,
+			match: (p: string) => p.startsWith('/pulso'),
 			accent: false
 		},
 		{

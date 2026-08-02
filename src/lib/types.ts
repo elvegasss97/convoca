@@ -356,3 +356,85 @@ export const DEFAULT_FILTERS: EventFiltersState = {
 	themes: [],
 	verifiedOnly: false
 };
+
+// ---------------------------------------------------------------------------
+// Pulso ciudadano
+// ---------------------------------------------------------------------------
+
+export type ConcernCategory =
+	| 'vivienda'
+	| 'sanidad'
+	| 'empleo'
+	| 'educacion'
+	| 'seguridad'
+	| 'coste_vida'
+	| 'transporte'
+	| 'medioambiente';
+
+export type ConcernScopeType = 'nacional' | 'comunidad_autonoma' | 'provincia' | 'municipio';
+
+export interface ConcernScope {
+	type: ConcernScopeType;
+	/** Nombre de la comunidad/provincia/municipio. undefined cuando type es 'nacional'. */
+	value?: string;
+}
+
+export type ConcernStatus = 'draft' | 'published' | 'archived';
+
+/** Nivel de respuesta de la escala de Pulso ciudadano (1 = Nada, 5 = Es prioritario). */
+export type ConcernLevel = 1 | 2 | 3 | 4 | 5;
+
+export interface Concern {
+	id: string;
+	slug: string;
+	category: ConcernCategory;
+	question: string;
+	description: string;
+	/** "Quién publica". Siempre "Convoca" por ahora — ver comentario en la migración. */
+	publisherLabel: string;
+	scope: ConcernScope;
+	status: ConcernStatus;
+	startsAt: string;
+	/** undefined = permanece activa, sin fecha de cierre. */
+	closesAt?: string;
+	createdBy?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+/** Distribución de respuestas por nivel (siempre las 5 claves presentes, aunque el conteo sea 0). */
+export type ConcernLevelCounts = Record<ConcernLevel, number>;
+
+export interface ConcernResults {
+	concernId: string;
+	counts: ConcernLevelCounts;
+	totalResponses: number;
+	/** Media aritmética de los niveles (1-5). undefined si totalResponses es 0 (evita dividir entre cero). */
+	averageLevel?: number;
+}
+
+/** Estado de la propia cuenta frente a una preocupación concreta. */
+export interface MyConcernResponse {
+	concernId: string;
+	level: ConcernLevel;
+}
+
+export type ConcernProposalStatus = 'pending' | 'approved' | 'rejected';
+
+export interface ConcernProposal {
+	id: string;
+	proposerUserId: string;
+	title: string;
+	proposedQuestion: string;
+	category: ConcernCategory;
+	description: string;
+	scope: ConcernScope;
+	reason: string;
+	status: ConcernProposalStatus;
+	reviewerNote?: string;
+	reviewedBy?: string;
+	reviewedAt?: string;
+	resultingConcernId?: string;
+	createdAt: string;
+	updatedAt: string;
+}
