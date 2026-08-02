@@ -759,3 +759,67 @@ export interface ParticipationSummary {
 	proposalsPublished: number;
 	lastUpdatedAt?: string;
 }
+
+// ---------------------------------------------------------------------------
+// Escucha ciudadana (priorizar y profundizar en preocupaciones concretas)
+// ---------------------------------------------------------------------------
+
+export type ListeningRoundStatus = 'draft' | 'open' | 'paused' | 'closed';
+
+export interface ListeningRound {
+	id: string;
+	category: ConcernCategory;
+	versionLabel: string;
+	status: ListeningRoundStatus;
+	opensAt?: string;
+	closesAt?: string;
+	createdBy?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export type ListeningSeverity = 'muy_grave' | 'grave' | 'moderada' | 'poco_grave' | 'sin_info';
+export type ListeningEvolution = 'empeorado' | 'similar' | 'mejorado' | 'no_sabe';
+export type ListeningPersonalRelation =
+	'directamente' | 'persona_cercana' | 'profesional' | 'no_afecta' | 'prefiere_no_responder';
+
+/**
+ * Selección/prioridad y profundización de un usuario sobre una preocupación
+ * concreta (`optionCode`) dentro de una ronda. `rank` ausente = actualmente
+ * deseleccionada (su profundización, si existía, se conserva).
+ */
+export interface ListeningResponse {
+	id: string;
+	roundId: string;
+	userId: string;
+	optionCode: string;
+	rank?: 1 | 2 | 3;
+	severity?: ListeningSeverity;
+	evolution?: ListeningEvolution;
+	personalRelation?: ListeningPersonalRelation;
+	causeCode?: string;
+	causeOther?: string;
+	comment?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export type ListeningAreaType = 'urbano' | 'intermedio' | 'rural' | 'prefiere_no_responder';
+
+export interface ListeningContext {
+	id: string;
+	roundId: string;
+	userId: string;
+	community?: string;
+	areaType?: ListeningAreaType;
+	housingSituation?: HousingSituation;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface ListeningCompletion {
+	roundId: string;
+	userId: string;
+	completedAt: string;
+	updatedAt: string;
+}

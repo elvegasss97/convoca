@@ -13,6 +13,10 @@ import type {
 	GeneralPosition,
 	HousingSituation,
 	InvestmentOpinion,
+	ListeningAreaType,
+	ListeningEvolution,
+	ListeningPersonalRelation,
+	ListeningSeverity,
 	MeasurePosition,
 	MeasurePriority,
 	MeasureStance,
@@ -357,4 +361,38 @@ export const measureReasonOptionsByPosition: Record<
 		{ code: 'consecuencias_no_claras', label: 'No están claras las consecuencias' },
 		{ code: 'otro', label: 'Otra información' }
 	]
+};
+
+// ---------------------------------------------------------------------------
+// Escucha ciudadana — priorizar y profundizar en preocupaciones concretas
+// ---------------------------------------------------------------------------
+
+export const listeningSeverityLabels: Record<ListeningSeverity, string> = {
+	muy_grave: 'Muy grave',
+	grave: 'Grave',
+	moderada: 'Moderada',
+	poco_grave: 'Poco grave',
+	sin_info: 'No tengo información suficiente'
+};
+
+export const listeningEvolutionLabels: Record<ListeningEvolution, string> = {
+	empeorado: 'Ha empeorado',
+	similar: 'Sigue parecida',
+	mejorado: 'Ha mejorado',
+	no_sabe: 'No lo sé'
+};
+
+export const listeningPersonalRelationLabels: Record<ListeningPersonalRelation, string> = {
+	directamente: 'Me afecta directamente',
+	persona_cercana: 'Afecta a una persona cercana',
+	profesional: 'Lo conozco por mi profesión o actividad',
+	no_afecta: 'No me afecta directamente',
+	prefiere_no_responder: 'Prefiero no responder'
+};
+
+export const listeningAreaTypeLabels: Record<ListeningAreaType, string> = {
+	urbano: 'Urbano',
+	intermedio: 'Intermedio',
+	rural: 'Rural',
+	prefiere_no_responder: 'Prefiero no responder'
 };

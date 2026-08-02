@@ -10,6 +10,7 @@
 	import ConcernCategoryGlyph from '$lib/components/pulso/ConcernCategoryGlyph.svelte';
 	import ProposeConcernDialog from '$lib/components/pulso/ProposeConcernDialog.svelte';
 	import TerritoryPicker from '$lib/components/pulso/TerritoryPicker.svelte';
+	import ViviendaListeningFlow from '$lib/components/pulso/ViviendaListeningFlow.svelte';
 	import { getMyConcernResponses } from '$lib/services/concernsService';
 	import { authState } from '$lib/auth/session.svelte';
 
@@ -138,30 +139,39 @@
 			</div>
 		{/if}
 
-		<div class="mt-4 flex flex-wrap items-end gap-3">
-			<div>
-				<p class="mb-1 text-xs font-medium text-ink-500">Ámbito</p>
-				<TerritoryPicker bind:scopeType bind:scopeValue idPrefix="escucha-territory" />
+		{#if data.category !== 'vivienda'}
+			<div class="mt-4 flex flex-wrap items-end gap-3">
+				<div>
+					<p class="mb-1 text-xs font-medium text-ink-500">Ámbito</p>
+					<TerritoryPicker bind:scopeType bind:scopeValue idPrefix="escucha-territory" />
+				</div>
+				<button
+					type="button"
+					onclick={applyScope}
+					class="rounded-xl border border-ink-200 bg-white px-4 py-2 text-sm font-medium text-ink-700 hover:bg-ink-50"
+				>
+					Consultar
+				</button>
+				<button
+					type="button"
+					onclick={() => (proposeOpen = true)}
+					class="ml-auto flex items-center gap-1.5 rounded-full bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-600"
+				>
+					<Megaphone class="size-4" strokeWidth={2.25} />
+					Proponer una preocupación
+				</button>
 			</div>
-			<button
-				type="button"
-				onclick={applyScope}
-				class="rounded-xl border border-ink-200 bg-white px-4 py-2 text-sm font-medium text-ink-700 hover:bg-ink-50"
-			>
-				Consultar
-			</button>
-			<button
-				type="button"
-				onclick={() => (proposeOpen = true)}
-				class="ml-auto flex items-center gap-1.5 rounded-full bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-600"
-			>
-				<Megaphone class="size-4" strokeWidth={2.25} />
-				Proponer una preocupación
-			</button>
-		</div>
+		{/if}
 	</section>
 
-	{#if data.concerns.length > 0}
+	{#if data.category === 'vivienda'}
+		<ViviendaListeningFlow
+			round={data.listeningRound}
+			responses={data.listeningResponses}
+			context={data.listeningContext}
+			completed={data.listeningCompleted}
+		/>
+	{:else if data.concerns.length > 0}
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each data.concerns as concern (concern.id)}
 				<ConcernCard

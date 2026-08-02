@@ -1072,6 +1072,168 @@ export type Database = {
 					}
 				];
 			};
+			concern_listening_rounds: {
+				Row: {
+					category: string;
+					closes_at: string | null;
+					created_at: string;
+					created_by: string | null;
+					id: string;
+					opens_at: string | null;
+					status: string;
+					updated_at: string;
+					version_label: string;
+				};
+				Insert: {
+					category: string;
+					closes_at?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					id?: string;
+					opens_at?: string | null;
+					status?: string;
+					updated_at?: string;
+					version_label: string;
+				};
+				Update: {
+					category?: string;
+					closes_at?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					id?: string;
+					opens_at?: string | null;
+					status?: string;
+					updated_at?: string;
+					version_label?: string;
+				};
+				Relationships: [];
+			};
+			concern_listening_responses: {
+				Row: {
+					cause_code: string | null;
+					cause_other: string | null;
+					comment: string | null;
+					created_at: string;
+					evolution: string | null;
+					id: string;
+					option_code: string;
+					personal_relation: string | null;
+					rank: number | null;
+					round_id: string;
+					severity: string | null;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					cause_code?: string | null;
+					cause_other?: string | null;
+					comment?: string | null;
+					created_at?: string;
+					evolution?: string | null;
+					id?: string;
+					option_code: string;
+					personal_relation?: string | null;
+					rank?: number | null;
+					round_id: string;
+					severity?: string | null;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					cause_code?: string | null;
+					cause_other?: string | null;
+					comment?: string | null;
+					created_at?: string;
+					evolution?: string | null;
+					id?: string;
+					option_code?: string;
+					personal_relation?: string | null;
+					rank?: number | null;
+					round_id?: string;
+					severity?: string | null;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'concern_listening_responses_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'concern_listening_rounds';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			concern_listening_contexts: {
+				Row: {
+					area_type: string | null;
+					community: string | null;
+					created_at: string;
+					housing_situation: string | null;
+					id: string;
+					round_id: string;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					area_type?: string | null;
+					community?: string | null;
+					created_at?: string;
+					housing_situation?: string | null;
+					id?: string;
+					round_id: string;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					area_type?: string | null;
+					community?: string | null;
+					created_at?: string;
+					housing_situation?: string | null;
+					id?: string;
+					round_id?: string;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'concern_listening_contexts_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'concern_listening_rounds';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			concern_listening_completions: {
+				Row: {
+					completed_at: string;
+					round_id: string;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					completed_at?: string;
+					round_id: string;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					completed_at?: string;
+					round_id?: string;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'concern_listening_completions_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'concern_listening_rounds';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			topic_measures: {
 				Row: {
 					arguments_for: string | null;
@@ -1591,6 +1753,36 @@ export type Database = {
 					proposals_published: number;
 					last_updated_at: string | null;
 				}[];
+			};
+			set_concern_listening_priorities: {
+				Args: { p_round_id: string; p_option_codes: string[] };
+				Returns: undefined;
+			};
+			set_concern_listening_detail: {
+				Args: {
+					p_round_id: string;
+					p_option_code: string;
+					p_severity?: string | null;
+					p_evolution?: string | null;
+					p_personal_relation?: string | null;
+					p_cause_code?: string | null;
+					p_cause_other?: string | null;
+					p_comment?: string | null;
+				};
+				Returns: undefined;
+			};
+			set_concern_listening_context: {
+				Args: {
+					p_round_id: string;
+					p_community?: string | null;
+					p_area_type?: string | null;
+					p_housing_situation?: string | null;
+				};
+				Returns: undefined;
+			};
+			set_concern_listening_completed: {
+				Args: { p_round_id: string };
+				Returns: undefined;
 			};
 		};
 		Enums: {
