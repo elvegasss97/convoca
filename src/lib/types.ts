@@ -624,6 +624,22 @@ export interface TopicTimelinePhase {
  * Los campos opcionales quedan sin rellenar mientras no se proporcione ese
  * contenido: nunca se inventan.
  */
+/**
+ * Compromiso comprobable de un tema (p. ej. los cinco compromisos de Plan
+ * Sanidad 2036): puente entre el diagnóstico y las medidas concretas.
+ * Compromiso propuesto para el horizonte del plan, nunca un resultado ya
+ * alcanzado.
+ */
+export interface TopicCommitment {
+	id: string;
+	topicId: string;
+	title: string;
+	description: string;
+	sortOrder: number;
+	createdAt: string;
+	updatedAt: string;
+}
+
 export interface TopicRisk {
 	id: string;
 	topicId: string;

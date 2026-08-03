@@ -16,7 +16,8 @@
 		History,
 		ChevronDown,
 		ChevronUp,
-		MessagesSquare
+		MessagesSquare,
+		ShieldCheck
 	} from '@lucide/svelte';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import type { PageData } from './$types';
@@ -111,15 +112,19 @@
 		}
 	});
 
-	const NAV_SECTIONS = [
+	// "Compromisos" solo aparece en la navegación si el tema tiene alguno
+	// guardado (hoy, únicamente Sanidad); Vivienda no lo tiene y su barra de
+	// navegación no cambia.
+	const NAV_SECTIONS = $derived([
 		{ id: 'resumen', label: 'Resumen' },
+		...(data.commitments.length > 0 ? [{ id: 'compromisos', label: 'Compromisos' }] : []),
 		{ id: 'medidas', label: 'Medidas' },
 		{ id: 'participar', label: 'Participar' },
 		{ id: 'coste', label: 'Coste' },
 		{ id: 'calendario', label: 'Calendario' },
 		{ id: 'riesgos', label: 'Riesgos' },
 		{ id: 'fuentes', label: 'Fuentes' }
-	];
+	]);
 
 	// "El problema": si el texto es largo, se colapsa tras unos ~220
 	// caracteres para no abrir la página con un muro de texto.
@@ -468,6 +473,42 @@
 			<p class="mt-3 text-xs text-ink-400">Datos destacados pendientes de incorporar.</p>
 		{/if}
 	</section>
+
+	<!-- Compromisos: puente entre el diagnóstico y las medidas. Solo aparece
+	     si el tema tiene compromisos guardados (hoy, únicamente Sanidad);
+	     Vivienda no tiene filas y esta sección no se renderiza para ella. -->
+	{#if data.commitments.length > 0}
+		<section
+			id="compromisos"
+			class="mt-4 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
+		>
+			<h2 class="flex items-center gap-1.5 font-display text-base font-semibold text-ink-900">
+				<ShieldCheck class="size-4 text-brand-700" /> Cinco compromisos que deben poder comprobarse
+			</h2>
+			<ContentTypeTag type="convoca" class="mt-2" />
+			<p class="mt-2 text-sm leading-relaxed text-ink-700">
+				{topic.title} no se limita a prometer más recursos. Propone cinco compromisos concretos para saber
+				si el sistema realmente está mejorando.
+			</p>
+			<ol class="mt-3 flex flex-col gap-3">
+				{#each data.commitments as commitment, i (commitment.id)}
+					<li class="flex gap-3 rounded-xl border border-ink-100 p-3">
+						<span
+							class="flex size-6 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-800"
+							>{i + 1}</span
+						>
+						<div class="min-w-0">
+							<p class="text-sm font-semibold text-ink-900">{commitment.title}</p>
+							<p class="mt-1 text-sm leading-relaxed text-ink-700">{commitment.description}</p>
+						</div>
+					</li>
+				{/each}
+			</ol>
+			<p class="mt-3 text-xs text-ink-400">
+				Compromisos propuestos para 2036, todavía por cumplir: no son resultados ya alcanzados.
+			</p>
+		</section>
+	{/if}
 
 	<!-- 3 + 4. Organización de medidas y tarjetas -->
 	<section id="medidas" class="mt-4 scroll-mt-20">

@@ -1409,6 +1409,44 @@ export type Database = {
 					}
 				];
 			};
+			topic_commitments: {
+				Row: {
+					created_at: string;
+					description: string;
+					id: string;
+					sort_order: number;
+					title: string;
+					topic_id: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					description: string;
+					id?: string;
+					sort_order?: number;
+					title: string;
+					topic_id: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					description?: string;
+					id?: string;
+					sort_order?: number;
+					title?: string;
+					topic_id?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_commitments_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			topic_risks: {
 				Row: {
 					created_at: string;

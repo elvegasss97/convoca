@@ -120,6 +120,7 @@
 		onclick={() => (expanded = !expanded)}
 		disabled={!hydrated}
 		aria-expanded={expanded}
+		aria-controls={`measure-panel-${measure.id}`}
 		class="flex w-full items-start justify-between gap-3 p-4 text-left disabled:cursor-wait disabled:opacity-90"
 	>
 		<div class="flex min-w-0 gap-3">
@@ -132,29 +133,6 @@
 				{#if measure.summary}
 					<p class="mt-1 text-sm leading-relaxed text-ink-600">{measure.summary}</p>
 				{/if}
-				{#if measure.problemAddressed}
-					<p class="mt-1.5 text-xs text-ink-500">
-						<strong class="font-semibold text-ink-700">El problema:</strong>
-						{measure.problemAddressed}
-					</p>
-				{/if}
-				<div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-500">
-					{#if measure.responsibleScope}
-						<span class="flex items-center gap-1"
-							><Landmark class="size-3.5 text-ink-400" /> {measure.responsibleScope}</span
-						>
-					{/if}
-					{#if measure.timeframe}
-						<span class="flex items-center gap-1"
-							><CalendarClock class="size-3.5 text-ink-400" /> {measure.timeframe}</span
-						>
-					{/if}
-					{#if measure.estimatedCost}
-						<span class="flex items-center gap-1"
-							><Coins class="size-3.5 text-ink-400" /> {measure.estimatedCost}</span
-						>
-					{/if}
-				</div>
 				{#if myResponse}
 					<span
 						class="mt-2 inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700"
@@ -179,8 +157,16 @@
 	</button>
 
 	{#if expanded}
-		<div class="border-t border-ink-100 p-4">
-			<p class="text-sm leading-relaxed whitespace-pre-line text-ink-700">{measure.explanation}</p>
+		<div id={`measure-panel-${measure.id}`} class="border-t border-ink-100 p-4">
+			{#if measure.problemAddressed}
+				<p class="text-xs text-ink-500">
+					<strong class="font-semibold text-ink-700">El problema:</strong>
+					{measure.problemAddressed}
+				</p>
+			{/if}
+			<p class="mt-3 text-sm leading-relaxed whitespace-pre-line text-ink-700">
+				{measure.explanation}
+			</p>
 
 			{#if measure.howItWorks}
 				<div class="mt-3 flex items-start gap-2 rounded-xl border border-ink-100 bg-ink-50 p-3">

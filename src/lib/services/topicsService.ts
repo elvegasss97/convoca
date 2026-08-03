@@ -22,6 +22,7 @@ import type {
 	TopicMeasureAlternative,
 	TopicMeasureAlternativeStatus,
 	TopicMeasureAxis,
+	TopicCommitment,
 	TopicRisk,
 	TopicSource,
 	TopicStatus,
@@ -219,6 +220,28 @@ function rowToTimelinePhase(row: TimelinePhaseRow): TopicTimelinePhase {
 		title: row.title,
 		description: row.description,
 		items: row.items ?? [],
+		sortOrder: row.sort_order,
+		createdAt: row.created_at,
+		updatedAt: row.updated_at
+	};
+}
+
+interface CommitmentRow {
+	id: string;
+	topic_id: string;
+	title: string;
+	description: string;
+	sort_order: number;
+	created_at: string;
+	updated_at: string;
+}
+
+function rowToCommitment(row: CommitmentRow): TopicCommitment {
+	return {
+		id: row.id,
+		topicId: row.topic_id,
+		title: row.title,
+		description: row.description,
 		sortOrder: row.sort_order,
 		createdAt: row.created_at,
 		updatedAt: row.updated_at
@@ -1265,6 +1288,67 @@ export async function unlinkMeasureSource(measureId: string, sourceId: string): 
 		.delete()
 		.eq('measure_id', measureId)
 		.eq('source_id', sourceId);
+	if (error) throw error;
+}
+
+// ---------------------------------------------------------------------------
+// Compromisos comprobables (puente entre el diagnóstico y las medidas)
+// ---------------------------------------------------------------------------
+
+export async function listTopicCommitments(topicId: string): Promise<TopicCommitment[]> {
+	const { data, error } = await supabase
+		.from('topic_commitments')
+		.select('*')
+		.eq('topic_id', topicId)
+		.order('sort_order', { ascending: true });
+	if (error) throw error;
+	return (data ?? []).map(rowToCommitment);
+}
+
+export interface TopicCommitmentInput {
+	title: string;
+	description: string;
+	sortOrder?: number;
+}
+
+export async function createTopicCommitment(
+	topicId: string,
+	input: TopicCommitmentInput
+): Promise<TopicCommitment> {
+	const { data, error } = await supabase
+		.from('topic_commitments')
+		.insert({
+			topic_id: topicId,
+			title: input.title.trim(),
+			description: input.description.trim(),
+			sort_order: input.sortOrder ?? 0
+		})
+		.select('*')
+		.single();
+	if (error) throw error;
+	return rowToCommitment(data);
+}
+
+export async function updateTopicCommitment(
+	commitmentId: string,
+	input: TopicCommitmentInput
+): Promise<TopicCommitment> {
+	const { data, error } = await supabase
+		.from('topic_commitments')
+		.update({
+			title: input.title.trim(),
+			description: input.description.trim(),
+			...(input.sortOrder !== undefined ? { sort_order: input.sortOrder } : {})
+		})
+		.eq('id', commitmentId)
+		.select('*')
+		.single();
+	if (error) throw error;
+	return rowToCommitment(data);
+}
+
+export async function deleteTopicCommitment(commitmentId: string): Promise<void> {
+	const { error } = await supabase.from('topic_commitments').delete().eq('id', commitmentId);
 	if (error) throw error;
 }
 

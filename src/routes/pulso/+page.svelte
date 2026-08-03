@@ -6,10 +6,17 @@
 	let { data }: { data: PageData } = $props();
 
 	const numberFormatter = new Intl.NumberFormat('es-ES');
-	const featuredTopic = $derived(data.topics[0]);
-	// El nombre del documento/plan (p. ej. "Plan Vivienda 2036") identifica
-	// mejor la propuesta que el título corto del tema ("Vivienda").
-	const featuredTopicTitle = $derived(featuredTopic?.documentTitle || featuredTopic?.title);
+	// Todas las propuestas publicadas, no solo la más reciente: con dos o
+	// más temas publicados (p. ej. Vivienda y Sanidad), la portada debe
+	// seguir mostrando acceso a todas, no solo a la última.
+	const availableTopics = $derived(
+		data.topics.map((t) => ({
+			slug: t.slug,
+			// El nombre del documento/plan (p. ej. "Plan Vivienda 2036")
+			// identifica mejor la propuesta que el título corto del tema.
+			title: t.documentTitle || t.title
+		}))
+	);
 </script>
 
 <Seo
@@ -64,9 +71,12 @@
 			</p>
 		</a>
 
-		<a
-			href="/pulso/soluciones"
-			class="group flex flex-col gap-3 rounded-2xl border border-ink-100 bg-white p-5 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover sm:p-6"
+		<!-- No es un único <a> como la tarjeta de la izquierda: cuando hay
+		     varias propuestas publicadas, cada nombre enlaza a la suya, y un
+		     enlace anidado dentro de otro enlace no es HTML válido ni
+		     accesible. -->
+		<div
+			class="flex flex-col gap-3 rounded-2xl border border-ink-100 bg-white p-5 shadow-card sm:p-6"
 		>
 			<span
 				class="flex size-11 items-center justify-center rounded-full bg-accent-100 text-accent-700"
@@ -78,17 +88,25 @@
 				Convoca investiga los problemas y presenta propuestas concretas para que la ciudadanía pueda
 				apoyarlas, rechazarlas o mejorarlas.
 			</p>
-			{#if featuredTopic}
+			{#if availableTopics.length > 0}
 				<p class="text-xs text-ink-500">
-					Disponible ahora: <strong class="font-semibold text-ink-700">{featuredTopicTitle}</strong>
+					{availableTopics.length === 1 ? 'Disponible ahora' : 'Disponibles ahora'}:
+					{#each availableTopics as topic, i (topic.slug)}
+						{#if i > 0}{i === availableTopics.length - 1 ? ' y ' : ', '}{/if}<a
+							href={`/pulso/soluciones/${topic.slug}`}
+							class="font-semibold text-ink-700 hover:text-brand-700 hover:underline"
+							>{topic.title}</a
+						>
+					{/each}
 				</p>
 			{/if}
-			<p
-				class="mt-auto flex items-center gap-1 text-sm font-semibold text-brand-700 group-hover:underline"
+			<a
+				href="/pulso/soluciones"
+				class="mt-auto flex items-center gap-1 text-sm font-semibold text-brand-700 hover:underline"
 			>
 				Consultar y revisar la propuesta <ArrowRight class="size-3.5" />
-			</p>
-		</a>
+			</a>
+		</div>
 	</div>
 
 	<p class="mt-8 text-center text-xs leading-relaxed text-ink-400 sm:text-left">

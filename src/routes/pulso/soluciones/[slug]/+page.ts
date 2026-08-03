@@ -10,6 +10,7 @@ import {
 	listTopicTimelinePhases,
 	listTopicVersions,
 	listTopicRisks,
+	listTopicCommitments,
 	listMeasureSourceIdsForMeasures
 } from '$lib/services/topicsService';
 import { getConcernResults } from '$lib/services/concernsService';
@@ -25,18 +26,29 @@ export const load: PageLoad = async ({ params }) => {
 	const topic = await getTopicBySlug(params.slug);
 	if (!topic) error(404, 'No hemos encontrado este tema.');
 
-	const [sources, dataPoints, concerns, measures, axes, timelinePhases, versions, risks, round] =
-		await Promise.all([
-			listTopicSources(topic.id),
-			listTopicDataPoints(topic.id),
-			listTopicConcerns(topic.id),
-			listTopicMeasures(topic.id),
-			listTopicMeasureAxes(topic.id),
-			listTopicTimelinePhases(topic.id),
-			listTopicVersions(topic.id),
-			listTopicRisks(topic.id),
-			getLatestRound(topic.id)
-		]);
+	const [
+		sources,
+		dataPoints,
+		concerns,
+		measures,
+		axes,
+		timelinePhases,
+		versions,
+		risks,
+		commitments,
+		round
+	] = await Promise.all([
+		listTopicSources(topic.id),
+		listTopicDataPoints(topic.id),
+		listTopicConcerns(topic.id),
+		listTopicMeasures(topic.id),
+		listTopicMeasureAxes(topic.id),
+		listTopicTimelinePhases(topic.id),
+		listTopicVersions(topic.id),
+		listTopicRisks(topic.id),
+		listTopicCommitments(topic.id),
+		getLatestRound(topic.id)
+	]);
 
 	const measureIds = measures.map((m) => m.id);
 	const [
@@ -65,6 +77,7 @@ export const load: PageLoad = async ({ params }) => {
 		timelinePhases,
 		versions,
 		risks,
+		commitments,
 		round,
 		concernResults,
 		measureSourceIds,
