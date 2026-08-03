@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Activity, Ear, FileEdit, ArrowRight, Users } from '@lucide/svelte';
+	import { Activity, Ear, FileEdit, ArrowRight, Users, Vote } from '@lucide/svelte';
 	import type { PageData } from './$types';
 	import Seo from '$lib/components/Seo.svelte';
 
@@ -48,6 +48,38 @@
 			</div>
 		{/if}
 	</section>
+
+	<!-- Sección con importancia propia, no un tercer tile genérico dentro de
+	     la rejilla de abajo: el encargo pide que se sienta como una decisión
+	     real, distinta de "explorar lo ya publicado" (Escucha/Propuestas). -->
+	<a
+		href="/pulso/proximo-bloque"
+		class="group mb-5 flex flex-col gap-3 rounded-2xl border border-accent-200 bg-accent-50 p-5 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover sm:flex-row sm:items-center sm:gap-5 sm:p-6"
+	>
+		<span
+			class="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent-100 text-accent-700"
+		>
+			<Vote class="size-5" strokeWidth={2.25} />
+		</span>
+		<div class="flex-1">
+			<span
+				class="inline-block rounded-full bg-accent-100 px-2.5 py-0.5 text-xs font-semibold text-accent-800"
+			>
+				Decisión abierta
+			</span>
+			<h2 class="mt-1.5 font-display text-lg font-semibold text-ink-900">
+				Elige el próximo bloque
+			</h2>
+			<p class="mt-1 text-sm leading-relaxed text-ink-600">
+				Decide qué problema debe empezar a trabajar Convoca después de vivienda y sanidad.
+			</p>
+		</div>
+		<p
+			class="flex shrink-0 items-center gap-1 text-sm font-semibold text-accent-700 group-hover:underline"
+		>
+			Elegir el próximo bloque <ArrowRight class="size-3.5" />
+		</p>
+	</a>
 
 	<div class="grid grid-cols-1 gap-5 md:grid-cols-2">
 		<a

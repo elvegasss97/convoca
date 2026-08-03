@@ -104,8 +104,7 @@ export function isValidSanidadListeningFormState(
 
 	if (!Array.isArray(f.problems) || f.problems.length > SANIDAD_LISTENING_PROBLEMS_MAX)
 		return false;
-	if (!f.problems.every((p) => typeof p === 'string' && ctx.problemCodes.includes(p)))
-		return false;
+	if (!f.problems.every((p) => typeof p === 'string' && ctx.problemCodes.includes(p))) return false;
 	if (new Set(f.problems).size !== f.problems.length) return false;
 
 	if (typeof f.otherProblemText !== 'string' || f.otherProblemText.length > 150) return false;

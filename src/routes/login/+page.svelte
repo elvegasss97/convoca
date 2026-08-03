@@ -17,10 +17,12 @@
 	let errorMessage = $state<string | null>(null);
 
 	const redirectTo = $derived(safeRedirect(page.url.searchParams.get('redirect'), '/organizador'));
-	// La escucha ciudadana es el único flujo, hoy, que trae aquí a alguien
-	// que no busca gestionar convocatorias: el texto de acceso debe reflejar
-	// por qué llega, no asumir que todo el mundo es organizador.
+	// La escucha ciudadana y "Tú eliges el próximo bloque" son los únicos
+	// flujos, hoy, que traen aquí a alguien que no busca gestionar
+	// convocatorias: el texto de acceso debe reflejar por qué llega, no
+	// asumir que todo el mundo es organizador.
 	const isListeningContext = $derived(redirectTo.startsWith('/pulso/escucha/'));
+	const isNextBlockVoteContext = $derived(redirectTo === '/pulso/proximo-bloque');
 
 	async function submit(e: SubmitEvent) {
 		e.preventDefault();
@@ -40,20 +42,30 @@
 
 <Seo
 	title="Iniciar sesión"
-	description={isListeningContext
-		? 'Accede para guardar tu participación en la escucha ciudadana de Convoca.'
-		: 'Accede a tu cuenta de organizador en Convoca para publicar y gestionar tus convocatorias.'}
+	description={isNextBlockVoteContext
+		? 'Accede para confirmar tu elección en la votación de Pulso ciudadano.'
+		: isListeningContext
+			? 'Accede para guardar tu participación en la escucha ciudadana de Convoca.'
+			: 'Accede a tu cuenta de organizador en Convoca para publicar y gestionar tus convocatorias.'}
 	noindex
 />
 
 <div class="mx-auto max-w-md px-4 py-10 sm:px-6">
-	{#if isListeningContext}
+	{#if isNextBlockVoteContext}
+		<h1 class="font-display text-2xl font-semibold text-ink-900">
+			Accede para confirmar tu elección
+		</h1>
+		<p class="mt-1 text-sm text-ink-500">
+			Utilizamos una cuenta para evitar votos duplicados y permitirte cambiar tu elección más
+			adelante.
+		</p>
+	{:else if isListeningContext}
 		<h1 class="font-display text-2xl font-semibold text-ink-900">
 			Accede para guardar tu participación
 		</h1>
 		<p class="mt-1 text-sm text-ink-500">
-			Necesitamos identificar una cuenta para evitar respuestas duplicadas y permitirte modificar
-			tu participación más adelante.
+			Necesitamos identificar una cuenta para evitar respuestas duplicadas y permitirte modificar tu
+			participación más adelante.
 		</p>
 	{:else}
 		<h1 class="font-display text-2xl font-semibold text-ink-900">Iniciar sesión</h1>
@@ -66,9 +78,11 @@
 		{#if ENABLE_GOOGLE_AUTH}
 			<GoogleSignInButton
 				{redirectTo}
-				helperText={isListeningContext
-					? 'Después de acceder volverás a la escucha con tus respuestas.'
-					: undefined}
+				helperText={isNextBlockVoteContext
+					? 'Después de acceder volverás aquí con tu selección.'
+					: isListeningContext
+						? 'Después de acceder volverás a la escucha con tus respuestas.'
+						: undefined}
 			/>
 		{/if}
 
@@ -164,7 +178,9 @@
 					<a
 						href={`/registro?redirect=${encodeURIComponent(redirectTo)}`}
 						class="font-semibold text-brand-700 hover:underline"
-						>{isListeningContext ? 'Crear cuenta' : 'Crea una convocatoria'}</a
+						>{isListeningContext || isNextBlockVoteContext
+							? 'Crear cuenta'
+							: 'Crea una convocatoria'}</a
 					>
 				</p>
 			</form>

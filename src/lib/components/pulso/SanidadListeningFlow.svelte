@@ -20,7 +20,6 @@
 	} from '@lucide/svelte';
 	import type {
 		ListeningRound,
-		ListeningSurveyAreaType,
 		ListeningSurveyResponse,
 		TopicCommitment,
 		TopicMeasure
@@ -442,7 +441,7 @@
 			class="flex items-center gap-2 rounded-xl border border-warning-300 bg-warning-50 px-3.5 py-2.5"
 		>
 			<Info class="size-4 shrink-0 text-warning-700" />
-			<p class="text-sm font-medium text-warning-800">Tienes dos respuestas distintas</p>
+			<p class="text-warning-800 text-sm font-medium">Tienes dos respuestas distintas</p>
 		</div>
 		<p class="mt-2 text-sm text-ink-600">
 			Ya existe una respuesta tuya guardada en la escucha, y este dispositivo también tiene un
@@ -521,6 +520,25 @@
 				<SanidadListeningResults {round} {measures} {commitments} />
 			</div>
 		{/if}
+
+		<!-- Invitación secundaria, nunca obligatoria: votar no es parte de
+		     completar esta escucha, solo una segunda cosa que se puede hacer
+		     ahora que ya se ha participado. -->
+		<div class="mt-4 rounded-xl border border-accent-200 bg-accent-50 p-4">
+			<p class="font-display text-sm font-semibold text-ink-900">
+				Ahora elige qué abordamos después
+			</p>
+			<p class="mt-1 text-sm text-ink-600">
+				Tu participación ayuda a mejorar el bloque de sanidad. También puedes decidir cuál será el
+				próximo problema que trabajará Convoca.
+			</p>
+			<a
+				href="/pulso/proximo-bloque"
+				class="mt-2.5 inline-flex items-center gap-1 rounded-full bg-accent-600 px-4 py-2 text-sm font-semibold text-white hover:bg-accent-700"
+			>
+				Elegir el próximo bloque <ArrowRight class="size-3.5" />
+			</a>
+		</div>
 	{:else if step === 0}
 		<div class="flex items-center gap-2">
 			<Sparkles class="size-5 text-brand-700" />
@@ -587,7 +605,9 @@
 		{#if f.mainCause}
 			<div>
 				<dt class="inline text-ink-400">Causa principal:</dt>
-				<dd class="inline">{SANIDAD_LISTENING_CAUSES.find((c) => c.code === f.mainCause)?.label}</dd>
+				<dd class="inline">
+					{SANIDAD_LISTENING_CAUSES.find((c) => c.code === f.mainCause)?.label}
+				</dd>
 			</div>
 		{/if}
 		{#if f.prioritizedMeasureIds.length > 0}

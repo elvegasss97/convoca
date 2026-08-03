@@ -23,6 +23,7 @@ import type {
 	MeasureStance,
 	MeasureUrgency,
 	ModerationAction,
+	NextBlockVoteRoundStatus,
 	OrganizerKind,
 	PacePreference,
 	ParticipationRoundStatus,
@@ -427,4 +428,10 @@ export const listeningSurveyAreaTypeLabels: Record<ListeningSurveyAreaType, stri
 	ciudad_mediana: 'Ciudad mediana',
 	gran_area_urbana: 'Gran área urbana',
 	prefiere_no_responder: 'Prefiero no responder'
+};
+
+export const nextBlockVoteRoundStatusLabels: Record<NextBlockVoteRoundStatus, string> = {
+	scheduled: 'Próximamente',
+	open: 'Abierta',
+	closed: 'Cerrada'
 };

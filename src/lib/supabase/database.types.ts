@@ -1307,6 +1307,78 @@ export type Database = {
 					}
 				];
 			};
+			// Añadidas a mano a partir de 0038_proximo_bloque.sql: esa migración
+			// todavía no está aplicada al esquema remoto, así que no se puede
+			// regenerar este archivo con generate_typescript_types todavía.
+			// Sustituir por la regeneración real en cuanto se aplique.
+			next_block_vote_rounds: {
+				Row: {
+					closes_at: string | null;
+					created_at: string;
+					created_by: string | null;
+					id: string;
+					opens_at: string | null;
+					status: string;
+					updated_at: string;
+					version_label: string;
+				};
+				Insert: {
+					closes_at?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					id?: string;
+					opens_at?: string | null;
+					status?: string;
+					updated_at?: string;
+					version_label: string;
+				};
+				Update: {
+					closes_at?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					id?: string;
+					opens_at?: string | null;
+					status?: string;
+					updated_at?: string;
+					version_label?: string;
+				};
+				Relationships: [];
+			};
+			next_block_votes: {
+				Row: {
+					created_at: string;
+					id: string;
+					option_code: string;
+					round_id: string;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					option_code: string;
+					round_id: string;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					option_code?: string;
+					round_id?: string;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'next_block_votes_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'next_block_vote_rounds';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			topic_measures: {
 				Row: {
 					arguments_for: string | null;
@@ -1930,6 +2002,18 @@ export type Database = {
 			get_concern_listening_survey_territory_breakdown: {
 				Args: { p_round_id: string; p_min_threshold?: number };
 				Returns: { community: string; response_count: number }[];
+			};
+			set_next_block_vote: {
+				Args: { p_round_id: string; p_option_code: string };
+				Returns: undefined;
+			};
+			get_next_block_vote_total: {
+				Args: { p_round_id: string };
+				Returns: number;
+			};
+			get_next_block_vote_results: {
+				Args: { p_round_id: string };
+				Returns: { option_code: string; vote_count: number }[];
 			};
 		};
 		Enums: {

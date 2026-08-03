@@ -17,6 +17,7 @@
 		Plus
 	} from '@lucide/svelte';
 	import PulsoModerationPanel from '$lib/components/pulso/PulsoModerationPanel.svelte';
+	import NextBlockVoteAdminPanel from '$lib/components/pulso/NextBlockVoteAdminPanel.svelte';
 	import TopicCard from '$lib/components/pulso/TopicCard.svelte';
 	import type { PageData } from './$types';
 	import type { AuditLog, Event, ModerationAction } from '$lib/types';
@@ -48,6 +49,7 @@
 	let concerns = $state(data.concerns);
 	let concernProposals = $state(data.concernProposals);
 	let topics = $state(data.topics);
+	let nextBlockVoteRounds = $state(data.nextBlockVoteRounds);
 	const pendingAlternativesCount = $derived(data.pendingAlternatives.length);
 
 	const orgNameById = $derived(new Map(data.organizers.map((o) => [o.id, o.displayName])));
@@ -434,6 +436,7 @@
 				events={data.publicEvents}
 				moderatorId={MODERATOR_ID}
 			/>
+			<NextBlockVoteAdminPanel bind:rounds={nextBlockVoteRounds} moderatorId={MODERATOR_ID} />
 		{:else if activeTab === 'temas'}
 			<div>
 				<a

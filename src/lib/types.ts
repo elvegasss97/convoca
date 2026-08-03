@@ -889,3 +889,43 @@ export interface ListeningSurveyTerritoryRow {
 	community: string;
 	responseCount: number;
 }
+
+// ---------------------------------------------------------------------------
+// "Tú eliges el próximo bloque" — votación de una opción entre 5 fijas
+// ---------------------------------------------------------------------------
+
+/** Fijas en esta fase — ver comentario en 0038_proximo_bloque.sql. */
+export type NextBlockVoteOptionCode =
+	| 'empleo_salarios'
+	| 'educacion'
+	| 'pensiones_cuidados'
+	| 'coste_vida'
+	| 'inmigracion_integracion_convivencia';
+
+export type NextBlockVoteRoundStatus = 'scheduled' | 'open' | 'closed';
+
+export interface NextBlockVoteRound {
+	id: string;
+	versionLabel: string;
+	status: NextBlockVoteRoundStatus;
+	opensAt?: string;
+	closesAt?: string;
+	createdBy?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface NextBlockVote {
+	id: string;
+	roundId: string;
+	userId: string;
+	optionCode: NextBlockVoteOptionCode;
+	createdAt: string;
+	updatedAt: string;
+}
+
+/** Recuento por opción. Solo se puede obtener con la ronda cerrada — ver get_next_block_vote_results(). */
+export interface NextBlockVoteResultRow {
+	optionCode: NextBlockVoteOptionCode;
+	voteCount: number;
+}
