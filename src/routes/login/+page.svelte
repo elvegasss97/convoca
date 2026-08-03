@@ -17,6 +17,10 @@
 	let errorMessage = $state<string | null>(null);
 
 	const redirectTo = $derived(safeRedirect(page.url.searchParams.get('redirect'), '/organizador'));
+	// La escucha ciudadana es el único flujo, hoy, que trae aquí a alguien
+	// que no busca gestionar convocatorias: el texto de acceso debe reflejar
+	// por qué llega, no asumir que todo el mundo es organizador.
+	const isListeningContext = $derived(redirectTo.startsWith('/pulso/escucha/'));
 
 	async function submit(e: SubmitEvent) {
 		e.preventDefault();
@@ -36,19 +40,36 @@
 
 <Seo
 	title="Iniciar sesión"
-	description="Accede a tu cuenta de organizador en Convoca para publicar y gestionar tus convocatorias."
+	description={isListeningContext
+		? 'Accede para guardar tu participación en la escucha ciudadana de Convoca.'
+		: 'Accede a tu cuenta de organizador en Convoca para publicar y gestionar tus convocatorias.'}
 	noindex
 />
 
 <div class="mx-auto max-w-md px-4 py-10 sm:px-6">
-	<h1 class="font-display text-2xl font-semibold text-ink-900">Iniciar sesión</h1>
-	<p class="mt-1 text-sm text-ink-500">
-		Accede a tu cuenta de organizador para crear y gestionar convocatorias.
-	</p>
+	{#if isListeningContext}
+		<h1 class="font-display text-2xl font-semibold text-ink-900">
+			Accede para guardar tu participación
+		</h1>
+		<p class="mt-1 text-sm text-ink-500">
+			Necesitamos identificar una cuenta para evitar respuestas duplicadas y permitirte modificar
+			tu participación más adelante.
+		</p>
+	{:else}
+		<h1 class="font-display text-2xl font-semibold text-ink-900">Iniciar sesión</h1>
+		<p class="mt-1 text-sm text-ink-500">
+			Accede a tu cuenta de organizador para crear y gestionar convocatorias.
+		</p>
+	{/if}
 
 	<div class="mt-6 space-y-4 rounded-3xl border border-ink-100 bg-white p-5 sm:p-6">
 		{#if ENABLE_GOOGLE_AUTH}
-			<GoogleSignInButton {redirectTo} />
+			<GoogleSignInButton
+				{redirectTo}
+				helperText={isListeningContext
+					? 'Después de acceder volverás a la escucha con tus respuestas.'
+					: undefined}
+			/>
 		{/if}
 
 		{#if ENABLE_GOOGLE_AUTH && ENABLE_PASSWORD_AUTH}
@@ -142,7 +163,8 @@
 					¿Todavía no tienes cuenta?
 					<a
 						href={`/registro?redirect=${encodeURIComponent(redirectTo)}`}
-						class="font-semibold text-brand-700 hover:underline">Crea una convocatoria</a
+						class="font-semibold text-brand-700 hover:underline"
+						>{isListeningContext ? 'Crear cuenta' : 'Crea una convocatoria'}</a
 					>
 				</p>
 			</form>

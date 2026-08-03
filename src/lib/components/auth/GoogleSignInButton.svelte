@@ -6,8 +6,14 @@
 		/** Ruta interna de Convoca a la que volver tras /auth/callback. */
 		redirectTo: string;
 		label?: string;
+		/** Texto auxiliar bajo el botón; contextual según quién llega (organizador vs. ciudadano). */
+		helperText?: string;
 	}
-	let { redirectTo, label = 'Continuar con Google' }: Props = $props();
+	let {
+		redirectTo,
+		label = 'Continuar con Google',
+		helperText = 'Usaremos tu cuenta únicamente para identificar tu panel de organizador. Convoca no accede a tu Gmail ni a otros servicios de Google.'
+	}: Props = $props();
 
 	let loading = $state(false);
 	let error = $state<string | null>(null);
@@ -58,7 +64,6 @@
 		<p class="text-critical-600 mt-2 text-sm font-medium" role="alert">{error}</p>
 	{/if}
 	<p class="mt-2 text-center text-xs text-ink-400">
-		Usaremos tu cuenta únicamente para identificar tu panel de organizador. Convoca no accede a tu
-		Gmail ni a otros servicios de Google.
+		{helperText}
 	</p>
 </div>

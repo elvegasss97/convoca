@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import {
@@ -13,7 +13,10 @@
 		ArrowRight,
 		ShieldAlert,
 		Clock,
-		Sparkles
+		Sparkles,
+		Undo2,
+		Info,
+		BarChart3
 	} from '@lucide/svelte';
 	import type {
 		ListeningRound,
@@ -34,6 +37,19 @@
 	} from '$lib/services/listeningSurveyService';
 	import { authState } from '$lib/auth/session.svelte';
 	import SanidadListeningResults from './SanidadListeningResults.svelte';
+	import {
+		SANIDAD_LISTENING_AREA_TYPES,
+		SANIDAD_LISTENING_DRAFT_VERSION,
+		SANIDAD_LISTENING_MEASURES_MAX,
+		SANIDAD_LISTENING_PROBLEMS_MAX,
+		emptySanidadListeningForm,
+		isSanidadListeningDraftExpired,
+		isValidSanidadListeningDraftPayload,
+		sanidadListeningFormsEqual,
+		type SanidadListeningDraftPayload,
+		type SanidadListeningFormState,
+		type SanidadListeningValidationContext
+	} from '$lib/utils/sanidadListeningDraft';
 
 	interface Props {
 		round?: ListeningRound;
@@ -44,39 +60,24 @@
 
 	let { round, measures, commitments, initialResponse }: Props = $props();
 
-	const DRAFT_KEY = 'convoca:escucha-sanidad:draft:v1';
-	const AREA_TYPES: ListeningSurveyAreaType[] = [
-		'rural',
-		'ciudad_mediana',
-		'gran_area_urbana',
-		'prefiere_no_responder'
-	];
+	// Distinta de una v1 previa (sin `version`/`savedAt`): un borrador v1
+	// antiguo que quedara en el navegador de alguien simplemente no valida
+	// y se ignora, no se intenta migrar.
+	const DRAFT_KEY = 'convoca:escucha-sanidad:draft:v2';
+	const AREA_TYPES = SANIDAD_LISTENING_AREA_TYPES;
+	const PROBLEMS_MAX = SANIDAD_LISTENING_PROBLEMS_MAX;
+	const MEASURES_MAX = SANIDAD_LISTENING_MEASURES_MAX;
 
-	interface FormState {
-		problems: string[];
-		otherProblemText: string;
-		mainCause: string | undefined;
-		prioritizedMeasureIds: string[];
-		commitmentMostUrgentId: string | undefined;
-		commitmentMostDifficultId: string | undefined;
-		missingImprovement: string;
-		community: string;
-		areaType: ListeningSurveyAreaType | '';
+	type FormState = SanidadListeningFormState;
+	type DraftPayload = SanidadListeningDraftPayload;
+
+	interface Conflict {
+		draftForm: FormState;
+		draftStep: number;
+		serverForm: FormState;
 	}
 
-	function emptyFormState(): FormState {
-		return {
-			problems: [],
-			otherProblemText: '',
-			mainCause: undefined,
-			prioritizedMeasureIds: [],
-			commitmentMostUrgentId: undefined,
-			commitmentMostDifficultId: undefined,
-			missingImprovement: '',
-			community: '',
-			areaType: ''
-		};
-	}
+	const emptyFormState = emptySanidadListeningForm;
 
 	function responseToFormState(r: ListeningSurveyResponse): FormState {
 		return {
@@ -92,75 +93,243 @@
 		};
 	}
 
-	// step: 0 = portada, 1-6 = pasos, 7 = confirmación
-	let step = $state(0);
-	let form = $state<FormState>(emptyFormState());
-	let hydrated = $state(false);
-	let finished = $state(false);
-	let pendingAutoSubmit = $state(false);
+	const formsEqual = sanidadListeningFormsEqual;
 
-	type SaveState = 'idle' | 'saving' | 'saved' | 'error';
-	let saveState = $state<SaveState>('idle');
-	let saveError = $state<string | null>(null);
-	let showResults = $state(false);
+	// Función (no `const` reactivo) a propósito: `measures`/`commitments` no
+	// cambian tras la carga inicial de esta pantalla, y esto solo se usa en
+	// la resolución síncrona de estado inicial, una única vez.
+	function buildValidationContext(): SanidadListeningValidationContext {
+		return {
+			problemCodes: SANIDAD_LISTENING_PROBLEMS.map((o) => o.code),
+			causeCodes: SANIDAD_LISTENING_CAUSES.map((o) => o.code),
+			measureIds: measures.map((m) => m.id),
+			commitmentIds: commitments.map((c) => c.id),
+			communityNames: autonomousCommunities.map((c) => c.name)
+		};
+	}
 
-	function loadDraft(): { form: FormState; step: number; pendingAutoSubmit: boolean } | null {
+	// Lee, valida y —si procede— caduca el borrador. Nunca lanza: un fallo
+	// de lectura (almacenamiento bloqueado, JSON corrupto...) se trata igual
+	// que "no hay borrador", nunca rompe el flujo.
+	function loadRawDraft(): DraftPayload | null {
+		if (!browser) return null;
 		try {
 			const raw = localStorage.getItem(DRAFT_KEY);
-			return raw ? JSON.parse(raw) : null;
+			if (!raw) return null;
+			const parsed = JSON.parse(raw);
+			if (!isValidSanidadListeningDraftPayload(parsed, buildValidationContext())) {
+				localStorage.removeItem(DRAFT_KEY);
+				return null;
+			}
+			if (isSanidadListeningDraftExpired(parsed)) {
+				localStorage.removeItem(DRAFT_KEY);
+				return null;
+			}
+			return parsed;
 		} catch {
 			return null;
 		}
 	}
 
-	function saveDraft() {
-		try {
-			localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step, pendingAutoSubmit }));
-		} catch {
-			// localStorage puede no estar disponible (modo privado estricto);
-			// degradamos sin romper el flujo, solo se pierde la persistencia local.
-		}
-	}
-
 	function clearDraft() {
+		if (!browser) return;
 		try {
 			localStorage.removeItem(DRAFT_KEY);
 		} catch {
-			// ver saveDraft: degradación silenciosa.
+			// Sin almacenamiento disponible no hay nada que borrar: degradación silenciosa.
 		}
 	}
 
-	onMount(() => {
-		hydrated = true;
-		const draft = loadDraft();
-		if (draft) {
-			form = draft.form;
-			step = draft.step;
-			pendingAutoSubmit = draft.pendingAutoSubmit;
-		} else if (initialResponse) {
-			form = responseToFormState(initialResponse);
-			finished = true;
-			step = 7;
+	function probeStorageAvailable(): boolean {
+		if (!browser) return false;
+		try {
+			const testKey = '__convoca_storage_probe__';
+			localStorage.setItem(testKey, '1');
+			localStorage.removeItem(testKey);
+			return true;
+		} catch {
+			return false;
 		}
-	});
+	}
 
-	// Persistencia local continua: sobrevive a recargas y al ir y volver de
-	// iniciar sesión. No sustituye el guardado real en el servidor, que solo
-	// ocurre al enviar (autenticado).
+	// Escritura inmediata (sin debounce), para el único momento en que no
+	// podemos permitirnos esperar: justo antes de salir hacia /login, donde
+	// un debounce pendiente podría no llegar a ejecutarse.
+	function flushDraftSave() {
+		if (!browser) return;
+		try {
+			const payload: DraftPayload = {
+				version: SANIDAD_LISTENING_DRAFT_VERSION,
+				form: $state.snapshot(form),
+				step,
+				pendingAutoSubmit,
+				savedAt: Date.now()
+			};
+			localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
+			storageAvailable = true;
+		} catch {
+			storageAvailable = false;
+		}
+	}
+
+	// Resuelto una única vez, de forma síncrona, ANTES del primer render:
+	// evita el salto visual de "onMount" (portada vacía primero, respuesta
+	// restaurada un instante después) que provocaba la sensación de que el
+	// borrador se perdía en cada recarga completa.
+	function resolveInitialState(): {
+		form: FormState;
+		step: number;
+		pendingAutoSubmit: boolean;
+		finished: boolean;
+		conflict: Conflict | null;
+		restoredFromDraft: boolean;
+	} {
+		const server = initialResponse ? responseToFormState(initialResponse) : null;
+		const draft = loadRawDraft();
+
+		if (draft && server) {
+			if (formsEqual(draft.form, server)) {
+				// Mismo contenido: no hay conflicto real que resolver, y el
+				// borrador ya sobra una vez que el servidor tiene lo mismo.
+				clearDraft();
+				return {
+					form: server,
+					step: 7,
+					pendingAutoSubmit: false,
+					finished: true,
+					conflict: null,
+					restoredFromDraft: false
+				};
+			}
+			// Difieren: nunca se sobrescribe ninguna de las dos en silencio.
+			// La respuesta ya enviada conserva prioridad como registro oficial
+			// hasta que la persona confirme explícitamente lo contrario.
+			return {
+				form: emptyFormState(),
+				step: 0,
+				pendingAutoSubmit: false,
+				finished: false,
+				conflict: { draftForm: draft.form, draftStep: draft.step, serverForm: server },
+				restoredFromDraft: false
+			};
+		}
+		if (draft && !server) {
+			return {
+				form: draft.form,
+				step: draft.step,
+				pendingAutoSubmit: draft.pendingAutoSubmit,
+				finished: false,
+				conflict: null,
+				restoredFromDraft: draft.step > 0
+			};
+		}
+		if (!draft && server) {
+			return {
+				form: server,
+				step: 7,
+				pendingAutoSubmit: false,
+				finished: true,
+				conflict: null,
+				restoredFromDraft: false
+			};
+		}
+		return {
+			form: emptyFormState(),
+			step: 0,
+			pendingAutoSubmit: false,
+			finished: false,
+			conflict: null,
+			restoredFromDraft: false
+		};
+	}
+
+	const initialState = resolveInitialState();
+
+	// step: 0 = portada, 1-6 = pasos, 7 = confirmación
+	let step = $state(initialState.step);
+	let form = $state<FormState>(initialState.form);
+	let finished = $state(initialState.finished);
+	let pendingAutoSubmit = $state(initialState.pendingAutoSubmit);
+	let conflict = $state<Conflict | null>(initialState.conflict);
+	let restoredFromDraft = $state(initialState.restoredFromDraft);
+	let storageAvailable = $state(browser ? probeStorageAvailable() : false);
+
+	type SaveState = 'idle' | 'saving' | 'saved' | 'error';
+	let saveState = $state<SaveState>('idle');
+	let saveError = $state<string | null>(null);
+	let showResults = $state(false);
+	let showPortadaResults = $state(false);
+
+	function discardDraft() {
+		const confirmed = confirm(
+			'¿Borrar tu borrador guardado en este dispositivo y empezar de nuevo? Esto no afecta a ninguna respuesta que ya hayas enviado.'
+		);
+		if (!confirmed) return;
+		clearDraft();
+		form = emptyFormState();
+		step = 1;
+		pendingAutoSubmit = false;
+		restoredFromDraft = false;
+	}
+
+	function resolveConflictKeepServer() {
+		if (!conflict) return;
+		form = conflict.serverForm;
+		step = 7;
+		finished = true;
+		clearDraft();
+		conflict = null;
+	}
+
+	function resolveConflictKeepDraft() {
+		if (!conflict) return;
+		form = conflict.draftForm;
+		step = conflict.draftStep > 0 ? conflict.draftStep : 1;
+		finished = false;
+		restoredFromDraft = true;
+		conflict = null;
+	}
+
+	// Persistencia local continua (con debounce): sobrevive a recargas y al
+	// ir y volver de iniciar sesión. No sustituye el guardado real en el
+	// servidor, que solo ocurre al enviar (autenticado). Se pausa mientras
+	// hay un conflicto sin resolver, para no sobrescribir el borrador con el
+	// formulario vacío que se muestra durante la decisión.
 	$effect(() => {
-		if (hydrated && !finished) saveDraft();
+		// Leído aquí (no dentro del setTimeout) para que Svelte registre estas
+		// dependencias: el debounce solo retrasa la escritura, no la detección
+		// del cambio.
+		const formSnapshot = $state.snapshot(form);
+		const stepSnapshot = step;
+		const pendingSnapshot = pendingAutoSubmit;
+		if (!browser || finished || conflict) return;
+		const timeout = setTimeout(() => {
+			try {
+				const payload: DraftPayload = {
+					version: SANIDAD_LISTENING_DRAFT_VERSION,
+					form: formSnapshot,
+					step: stepSnapshot,
+					pendingAutoSubmit: pendingSnapshot,
+					savedAt: Date.now()
+				};
+				localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
+				storageAvailable = true;
+			} catch {
+				storageAvailable = false;
+			}
+		}, 400);
+		return () => clearTimeout(timeout);
 	});
 
 	// Si hay un envío pendiente de sesión y la sesión ya está disponible,
 	// completa el envío automáticamente sin que la persona pierda su lugar.
 	$effect(() => {
-		if (hydrated && pendingAutoSubmit && authState.session) {
+		if (browser && pendingAutoSubmit && authState.session && !conflict) {
 			pendingAutoSubmit = false;
 			submitFinal();
 		}
 	});
 
-	const PROBLEMS_MAX = 3;
 	function toggleProblem(code: string) {
 		if (form.problems.includes(code)) {
 			form.problems = form.problems.filter((c) => c !== code);
@@ -169,7 +338,6 @@
 		}
 	}
 
-	const MEASURES_MAX = 3;
 	function toggleMeasure(id: string) {
 		if (form.prioritizedMeasureIds.includes(id)) {
 			form.prioritizedMeasureIds = form.prioritizedMeasureIds.filter((m) => m !== id);
@@ -199,6 +367,7 @@
 	});
 
 	function nextStep() {
+		restoredFromDraft = false;
 		if (step === 6) {
 			finish();
 		} else {
@@ -206,6 +375,7 @@
 		}
 	}
 	function prevStep() {
+		restoredFromDraft = false;
 		if (step > 0) step -= 1;
 	}
 
@@ -229,7 +399,10 @@
 		if (!round) return;
 		if (!authState.session) {
 			pendingAutoSubmit = true;
-			saveDraft();
+			// Escritura inmediata, no con el debounce habitual: la pestaña va a
+			// navegar fuera de la SPA (a /login) justo después, y un guardado
+			// pendiente en un setTimeout podría no llegar a ejecutarse a tiempo.
+			flushDraftSave();
 			goto(`/login?redirect=${encodeURIComponent(page.url.pathname)}`);
 			return;
 		}
@@ -264,6 +437,42 @@
 <div class="rounded-2xl border border-ink-100 bg-white p-4 sm:p-6">
 	{#if !round || round.status !== 'open'}
 		<p class="text-sm text-ink-500">Esta escucha no está abierta todavía.</p>
+	{:else if conflict}
+		<div
+			class="flex items-center gap-2 rounded-xl border border-warning-300 bg-warning-50 px-3.5 py-2.5"
+		>
+			<Info class="size-4 shrink-0 text-warning-700" />
+			<p class="text-sm font-medium text-warning-800">Tienes dos respuestas distintas</p>
+		</div>
+		<p class="mt-2 text-sm text-ink-600">
+			Ya existe una respuesta tuya guardada en la escucha, y este dispositivo también tiene un
+			borrador sin enviar con respuestas diferentes. Elige con cuál quieres continuar — la otra no
+			se pierde hasta que lo confirmes.
+		</p>
+		<div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+			<div class="rounded-xl border border-ink-100 p-3">
+				<p class="text-xs font-semibold text-ink-700">Tu respuesta ya enviada</p>
+				{@render formSummary(conflict.serverForm)}
+				<button
+					type="button"
+					onclick={resolveConflictKeepServer}
+					class="mt-3 w-full rounded-full bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800"
+				>
+					Continuar con esta respuesta
+				</button>
+			</div>
+			<div class="rounded-xl border border-ink-100 p-3">
+				<p class="text-xs font-semibold text-ink-700">Tu borrador sin enviar en este dispositivo</p>
+				{@render formSummary(conflict.draftForm)}
+				<button
+					type="button"
+					onclick={resolveConflictKeepDraft}
+					class="mt-3 w-full rounded-full border border-ink-200 px-4 py-2 text-sm font-medium text-ink-700 hover:bg-ink-50"
+				>
+					Recuperar este borrador
+				</button>
+			</div>
+		</div>
 	{:else if finished}
 		<div
 			class="flex items-center gap-2 rounded-xl border border-brand-200 bg-brand-50 px-3.5 py-2.5"
@@ -281,56 +490,7 @@
 
 		<div class="mt-4 rounded-xl border border-ink-100 p-3">
 			<p class="text-xs font-semibold text-ink-700">Tu resumen privado</p>
-			<dl class="mt-2 flex flex-col gap-1.5 text-xs text-ink-600">
-				{#if form.problems.length > 0}
-					<div>
-						<dt class="inline text-ink-400">Dónde falla más:</dt>
-						<dd class="inline">
-							{form.problems
-								.map((c) =>
-									c === 'otro'
-										? form.otherProblemText || 'Otro problema'
-										: (SANIDAD_LISTENING_PROBLEMS.find((p) => p.code === c)?.label ?? c)
-								)
-								.join(' · ')}
-						</dd>
-					</div>
-				{/if}
-				{#if form.mainCause}
-					<div>
-						<dt class="inline text-ink-400">Causa principal:</dt>
-						<dd class="inline">
-							{SANIDAD_LISTENING_CAUSES.find((c) => c.code === form.mainCause)?.label}
-						</dd>
-					</div>
-				{/if}
-				{#if form.prioritizedMeasureIds.length > 0}
-					<div>
-						<dt class="inline text-ink-400">Medidas priorizadas:</dt>
-						<dd class="inline">
-							{form.prioritizedMeasureIds
-								.map((id, i) => `${i + 1}. ${measureTitle(id)}`)
-								.join(' · ')}
-						</dd>
-					</div>
-				{/if}
-				{#if form.commitmentMostUrgentId}
-					<div>
-						<dt class="inline text-ink-400">Compromiso más urgente:</dt>
-						<dd class="inline">
-							{commitments.find((c) => c.id === form.commitmentMostUrgentId)?.title}
-						</dd>
-					</div>
-				{/if}
-				{#if form.commitmentMostDifficultId}
-					<div>
-						<dt class="inline text-ink-400">Compromiso más difícil:</dt>
-						<dd class="inline">
-							{commitments.find((c) => c.id === form.commitmentMostDifficultId)?.title}
-						</dd>
-					</div>
-				{/if}
-			</dl>
+			{@render formSummary(form)}
 		</div>
 
 		<div class="mt-4 flex flex-wrap gap-2">
@@ -366,11 +526,7 @@
 			<Sparkles class="size-5 text-brand-700" />
 			<h2 class="font-display text-lg font-semibold text-ink-900">Antes de empezar</h2>
 		</div>
-		<p class="mt-2 text-sm leading-relaxed text-ink-700">
-			La sanidad no se mejora solo desde los despachos. Queremos conocer qué está fallando, qué
-			debería cambiar primero y qué soluciones todavía no aparecen en el Plan Sanidad 2036.
-		</p>
-		<ul class="mt-3 flex flex-col gap-1.5 text-xs text-ink-500">
+		<ul class="mt-2 flex flex-col gap-1.5 text-xs text-ink-500">
 			<li class="flex items-start gap-1.5">
 				<Clock class="mt-0.5 size-3.5 shrink-0" /> Participar lleva aproximadamente 4 minutos.
 			</li>
@@ -384,18 +540,80 @@
 			<li>· Las respuestas abiertas no se publicarán individualmente.</li>
 			<li>· Los resultados públicos serán siempre agregados.</li>
 		</ul>
-		<button
-			type="button"
-			onclick={() => (step = 1)}
-			class="mt-4 flex items-center gap-1.5 rounded-full bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-800"
-		>
-			Empezar la escucha <ArrowRight class="size-4" />
-		</button>
+		<div class="mt-4 flex flex-wrap items-center gap-2">
+			<button
+				type="button"
+				onclick={() => (step = 1)}
+				class="flex items-center gap-1.5 rounded-full bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-800"
+			>
+				Empezar la escucha <ArrowRight class="size-4" />
+			</button>
+			<button
+				type="button"
+				onclick={() => (showPortadaResults = !showPortadaResults)}
+				class="flex items-center gap-1.5 rounded-full border border-ink-200 px-4 py-2.5 text-sm font-medium text-ink-700 hover:bg-ink-50"
+			>
+				<BarChart3 class="size-3.5" />
+				{showPortadaResults ? 'Ocultar estado de los resultados' : 'Ver estado de los resultados'}
+			</button>
+		</div>
+		{#if showPortadaResults}
+			<div class="mt-4">
+				<SanidadListeningResults {round} {measures} {commitments} />
+			</div>
+		{/if}
 	{:else}
 		<!-- El recorrido es libre sin sesión; solo se pide iniciar sesión al llegar al final. -->
 		{@render stepContent()}
 	{/if}
 </div>
+
+{#snippet formSummary(f: FormState)}
+	<dl class="mt-2 flex flex-col gap-1.5 text-xs text-ink-600">
+		{#if f.problems.length > 0}
+			<div>
+				<dt class="inline text-ink-400">Dónde falla más:</dt>
+				<dd class="inline">
+					{f.problems
+						.map((c) =>
+							c === 'otro'
+								? f.otherProblemText || 'Otro problema'
+								: (SANIDAD_LISTENING_PROBLEMS.find((p) => p.code === c)?.label ?? c)
+						)
+						.join(' · ')}
+				</dd>
+			</div>
+		{/if}
+		{#if f.mainCause}
+			<div>
+				<dt class="inline text-ink-400">Causa principal:</dt>
+				<dd class="inline">{SANIDAD_LISTENING_CAUSES.find((c) => c.code === f.mainCause)?.label}</dd>
+			</div>
+		{/if}
+		{#if f.prioritizedMeasureIds.length > 0}
+			<div>
+				<dt class="inline text-ink-400">Medidas priorizadas:</dt>
+				<dd class="inline">
+					{f.prioritizedMeasureIds.map((id, i) => `${i + 1}. ${measureTitle(id)}`).join(' · ')}
+				</dd>
+			</div>
+		{/if}
+		{#if f.commitmentMostUrgentId}
+			<div>
+				<dt class="inline text-ink-400">Compromiso más urgente:</dt>
+				<dd class="inline">{commitments.find((c) => c.id === f.commitmentMostUrgentId)?.title}</dd>
+			</div>
+		{/if}
+		{#if f.commitmentMostDifficultId}
+			<div>
+				<dt class="inline text-ink-400">Compromiso más difícil:</dt>
+				<dd class="inline">
+					{commitments.find((c) => c.id === f.commitmentMostDifficultId)?.title}
+				</dd>
+			</div>
+		{/if}
+	</dl>
+{/snippet}
 
 {#snippet stepContent()}
 	<!-- Progreso -->
@@ -412,6 +630,29 @@
 			</li>
 		{/each}
 	</ol>
+
+	{#if !storageAvailable}
+		<p class="mt-2 flex items-start gap-1.5 text-xs text-warning-700">
+			<Info class="mt-0.5 size-3.5 shrink-0" /> Este navegador no permite guardar tu progreso localmente:
+			si recargas la página o sales antes de enviar, tendrás que volver a responder.
+		</p>
+	{/if}
+	<div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+		{#if restoredFromDraft}
+			<p class="flex items-center gap-1.5 text-xs text-ink-400">
+				<Undo2 class="size-3.5 shrink-0" /> Hemos recuperado tu borrador guardado en este dispositivo.
+			</p>
+		{:else}
+			<span></span>
+		{/if}
+		<button
+			type="button"
+			onclick={discardDraft}
+			class="text-xs font-medium text-ink-400 underline hover:text-ink-700"
+		>
+			Descartar borrador y empezar de nuevo
+		</button>
+	</div>
 
 	{#if step === 1}
 		<p class="mt-3 text-sm font-semibold text-ink-900">
