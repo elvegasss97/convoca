@@ -27,14 +27,14 @@
 
 	<div class="mt-6 flex flex-wrap justify-center gap-3">
 		<a
-			href="/"
+			href="/descubrir"
 			class="flex items-center gap-1.5 rounded-full bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800"
 		>
 			<Home class="size-4" strokeWidth={2.25} />
 			Volver al inicio
 		</a>
 		<a
-			href="/?vista=mapa"
+			href="/descubrir?vista=mapa"
 			class="flex items-center gap-1.5 rounded-full border border-ink-200 bg-white px-5 py-2.5 text-sm font-semibold text-ink-800 shadow-sm transition hover:bg-ink-50"
 		>
 			<MapIcon class="size-4" strokeWidth={2.25} />
@@ -43,7 +43,7 @@
 	</div>
 
 	<a
-		href="/#convocatorias"
+		href="/descubrir#convocatorias"
 		class="mt-8 flex items-center gap-1.5 text-sm font-medium text-brand-700 hover:underline"
 	>
 		<Search class="size-4" />

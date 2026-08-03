@@ -11,7 +11,8 @@ import { SITE_URL } from '$lib/seo';
  * que una convocatoria nueva aparezca sin esperar a un rebuild.
  */
 const STATIC_PATHS = [
-	{ path: '/', changefreq: 'hourly', priority: '1.0' },
+	{ path: '/', changefreq: 'monthly', priority: '1.0' },
+	{ path: '/descubrir', changefreq: 'hourly', priority: '0.9' },
 	{ path: '/crear', changefreq: 'weekly', priority: '0.7' },
 	{ path: '/pulso', changefreq: 'daily', priority: '0.8' },
 	{ path: '/pulso/escucha', changefreq: 'daily', priority: '0.7' },

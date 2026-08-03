@@ -364,7 +364,7 @@
 					Ir a mi panel
 				</a>
 				<a
-					href="/"
+					href="/descubrir"
 					class="rounded-full border border-ink-200 bg-white px-5 py-2.5 text-sm font-semibold text-ink-700 hover:bg-ink-50"
 				>
 					Volver a inicio
@@ -373,7 +373,7 @@
 		</div>
 	{:else}
 		<a
-			href="/"
+			href="/descubrir"
 			class="mb-2 inline-flex items-center gap-1.5 text-sm font-medium text-ink-500 hover:text-ink-800"
 		>
 			<ArrowLeft class="size-4" /> Cancelar

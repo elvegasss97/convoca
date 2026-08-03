@@ -7,12 +7,12 @@
 		PlusCircle,
 		LayoutDashboard,
 		ShieldCheck,
-		LogIn
+		LogIn,
+		Sparkles
 	} from '@lucide/svelte';
 	import { authState } from '$lib/auth/session.svelte';
 
 	const search = $derived(page.url.search);
-	const isMapaHome = $derived(page.url.pathname === '/' && search.includes('vista=mapa'));
 
 	const createHref = $derived(
 		authState.session ? '/crear' : `/login?redirect=${encodeURIComponent('/crear')}`
@@ -48,16 +48,23 @@
 	const items = $derived([
 		{
 			href: '/',
-			label: 'Descubrir',
-			icon: Compass,
+			label: 'Proyecto',
+			icon: Sparkles,
 			match: (p: string) => p === '/',
 			accent: false
 		},
 		{
-			href: '/?vista=mapa',
+			href: '/descubrir',
+			label: 'Descubrir',
+			icon: Compass,
+			match: (p: string, s: string) => p.startsWith('/descubrir') && !s.includes('vista=mapa'),
+			accent: false
+		},
+		{
+			href: '/descubrir?vista=mapa',
 			label: 'Mapa',
 			icon: Map,
-			match: (p: string, s: string) => p === '/' && s.includes('vista=mapa'),
+			match: (p: string, s: string) => p.startsWith('/descubrir') && s.includes('vista=mapa'),
 			accent: false
 		},
 		{
@@ -84,10 +91,7 @@
 >
 	<div class="mx-auto flex max-w-lg items-stretch justify-between px-2">
 		{#each items as item (item.label)}
-			{@const active =
-				item.href === '/'
-					? page.url.pathname === '/' && !isMapaHome
-					: item.match(page.url.pathname, search)}
+			{@const active = item.match(page.url.pathname, search)}
 			<a
 				href={item.href}
 				class="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition"

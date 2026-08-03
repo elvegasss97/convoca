@@ -16,7 +16,7 @@ export const load: PageLoad = async ({ url }) => {
 	if (!session.user.organizerId) {
 		// No debería ocurrir en el mock (todo rol organizer trae organizerId),
 		// pero por robustez evitamos un panel a medio construir.
-		redirect(303, '/');
+		redirect(303, '/descubrir');
 	}
 
 	const dashboard = await getOrganizerDashboard(session.user.organizerId);

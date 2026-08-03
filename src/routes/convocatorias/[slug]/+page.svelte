@@ -59,7 +59,7 @@
 
 <div class="mx-auto max-w-6xl px-4 pt-4 pb-24 sm:px-6 md:pb-10">
 	<a
-		href="/"
+		href="/descubrir"
 		class="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-ink-500 hover:text-ink-800"
 	>
 		<ArrowLeft class="size-4" /> Volver

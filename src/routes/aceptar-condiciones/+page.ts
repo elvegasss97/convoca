@@ -26,7 +26,7 @@ export const load: PageLoad = async ({ url }) => {
 		redirect(303, `/login?redirect=${encodeURIComponent(url.pathname + url.search)}`);
 	}
 	if (!session.user.organizerId) {
-		redirect(303, '/');
+		redirect(303, '/descubrir');
 	}
 
 	const profile = await getMyOrganizerPrivateProfile(session.user.id);

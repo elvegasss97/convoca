@@ -18,7 +18,7 @@
 	async function signOut() {
 		open = false;
 		await authService.signOut();
-		await goto('/');
+		await goto('/descubrir');
 	}
 
 	function close() {

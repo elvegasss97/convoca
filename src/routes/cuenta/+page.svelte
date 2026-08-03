@@ -49,14 +49,14 @@
 	async function signOut() {
 		signingOut = true;
 		await authService.signOut();
-		await goto('/');
+		await goto('/descubrir');
 	}
 
 	async function confirmDelete() {
 		deleting = true;
 		try {
 			await authService.deleteAccount();
-			await goto('/');
+			await goto('/descubrir');
 		} finally {
 			deleting = false;
 			deleteOpen = false;

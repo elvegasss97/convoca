@@ -32,7 +32,7 @@
 <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
 	<div class="print:hidden">
 		<a
-			href="/"
+			href="/descubrir"
 			class="inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 hover:underline"
 		>
 			<ArrowLeft class="size-4" strokeWidth={2.25} />
