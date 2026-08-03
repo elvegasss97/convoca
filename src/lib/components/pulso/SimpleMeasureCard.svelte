@@ -169,10 +169,11 @@
 			</p>
 
 			{#if measure.howItWorks}
-				<div class="mt-3 flex items-start gap-2 rounded-xl border border-ink-100 bg-ink-50 p-3">
-					<Cog class="mt-0.5 size-4 shrink-0 text-ink-500" />
-					<p class="text-sm leading-relaxed text-ink-700">
-						<strong class="font-semibold text-ink-900">Cómo funciona:</strong>
+				<div class="mt-3 rounded-xl border border-ink-100 bg-ink-50 p-3">
+					<p class="flex items-center gap-1.5 text-xs font-semibold text-ink-800">
+						<Cog class="size-3.5 text-ink-500" /> Cómo se llevará a cabo
+					</p>
+					<p class="mt-1.5 text-sm leading-relaxed whitespace-pre-line text-ink-700">
 						{measure.howItWorks}
 					</p>
 				</div>
