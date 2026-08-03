@@ -80,7 +80,7 @@ export const GET: RequestHandler = async ({ params, fetch }) => {
 												width: 56,
 												height: 56,
 												borderRadius: 16,
-												background: '#dc6c25',
+												background: '#FF7101',
 												alignItems: 'center',
 												justifyContent: 'center',
 												fontSize: 28,

@@ -1,5 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-	<title>Convoca</title>
+<script lang="ts">
+	interface Props {
+		class?: string;
+	}
+
+	let { class: className = 'size-8' }: Props = $props();
+</script>
+
+<svg viewBox="0 0 256 256" class={className} aria-hidden="true">
 	<path
 		d="M 194.69 197.06 A 96 96 0 1 1 194.69 58.94"
 		fill="none"

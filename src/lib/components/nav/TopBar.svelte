@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import { Compass, PlusCircle, LayoutDashboard, Activity, Sparkles } from '@lucide/svelte';
 	import { authState } from '$lib/auth/session.svelte';
+	import BrandMark from '$lib/components/BrandMark.svelte';
 	import LocationPicker from './LocationPicker.svelte';
 	import UserMenu from './UserMenu.svelte';
 
@@ -34,21 +35,13 @@
 
 <header class="sticky top-0 z-20 border-b border-ink-100 bg-ink-50/90 backdrop-blur">
 	<div class="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
-		<a href="/" class="flex items-center gap-2 font-display text-lg font-semibold text-ink-900">
-			<span class="grid size-8 place-items-center rounded-xl bg-brand-700 text-white">
-				<svg
-					viewBox="0 0 24 24"
-					class="size-4.5"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-				>
-					<circle cx="12" cy="9" r="2.5" />
-					<path d="M12 21c4-4.5 7-8.2 7-12A7 7 0 0 0 5 9c0 3.8 3 7.5 7 12Z" />
-				</svg>
+		<a href="/" class="flex items-center gap-2 font-display text-lg font-semibold tracking-tight">
+			<BrandMark class="size-8" />
+			<span>
+				<span class="text-[#FF7101]">C</span><span class="text-[#016548]">onvo</span><span
+					class="text-[#FF7101]">c</span
+				><span class="text-[#016548]">a</span>
 			</span>
-			Convoca
 		</a>
 
 		{#if !minimal}
