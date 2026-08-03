@@ -950,9 +950,9 @@ export type Database = {
 					created_at: string;
 					general_position: string;
 					id: string;
-					investment_opinion: string;
+					investment_opinion: string | null;
 					measures_considered_count: number;
-					pace_preference: string;
+					pace_preference: string | null;
 					round_id: string;
 					unaddressed_problem: string | null;
 					updated_at: string;
@@ -962,9 +962,9 @@ export type Database = {
 					created_at?: string;
 					general_position: string;
 					id?: string;
-					investment_opinion: string;
+					investment_opinion?: string | null;
 					measures_considered_count?: number;
-					pace_preference: string;
+					pace_preference?: string | null;
 					round_id: string;
 					unaddressed_problem?: string | null;
 					updated_at?: string;
@@ -974,9 +974,9 @@ export type Database = {
 					created_at?: string;
 					general_position?: string;
 					id?: string;
-					investment_opinion?: string;
+					investment_opinion?: string | null;
 					measures_considered_count?: number;
-					pace_preference?: string;
+					pace_preference?: string | null;
 					round_id?: string;
 					unaddressed_problem?: string | null;
 					updated_at?: string;
@@ -1248,6 +1248,7 @@ export type Database = {
 					problem_addressed: string | null;
 					responsible_scope: string | null;
 					risks: string | null;
+					safeguard: string | null;
 					sort_order: number;
 					summary: string | null;
 					timeframe: string | null;
@@ -1268,6 +1269,7 @@ export type Database = {
 					problem_addressed?: string | null;
 					responsible_scope?: string | null;
 					risks?: string | null;
+					safeguard?: string | null;
 					sort_order?: number;
 					summary?: string | null;
 					timeframe?: string | null;
@@ -1288,6 +1290,7 @@ export type Database = {
 					problem_addressed?: string | null;
 					responsible_scope?: string | null;
 					risks?: string | null;
+					safeguard?: string | null;
 					sort_order?: number;
 					summary?: string | null;
 					timeframe?: string | null;
@@ -1535,10 +1538,12 @@ export type Database = {
 					created_by: string | null;
 					document_title: string | null;
 					evaluation_rules: string | null;
+					governance_narrative: string | null;
 					id: string;
 					investment_gdp_percent: string | null;
 					investment_range: string | null;
 					problem_intro: string;
+					public_notice: string | null;
 					published_at: string | null;
 					reference_goal: string | null;
 					risks_overview: string[];
@@ -1558,10 +1563,12 @@ export type Database = {
 					created_by?: string | null;
 					document_title?: string | null;
 					evaluation_rules?: string | null;
+					governance_narrative?: string | null;
 					id?: string;
 					investment_gdp_percent?: string | null;
 					investment_range?: string | null;
 					problem_intro?: string;
+					public_notice?: string | null;
 					published_at?: string | null;
 					reference_goal?: string | null;
 					risks_overview?: string[];
@@ -1581,10 +1588,12 @@ export type Database = {
 					created_by?: string | null;
 					document_title?: string | null;
 					evaluation_rules?: string | null;
+					governance_narrative?: string | null;
 					id?: string;
 					investment_gdp_percent?: string | null;
 					investment_range?: string | null;
 					problem_intro?: string;
+					public_notice?: string | null;
 					published_at?: string | null;
 					reference_goal?: string | null;
 					risks_overview?: string[];
@@ -1705,8 +1714,8 @@ export type Database = {
 				Args: {
 					p_round_id: string;
 					p_general_position: string;
-					p_investment_opinion: string;
-					p_pace_preference: string;
+					p_investment_opinion?: string | null;
+					p_pace_preference?: string | null;
 					p_unaddressed_problem?: string | null;
 				};
 				Returns: undefined;

@@ -36,6 +36,8 @@
 	import ConcernResultsChart from '$lib/components/pulso/ConcernResultsChart.svelte';
 	import TopicMeasureCard from '$lib/components/pulso/TopicMeasureCard.svelte';
 	import GeneralParticipationBlock from '$lib/components/pulso/GeneralParticipationBlock.svelte';
+	import SimpleMeasureCard from '$lib/components/pulso/SimpleMeasureCard.svelte';
+	import SimpleGeneralParticipationBlock from '$lib/components/pulso/SimpleGeneralParticipationBlock.svelte';
 	import { submitMeasureAlternative } from '$lib/services/topicsService';
 	import {
 		listMyMeasureParticipationResponses,
@@ -49,6 +51,16 @@
 
 	const topic = $derived(data.topic);
 	const round = $derived(data.round);
+	// Solo Vivienda tiene construida la Escucha abierta rica (priorizar +
+	// profundizar). El resto de temas la enlazan como "Próximamente" en vez
+	// de apuntar a la rejilla genérica de preocupaciones, vacía y sin ese
+	// recorrido todavía.
+	const hasOpenListening = $derived(topic.category === 'vivienda');
+	// Vivienda usa el cuestionario rico (motivo estructurado, urgencia,
+	// inversión, ritmo, prioridades, contexto). Otros temas, como Sanidad,
+	// usan un modelo de participación más simple: posición + comentario
+	// opcional. Cambiar esta rama no toca el camino de Vivienda.
+	const usesSimpleParticipation = $derived(topic.category === 'sanidad');
 	const categoryLabel = $derived(
 		topic.category ? concernCategoryLabels[topic.category] : TOPIC_CATEGORY_PENDING_LABEL
 	);
@@ -171,6 +183,7 @@
 	let riskAccordionOpen = $state(false);
 	let indicatorsAccordionOpen = $state(false);
 	let evaluationAccordionOpen = $state(false);
+	let governanceAccordionOpen = $state(false);
 
 	// Agrupación puramente visual de los riesgos generales en 5 categorías,
 	// sin tocar el contenido guardado en cada topic_risks.title.
@@ -289,13 +302,19 @@
 		>
 			<ArrowLeft class="size-4" /> Volver a Propuestas de Convoca
 		</a>
-		{#if topic.category}
+		{#if topic.category && hasOpenListening}
 			<a
 				href={`/pulso/escucha/${topic.category}`}
 				class="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-ink-500 hover:text-ink-800"
 			>
 				Ver la escucha ciudadana relacionada
 			</a>
+		{:else if topic.category}
+			<span
+				class="mb-4 inline-flex items-center gap-1.5 rounded-full bg-ink-100 px-2.5 py-1 text-xs font-medium text-ink-500"
+			>
+				Escucha abierta sobre {concernCategoryLabels[topic.category].toLowerCase()} — Próximamente
+			</span>
 		{/if}
 	</div>
 
@@ -358,6 +377,14 @@
 		</dl>
 	{/if}
 
+	{#if topic.publicNotice}
+		<div
+			class="mt-3 flex items-start gap-2 rounded-xl bg-warning-50 p-3 text-xs leading-relaxed text-warning-700"
+		>
+			<AlertTriangle class="mt-0.5 size-3.5 shrink-0" />
+			{topic.publicNotice}
+		</div>
+	{/if}
 	<div
 		class="mt-3 flex items-start gap-2 rounded-xl bg-warning-50 p-3 text-xs leading-relaxed text-warning-700"
 	>
@@ -473,17 +500,29 @@
 									reasonCounts: {},
 									totalResponses: 0
 								}}
-								<TopicMeasureCard
-									{measure}
-									topicId={topic.id}
-									number={measureNumberById.get(measure.id) ?? 0}
-									{round}
-									{results}
-									myResponse={myMeasureResponses.get(measure.id)}
-									sources={(data.measureSourceIds.get(measure.id) ?? [])
-										.map((id) => sourceById(id))
-										.filter((s): s is NonNullable<typeof s> => Boolean(s))}
-								/>
+								{@const measureSources = (data.measureSourceIds.get(measure.id) ?? [])
+									.map((id) => sourceById(id))
+									.filter((s): s is NonNullable<typeof s> => Boolean(s))}
+								{#if usesSimpleParticipation}
+									<SimpleMeasureCard
+										{measure}
+										number={measureNumberById.get(measure.id) ?? 0}
+										{round}
+										{results}
+										myResponse={myMeasureResponses.get(measure.id)}
+										sources={measureSources}
+									/>
+								{:else}
+									<TopicMeasureCard
+										{measure}
+										topicId={topic.id}
+										number={measureNumberById.get(measure.id) ?? 0}
+										{round}
+										{results}
+										myResponse={myMeasureResponses.get(measure.id)}
+										sources={measureSources}
+									/>
+								{/if}
 							{/each}
 						</div>
 					</div>
@@ -498,17 +537,26 @@
 
 	<!-- Participar (cierre de participación general) -->
 	<section id="participar" class="mt-4 scroll-mt-20">
-		<GeneralParticipationBlock
-			{round}
-			measures={data.measures}
-			{measuresRespondedCount}
-			{myGeneralResponse}
-			{myPriorities}
-			{myContext}
-			generalResults={data.generalResults}
-			priorityResults={data.priorityResults}
-			summary={data.summary}
-		/>
+		{#if usesSimpleParticipation}
+			<SimpleGeneralParticipationBlock
+				{round}
+				{myGeneralResponse}
+				generalResults={data.generalResults}
+				summary={data.summary}
+			/>
+		{:else}
+			<GeneralParticipationBlock
+				{round}
+				measures={data.measures}
+				{measuresRespondedCount}
+				{myGeneralResponse}
+				{myPriorities}
+				{myContext}
+				generalResults={data.generalResults}
+				priorityResults={data.priorityResults}
+				summary={data.summary}
+			/>
+		{/if}
 	</section>
 
 	<!-- 6. Coste y calendario -->
@@ -760,6 +808,29 @@
 				</div>
 			{/if}
 		</div>
+
+		{#if topic.governanceNarrative}
+			<div class="mt-2 rounded-xl border border-ink-100">
+				<button
+					type="button"
+					onclick={() => (governanceAccordionOpen = !governanceAccordionOpen)}
+					aria-expanded={governanceAccordionOpen}
+					class="flex w-full items-center justify-between gap-2 p-3 text-left text-sm font-semibold text-ink-900"
+				>
+					Gobernanza: quién puede hacer qué
+					{#if governanceAccordionOpen}<ChevronUp class="size-4 text-ink-400" />{:else}<ChevronDown
+							class="size-4 text-ink-400"
+						/>{/if}
+				</button>
+				{#if governanceAccordionOpen}
+					<div class="border-t border-ink-100 p-3">
+						<p class="text-sm leading-relaxed whitespace-pre-line text-ink-700">
+							{topic.governanceNarrative}
+						</p>
+					</div>
+				{/if}
+			</div>
+		{/if}
 	</section>
 
 	<!-- 8. Pulso ciudadano -->

@@ -99,8 +99,8 @@ interface GeneralResponseRow {
 	round_id: string;
 	user_id: string;
 	general_position: string;
-	investment_opinion: string;
-	pace_preference: string;
+	investment_opinion: string | null;
+	pace_preference: string | null;
 	unaddressed_problem: string | null;
 	measures_considered_count: number;
 	created_at: string;
@@ -113,8 +113,8 @@ function rowToGeneralResponse(row: GeneralResponseRow): GeneralParticipationResp
 		roundId: row.round_id,
 		userId: row.user_id,
 		generalPosition: row.general_position as GeneralPosition,
-		investmentOpinion: row.investment_opinion as InvestmentOpinion,
-		pacePreference: row.pace_preference as PacePreference,
+		investmentOpinion: (row.investment_opinion as InvestmentOpinion) ?? undefined,
+		pacePreference: (row.pace_preference as PacePreference) ?? undefined,
 		unaddressedProblem: row.unaddressed_problem ?? undefined,
 		measuresConsideredCount: row.measures_considered_count,
 		createdAt: row.created_at,
@@ -293,8 +293,10 @@ export async function listMyMeasureParticipationResponses(
 
 export interface GeneralParticipationInput {
 	generalPosition: GeneralPosition;
-	investmentOpinion: InvestmentOpinion;
-	pacePreference: PacePreference;
+	/** Pregunta específica de Vivienda. Ausente en propuestas más simples como Sanidad. */
+	investmentOpinion?: InvestmentOpinion;
+	/** Pregunta específica de Vivienda. Ausente en propuestas más simples como Sanidad. */
+	pacePreference?: PacePreference;
 	unaddressedProblem?: string;
 }
 
@@ -309,8 +311,8 @@ export async function setGeneralParticipationResponse(
 	const { error } = await supabase.rpc('set_general_participation_response', {
 		p_round_id: roundId,
 		p_general_position: input.generalPosition,
-		p_investment_opinion: input.investmentOpinion,
-		p_pace_preference: input.pacePreference,
+		p_investment_opinion: input.investmentOpinion ?? null,
+		p_pace_preference: input.pacePreference ?? null,
 		p_unaddressed_problem: input.unaddressedProblem ?? null
 	});
 	if (error) throw new Error(error.message || 'No se ha podido guardar tu valoración general.');

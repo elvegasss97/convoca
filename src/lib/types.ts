@@ -491,6 +491,10 @@ export interface Topic {
 	investmentGdpPercent?: string;
 	/** Objetivo de referencia del plan (p. ej. "Parque público cercano al 5 % en 2036"). */
 	referenceGoal?: string;
+	/** Quién puede hacer qué: competencia estatal, acuerdo con comunidades, ejecución autonómica, objetivo sujeto a memoria económica. */
+	governanceNarrative?: string;
+	/** Aviso público específico del tema (p. ej. "no es una ley aprobada..."). Distinto del aviso genérico ya mostrado en la ficha. */
+	publicNotice?: string;
 	/** "Qué podría salir mal" a nivel de todo el tema. */
 	risksOverview: string[];
 	/** "Cómo sabríamos si funciona" a nivel de todo el tema. */
@@ -532,6 +536,8 @@ export interface TopicMeasure {
 	risks?: string;
 	/** "Indicadores para medirla", propios de esta medida. */
 	indicators: string[];
+	/** Salvaguarda: qué no contará como éxito de esta medida. */
+	safeguard?: string;
 	sortOrder: number;
 	isPublished: boolean;
 	createdAt: string;
@@ -691,8 +697,10 @@ export interface GeneralParticipationResponse {
 	roundId: string;
 	userId: string;
 	generalPosition: GeneralPosition;
-	investmentOpinion: InvestmentOpinion;
-	pacePreference: PacePreference;
+	/** Ausente en propuestas que, como Sanidad, no incluyen esta pregunta específica de Vivienda. */
+	investmentOpinion?: InvestmentOpinion;
+	/** Ausente en propuestas que, como Sanidad, no incluyen esta pregunta específica de Vivienda. */
+	pacePreference?: PacePreference;
 	unaddressedProblem?: string;
 	measuresConsideredCount: number;
 	createdAt: string;

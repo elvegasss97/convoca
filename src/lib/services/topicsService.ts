@@ -50,6 +50,8 @@ interface TopicRow {
 	investment_range: string | null;
 	investment_gdp_percent: string | null;
 	reference_goal: string | null;
+	governance_narrative: string | null;
+	public_notice: string | null;
 	risks_overview: string[];
 	success_indicators: string[];
 	version: string;
@@ -75,6 +77,8 @@ function rowToTopic(row: TopicRow): Topic {
 		investmentRange: row.investment_range ?? undefined,
 		investmentGdpPercent: row.investment_gdp_percent ?? undefined,
 		referenceGoal: row.reference_goal ?? undefined,
+		governanceNarrative: row.governance_narrative ?? undefined,
+		publicNotice: row.public_notice ?? undefined,
 		risksOverview: row.risks_overview ?? [],
 		successIndicators: row.success_indicators ?? [],
 		version: row.version,
@@ -148,6 +152,7 @@ interface MeasureRow {
 	arguments_for: string | null;
 	risks: string | null;
 	indicators: string[];
+	safeguard: string | null;
 	sort_order: number;
 	is_published: boolean;
 	created_at: string;
@@ -170,6 +175,7 @@ function rowToMeasure(row: MeasureRow): TopicMeasure {
 		argumentsFor: row.arguments_for ?? undefined,
 		risks: row.risks ?? undefined,
 		indicators: row.indicators ?? [],
+		safeguard: row.safeguard ?? undefined,
 		sortOrder: row.sort_order,
 		isPublished: row.is_published,
 		createdAt: row.created_at,
@@ -387,6 +393,8 @@ export interface TopicInput {
 	investmentRange?: string;
 	investmentGdpPercent?: string;
 	referenceGoal?: string;
+	governanceNarrative?: string;
+	publicNotice?: string;
 	risksOverview: string[];
 	successIndicators: string[];
 	version: string;
@@ -410,6 +418,8 @@ export async function createTopic(input: TopicInput, createdBy: string): Promise
 			investment_range: input.investmentRange?.trim() || null,
 			investment_gdp_percent: input.investmentGdpPercent?.trim() || null,
 			reference_goal: input.referenceGoal?.trim() || null,
+			governance_narrative: input.governanceNarrative?.trim() || null,
+			public_notice: input.publicNotice?.trim() || null,
 			risks_overview: input.risksOverview.map((r) => r.trim()).filter(Boolean),
 			success_indicators: input.successIndicators.map((s) => s.trim()).filter(Boolean),
 			version: input.version.trim() || '1',
@@ -445,6 +455,8 @@ export async function updateTopic(
 			investment_range: input.investmentRange?.trim() || null,
 			investment_gdp_percent: input.investmentGdpPercent?.trim() || null,
 			reference_goal: input.referenceGoal?.trim() || null,
+			governance_narrative: input.governanceNarrative?.trim() || null,
+			public_notice: input.publicNotice?.trim() || null,
 			risks_overview: input.risksOverview.map((r) => r.trim()).filter(Boolean),
 			success_indicators: input.successIndicators.map((s) => s.trim()).filter(Boolean),
 			version: input.version.trim() || '1',
@@ -674,6 +686,7 @@ export interface TopicMeasureInput {
 	argumentsFor?: string;
 	risks?: string;
 	indicators: string[];
+	safeguard?: string;
 	isPublished: boolean;
 }
 
@@ -698,6 +711,7 @@ export async function createTopicMeasure(
 			arguments_for: input.argumentsFor?.trim() || null,
 			risks: input.risks?.trim() || null,
 			indicators: input.indicators.map((i) => i.trim()).filter(Boolean),
+			safeguard: input.safeguard?.trim() || null,
 			is_published: input.isPublished,
 			sort_order: sortOrder
 		})
@@ -726,6 +740,7 @@ export async function updateTopicMeasure(
 			arguments_for: input.argumentsFor?.trim() || null,
 			risks: input.risks?.trim() || null,
 			indicators: input.indicators.map((i) => i.trim()).filter(Boolean),
+			safeguard: input.safeguard?.trim() || null,
 			is_published: input.isPublished
 		})
 		.eq('id', measureId)

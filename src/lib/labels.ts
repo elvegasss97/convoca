@@ -296,6 +296,30 @@ export const generalPositionLabels: Record<GeneralPosition, string> = {
 	mas_info: 'Necesito más información'
 };
 
+/**
+ * Redacción de la valoración general para propuestas con el modelo simple
+ * (Sanidad): solo 3 opciones, sin "con_cambios". Reutiliza el mismo código
+ * `GeneralPosition` que Vivienda, con textos propios — no toca
+ * `generalPositionLabels`.
+ */
+export const simpleGeneralPositionLabels: Partial<Record<GeneralPosition, string>> = {
+	favor: 'Apoyo el plan',
+	en_contra: 'No apoyo el plan',
+	mas_info: 'Necesito revisarlo mejor antes de decidir'
+};
+
+/**
+ * Redacción de la valoración por medida para propuestas con el modelo
+ * simple (Sanidad). Mismos códigos `MeasurePosition` que Vivienda, textos
+ * propios — no toca `measurePositionLabels`.
+ */
+export const simpleMeasurePositionLabels: Record<MeasurePosition, string> = {
+	favor: 'La apoyo como está',
+	con_cambios: 'La apoyaría con cambios',
+	en_contra: 'No la apoyo',
+	mas_info: 'No tengo información suficiente'
+};
+
 export const investmentOpinionLabels: Record<InvestmentOpinion, string> = {
 	insuficiente: 'Insuficiente',
 	adecuada: 'Aproximadamente adecuada',
