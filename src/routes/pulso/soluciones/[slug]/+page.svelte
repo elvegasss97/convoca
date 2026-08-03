@@ -17,7 +17,9 @@
 		ChevronDown,
 		ChevronUp,
 		MessagesSquare,
-		ShieldCheck
+		ShieldCheck,
+		Ear,
+		ArrowRight
 	} from '@lucide/svelte';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import type { PageData } from './$types';
@@ -52,11 +54,11 @@
 
 	const topic = $derived(data.topic);
 	const round = $derived(data.round);
-	// Solo Vivienda tiene construida la Escucha abierta rica (priorizar +
-	// profundizar). El resto de temas la enlazan como "Próximamente" en vez
-	// de apuntar a la rejilla genérica de preocupaciones, vacía y sin ese
-	// recorrido todavía.
-	const hasOpenListening = $derived(topic.category === 'vivienda');
+	// Vivienda (priorizar + profundizar) y Sanidad (encuesta de una tirada)
+	// ya tienen construida su propia Escucha abierta. El resto de temas la
+	// enlaza como "Próximamente" en vez de apuntar a la rejilla genérica de
+	// preocupaciones, vacía y sin ese recorrido todavía.
+	const hasOpenListening = $derived(topic.category === 'vivienda' || topic.category === 'sanidad');
 	// Vivienda usa el cuestionario rico (motivo estructurado, urgencia,
 	// inversión, ritmo, prioridades, contexto). Otros temas, como Sanidad,
 	// usan un modelo de participación más simple: posición + comentario
@@ -1053,4 +1055,22 @@
 			adhesiones, comunicaciones institucionales o convocatorias relacionadas con este tema.
 		</p>
 	</section>
+
+	{#if topic.category === 'sanidad'}
+		<section class="mt-4 rounded-2xl border border-brand-100 bg-brand-50 p-4 sm:p-5">
+			<h2 class="flex items-center gap-1.5 font-display text-base font-semibold text-ink-900">
+				<Ear class="size-4 text-brand-700" /> Ahora queremos escucharte
+			</h2>
+			<p class="mt-2 text-sm leading-relaxed text-ink-700">
+				Ya puedes valorar cada medida del plan. En esta escucha queremos ir un paso más allá: saber
+				qué problemas consideras prioritarios y qué soluciones todavía faltan.
+			</p>
+			<a
+				href="/pulso/escucha/sanidad"
+				class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800"
+			>
+				Participar en la escucha sobre sanidad <ArrowRight class="size-3.5" />
+			</a>
+		</section>
+	{/if}
 </div>

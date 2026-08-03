@@ -1234,6 +1234,79 @@ export type Database = {
 					}
 				];
 			};
+			concern_listening_survey_responses: {
+				Row: {
+					area_type: string | null;
+					commitment_most_difficult_id: string | null;
+					commitment_most_urgent_id: string | null;
+					community: string | null;
+					created_at: string;
+					id: string;
+					main_cause: string | null;
+					missing_improvement: string | null;
+					other_problem_text: string | null;
+					prioritized_measure_ids: string[];
+					problems: string[];
+					round_id: string;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					area_type?: string | null;
+					commitment_most_difficult_id?: string | null;
+					commitment_most_urgent_id?: string | null;
+					community?: string | null;
+					created_at?: string;
+					id?: string;
+					main_cause?: string | null;
+					missing_improvement?: string | null;
+					other_problem_text?: string | null;
+					prioritized_measure_ids?: string[];
+					problems?: string[];
+					round_id: string;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					area_type?: string | null;
+					commitment_most_difficult_id?: string | null;
+					commitment_most_urgent_id?: string | null;
+					community?: string | null;
+					created_at?: string;
+					id?: string;
+					main_cause?: string | null;
+					missing_improvement?: string | null;
+					other_problem_text?: string | null;
+					prioritized_measure_ids?: string[];
+					problems?: string[];
+					round_id?: string;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'concern_listening_survey_responses_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'concern_listening_rounds';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'concern_listening_survey_responses_commitment_most_urgent_id_fkey';
+						columns: ['commitment_most_urgent_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_commitments';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'concern_listening_survey_responses_commitment_most_difficult_id_fkey';
+						columns: ['commitment_most_difficult_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_commitments';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			topic_measures: {
 				Row: {
 					arguments_for: string | null;
@@ -1830,6 +1903,33 @@ export type Database = {
 			set_concern_listening_completed: {
 				Args: { p_round_id: string };
 				Returns: undefined;
+			};
+			set_concern_listening_survey_response: {
+				Args: {
+					p_round_id: string;
+					p_problems: string[];
+					p_other_problem_text?: string | null;
+					p_main_cause?: string | null;
+					p_prioritized_measure_ids?: string[];
+					p_commitment_most_urgent_id?: string | null;
+					p_commitment_most_difficult_id?: string | null;
+					p_missing_improvement?: string | null;
+					p_community?: string | null;
+					p_area_type?: string | null;
+				};
+				Returns: undefined;
+			};
+			get_concern_listening_survey_summary: {
+				Args: { p_round_id: string };
+				Returns: { dimension: string; code: string; response_count: number }[];
+			};
+			get_concern_listening_survey_total: {
+				Args: { p_round_id: string };
+				Returns: number;
+			};
+			get_concern_listening_survey_territory_breakdown: {
+				Args: { p_round_id: string; p_min_threshold?: number };
+				Returns: { community: string; response_count: number }[];
 			};
 		};
 		Enums: {

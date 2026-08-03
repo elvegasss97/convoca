@@ -847,3 +847,45 @@ export interface ListeningCompletion {
 	completedAt: string;
 	updatedAt: string;
 }
+
+// ---------------------------------------------------------------------------
+// Escucha ciudadana de una sola tirada (p. ej. Escucha abierta sobre
+// sanidad): una respuesta por usuario y ronda, distinta del modelo de
+// priorizar + profundizar de ListeningResponse.
+// ---------------------------------------------------------------------------
+
+export type ListeningSurveyAreaType =
+	'rural' | 'ciudad_mediana' | 'gran_area_urbana' | 'prefiere_no_responder';
+
+export interface ListeningSurveyResponse {
+	id: string;
+	roundId: string;
+	userId: string;
+	problems: string[];
+	otherProblemText?: string;
+	mainCause?: string;
+	prioritizedMeasureIds: string[];
+	commitmentMostUrgentId?: string;
+	commitmentMostDifficultId?: string;
+	missingImprovement?: string;
+	community?: string;
+	areaType?: ListeningSurveyAreaType;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface ListeningSurveyCountRow {
+	dimension:
+		| 'problem'
+		| 'main_cause'
+		| 'prioritized_measure'
+		| 'commitment_most_urgent'
+		| 'commitment_most_difficult';
+	code: string;
+	responseCount: number;
+}
+
+export interface ListeningSurveyTerritoryRow {
+	community: string;
+	responseCount: number;
+}

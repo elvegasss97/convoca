@@ -9,6 +9,17 @@
 	let { data }: { data: PageData } = $props();
 
 	const numberFormatter = new Intl.NumberFormat('es-ES');
+
+	// Solo las categorías con una escucha propia ya construida tienen texto
+	// dedicado; el resto sigue mostrando únicamente el nombre del tema, sin
+	// cambios respecto a como ya se mostraban.
+	const CARD_OVERRIDES: Partial<Record<string, { title: string; description: string }>> = {
+		sanidad: {
+			title: 'Escucha abierta sobre sanidad',
+			description:
+				'Cuéntanos qué está fallando, qué debería cambiar primero y qué falta en el Plan Sanidad 2036.'
+		}
+	};
 </script>
 
 <Seo
@@ -52,6 +63,7 @@
 	{#if data.active.length > 0}
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each data.active as category (category)}
+				{@const override = CARD_OVERRIDES[category]}
 				<a
 					href={`/pulso/escucha/${category}`}
 					class="group flex flex-col gap-2.5 rounded-2xl border border-ink-100 bg-white p-4 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover"
@@ -63,11 +75,14 @@
 							<ConcernCategoryGlyph {category} class="size-4.5" />
 						</span>
 						<h2 class="font-display text-base font-semibold text-ink-900">
-							{concernCategoryLabels[category]}
+							{override?.title ?? concernCategoryLabels[category]}
 						</h2>
 					</div>
+					{#if override?.description}
+						<p class="text-sm leading-relaxed text-ink-600">{override.description}</p>
+					{/if}
 					<p
-						class="flex items-center gap-1 text-sm font-medium text-brand-700 group-hover:underline"
+						class="mt-auto flex items-center gap-1 text-sm font-medium text-brand-700 group-hover:underline"
 					>
 						Participar en la escucha <ArrowRight class="size-3.5" />
 					</p>

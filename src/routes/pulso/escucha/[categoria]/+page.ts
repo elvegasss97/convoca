@@ -6,13 +6,18 @@ import {
 	getRelatedEventCounts,
 	getPulsoParticipantCount
 } from '$lib/services/concernsService';
-import { listPublishedTopics } from '$lib/services/topicsService';
+import {
+	listPublishedTopics,
+	listTopicMeasures,
+	listTopicCommitments
+} from '$lib/services/topicsService';
 import {
 	getLatestListeningRound,
 	listMyListeningResponses,
 	getMyListeningContext,
 	getMyListeningCompletion
 } from '$lib/services/listeningService';
+import { getMyListeningSurveyResponse } from '$lib/services/listeningSurveyService';
 import type { ConcernCategory, ConcernScope, ConcernScopeType } from '$lib/types';
 
 const VALID_CATEGORIES: ConcernCategory[] = [
@@ -77,6 +82,26 @@ export const load: PageLoad = async ({ params, url }) => {
 		}
 	}
 
+	// Escucha abierta de una sola tirada (encuesta): por ahora solo sanidad.
+	// Las medidas y compromisos se leen en vivo del tema real vinculado, para
+	// mostrar siempre el nombre vigente.
+	let surveyRound = undefined;
+	let surveyMeasures: Awaited<ReturnType<typeof listTopicMeasures>> = [];
+	let surveyCommitments: Awaited<ReturnType<typeof listTopicCommitments>> = [];
+	let mySurveyResponse: Awaited<ReturnType<typeof getMyListeningSurveyResponse>> = undefined;
+	if (category === 'sanidad') {
+		surveyRound = await getLatestListeningRound(category);
+		const measurePromise = relatedTopic ? listTopicMeasures(relatedTopic.id) : Promise.resolve([]);
+		const commitmentPromise = relatedTopic
+			? listTopicCommitments(relatedTopic.id)
+			: Promise.resolve([]);
+		[surveyMeasures, surveyCommitments] = await Promise.all([measurePromise, commitmentPromise]);
+		surveyMeasures = surveyMeasures.filter((m) => m.isPublished);
+		if (surveyRound) {
+			mySurveyResponse = await getMyListeningSurveyResponse(surveyRound.id);
+		}
+	}
+
 	return {
 		category,
 		concerns,
@@ -88,6 +113,10 @@ export const load: PageLoad = async ({ params, url }) => {
 		listeningRound,
 		listeningResponses,
 		listeningContext,
-		listeningCompleted
+		listeningCompleted,
+		surveyRound,
+		surveyMeasures,
+		surveyCommitments,
+		mySurveyResponse
 	};
 };

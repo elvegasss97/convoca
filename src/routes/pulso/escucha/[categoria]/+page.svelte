@@ -11,6 +11,7 @@
 	import ProposeConcernDialog from '$lib/components/pulso/ProposeConcernDialog.svelte';
 	import TerritoryPicker from '$lib/components/pulso/TerritoryPicker.svelte';
 	import ViviendaListeningFlow from '$lib/components/pulso/ViviendaListeningFlow.svelte';
+	import SanidadListeningFlow from '$lib/components/pulso/SanidadListeningFlow.svelte';
 	import { getMyConcernResponses } from '$lib/services/concernsService';
 	import { authState } from '$lib/auth/session.svelte';
 
@@ -111,8 +112,13 @@
 			</h1>
 		</div>
 		<p class="mt-1.5 max-w-2xl text-sm text-ink-600 sm:text-base">
-			¿Qué dificultades relacionadas con {topicPhrase} deberían abordarse primero? Prioriza tus preocupaciones,
-			explica cómo las percibes y señala aquello que Convoca todavía no está viendo.
+			{#if data.category === 'sanidad'}
+				La sanidad no se mejora solo desde los despachos. Queremos conocer qué está fallando, qué
+				debería cambiar primero y qué soluciones todavía no aparecen en el Plan Sanidad 2036.
+			{:else}
+				¿Qué dificultades relacionadas con {topicPhrase} deberían abordarse primero? Prioriza tus preocupaciones,
+				explica cómo las percibes y señala aquello que Convoca todavía no está viendo.
+			{/if}
 		</p>
 
 		{#if data.relatedTopic}
@@ -139,7 +145,7 @@
 			</div>
 		{/if}
 
-		{#if data.category !== 'vivienda'}
+		{#if data.category !== 'vivienda' && data.category !== 'sanidad'}
 			<div class="mt-4 flex flex-wrap items-end gap-3">
 				<div>
 					<p class="mb-1 text-xs font-medium text-ink-500">Ámbito</p>
@@ -170,6 +176,13 @@
 			responses={data.listeningResponses}
 			context={data.listeningContext}
 			completed={data.listeningCompleted}
+		/>
+	{:else if data.category === 'sanidad'}
+		<SanidadListeningFlow
+			round={data.surveyRound}
+			measures={data.surveyMeasures}
+			commitments={data.surveyCommitments}
+			initialResponse={data.mySurveyResponse}
 		/>
 	{:else if data.concerns.length > 0}
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

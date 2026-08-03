@@ -15,6 +15,7 @@ import type {
 	InvestmentOpinion,
 	ListeningAreaType,
 	ListeningEvolution,
+	ListeningSurveyAreaType,
 	ListeningPersonalRelation,
 	ListeningSeverity,
 	MeasurePosition,
@@ -418,5 +419,12 @@ export const listeningAreaTypeLabels: Record<ListeningAreaType, string> = {
 	urbano: 'Urbano',
 	intermedio: 'Intermedio',
 	rural: 'Rural',
+	prefiere_no_responder: 'Prefiero no responder'
+};
+
+export const listeningSurveyAreaTypeLabels: Record<ListeningSurveyAreaType, string> = {
+	rural: 'Rural o municipio pequeño',
+	ciudad_mediana: 'Ciudad mediana',
+	gran_area_urbana: 'Gran área urbana',
 	prefiere_no_responder: 'Prefiero no responder'
 };
