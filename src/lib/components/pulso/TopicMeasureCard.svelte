@@ -240,23 +240,6 @@
 						{measure.problemAddressed}
 					</p>
 				{/if}
-				<div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-500">
-					{#if measure.responsibleScope}
-						<span class="flex items-center gap-1"
-							><Landmark class="size-3.5 text-ink-400" /> {measure.responsibleScope}</span
-						>
-					{/if}
-					{#if measure.timeframe}
-						<span class="flex items-center gap-1"
-							><CalendarClock class="size-3.5 text-ink-400" /> {measure.timeframe}</span
-						>
-					{/if}
-					{#if measure.estimatedCost}
-						<span class="flex items-center gap-1"
-							><Coins class="size-3.5 text-ink-400" /> {measure.estimatedCost}</span
-						>
-					{/if}
-				</div>
 				{#if myResponse}
 					<span
 						class="mt-2 inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700"
@@ -291,23 +274,33 @@
 
 			<p class="text-sm leading-relaxed whitespace-pre-line text-ink-700">{measure.explanation}</p>
 
+			{#if measure.responsibleScope}
+				<div class="mt-3 flex items-start gap-2 rounded-xl border border-ink-100 bg-ink-50 p-3">
+					<Landmark class="mt-0.5 size-4 shrink-0 text-ink-500" />
+					<p class="text-sm leading-relaxed text-ink-700">
+						<strong class="font-semibold text-ink-900">Quién lo aplicaría:</strong>
+						{measure.responsibleScope}
+					</p>
+				</div>
+			{/if}
+
 			{#if measure.howItWorks}
 				<div class="mt-3 flex items-start gap-2 rounded-xl border border-ink-100 bg-ink-50 p-3">
 					<Cog class="mt-0.5 size-4 shrink-0 text-ink-500" />
 					<p class="text-sm leading-relaxed text-ink-700">
-						<strong class="font-semibold text-ink-900">Cómo funciona:</strong>
+						<strong class="font-semibold text-ink-900">Cómo funcionaría:</strong>
 						{measure.howItWorks}
 					</p>
 				</div>
 			{/if}
 
-			<div class="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-				{#if measure.responsibleScope}
+			<div class="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+				{#if measure.timeframe}
 					<div class="flex items-start gap-2 text-xs text-ink-600">
-						<Landmark class="mt-0.5 size-3.5 shrink-0 text-brand-600" />
+						<CalendarClock class="mt-0.5 size-3.5 shrink-0 text-brand-600" />
 						<span
-							><strong class="font-semibold text-ink-800">Administración responsable:</strong>
-							{measure.responsibleScope}</span
+							><strong class="font-semibold text-ink-800">Calendario:</strong>
+							{measure.timeframe}</span
 						>
 					</div>
 				{/if}
@@ -317,14 +310,6 @@
 						<span
 							><strong class="font-semibold text-ink-800">Coste estimado:</strong>
 							{measure.estimatedCost}</span
-						>
-					</div>
-				{/if}
-				{#if measure.timeframe}
-					<div class="flex items-start gap-2 text-xs text-ink-600">
-						<CalendarClock class="mt-0.5 size-3.5 shrink-0 text-brand-600" />
-						<span
-							><strong class="font-semibold text-ink-800">Plazo:</strong> {measure.timeframe}</span
 						>
 					</div>
 				{/if}

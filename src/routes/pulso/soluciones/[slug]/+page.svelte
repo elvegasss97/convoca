@@ -489,8 +489,8 @@
 			</h2>
 			<ContentTypeTag type="convoca" class="mt-2" />
 			<p class="mt-2 text-sm leading-relaxed text-ink-700">
-				{topic.title} no se limita a prometer más recursos. Propone cinco compromisos concretos para saber
-				si el sistema realmente está mejorando.
+				{topic.documentTitle || topic.title} no se limita a proponer más recursos: establece compromisos
+				concretos, plazos, indicadores y mecanismos de evaluación.
 			</p>
 			<ol class="mt-3 flex flex-col gap-3">
 				{#each data.commitments as commitment, i (commitment.id)}
