@@ -274,16 +274,6 @@
 
 			<p class="text-sm leading-relaxed whitespace-pre-line text-ink-700">{measure.explanation}</p>
 
-			{#if measure.responsibleScope}
-				<div class="mt-3 flex items-start gap-2 rounded-xl border border-ink-100 bg-ink-50 p-3">
-					<Landmark class="mt-0.5 size-4 shrink-0 text-ink-500" />
-					<p class="text-sm leading-relaxed text-ink-700">
-						<strong class="font-semibold text-ink-900">Quién lo aplicaría:</strong>
-						{measure.responsibleScope}
-					</p>
-				</div>
-			{/if}
-
 			{#if measure.howItWorks}
 				<div class="mt-3 flex items-start gap-2 rounded-xl border border-ink-100 bg-ink-50 p-3">
 					<Cog class="mt-0.5 size-4 shrink-0 text-ink-500" />
@@ -294,22 +284,32 @@
 				</div>
 			{/if}
 
+			{#if measure.responsibleScope}
+				<div class="mt-3 flex items-start gap-2 rounded-xl border border-ink-100 bg-ink-50 p-3">
+					<Landmark class="mt-0.5 size-4 shrink-0 text-ink-500" />
+					<p class="text-sm leading-relaxed text-ink-700">
+						<strong class="font-semibold text-ink-900">Quién lo aplicaría:</strong>
+						{measure.responsibleScope}
+					</p>
+				</div>
+			{/if}
+
 			<div class="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-				{#if measure.timeframe}
-					<div class="flex items-start gap-2 text-xs text-ink-600">
-						<CalendarClock class="mt-0.5 size-3.5 shrink-0 text-brand-600" />
-						<span
-							><strong class="font-semibold text-ink-800">Calendario:</strong>
-							{measure.timeframe}</span
-						>
-					</div>
-				{/if}
 				{#if measure.estimatedCost}
 					<div class="flex items-start gap-2 text-xs text-ink-600">
 						<Coins class="mt-0.5 size-3.5 shrink-0 text-brand-600" />
 						<span
-							><strong class="font-semibold text-ink-800">Coste estimado:</strong>
+							><strong class="font-semibold text-ink-800">Inversión estimada:</strong>
 							{measure.estimatedCost}</span
+						>
+					</div>
+				{/if}
+				{#if measure.timeframe}
+					<div class="flex items-start gap-2 text-xs text-ink-600">
+						<CalendarClock class="mt-0.5 size-3.5 shrink-0 text-brand-600" />
+						<span
+							><strong class="font-semibold text-ink-800">Plazo:</strong>
+							{measure.timeframe}</span
 						>
 					</div>
 				{/if}

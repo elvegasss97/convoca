@@ -171,7 +171,7 @@
 			{#if measure.howItWorks}
 				<div class="mt-3 rounded-xl border border-ink-100 bg-ink-50 p-3">
 					<p class="flex items-center gap-1.5 text-xs font-semibold text-ink-800">
-						<Cog class="size-3.5 text-ink-500" /> Cómo se llevará a cabo
+						<Cog class="size-3.5 text-ink-500" /> Cómo funcionaría
 					</p>
 					<p class="mt-1.5 text-sm leading-relaxed whitespace-pre-line text-ink-700">
 						{measure.howItWorks}
@@ -184,7 +184,7 @@
 					<div class="flex items-start gap-2 text-xs text-ink-600">
 						<Landmark class="mt-0.5 size-3.5 shrink-0 text-brand-600" />
 						<span
-							><strong class="font-semibold text-ink-800">Quién responde:</strong>
+							><strong class="font-semibold text-ink-800">Quién lo aplicaría:</strong>
 							{measure.responsibleScope}</span
 						>
 					</div>
@@ -193,7 +193,7 @@
 					<div class="flex items-start gap-2 text-xs text-ink-600">
 						<Coins class="mt-0.5 size-3.5 shrink-0 text-brand-600" />
 						<span
-							><strong class="font-semibold text-ink-800">Coste estimado:</strong>
+							><strong class="font-semibold text-ink-800">Inversión estimada:</strong>
 							{measure.estimatedCost}</span
 						>
 					</div>
@@ -202,7 +202,7 @@
 					<div class="flex items-start gap-2 text-xs text-ink-600">
 						<CalendarClock class="mt-0.5 size-3.5 shrink-0 text-brand-600" />
 						<span
-							><strong class="font-semibold text-ink-800">Calendario:</strong>
+							><strong class="font-semibold text-ink-800">Plazo:</strong>
 							{measure.timeframe}</span
 						>
 					</div>
