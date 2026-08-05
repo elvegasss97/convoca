@@ -17,6 +17,9 @@ import type {
 	MeasureStanceCounts,
 	MyMeasureResponse,
 	Topic,
+	TopicBudgetLine,
+	TopicBudgetScenario,
+	TopicBudgetTimelineEntry,
 	TopicDataPoint,
 	TopicMeasure,
 	TopicMeasureAlternative,
@@ -47,6 +50,7 @@ interface TopicRow {
 	document_title: string | null;
 	problem_intro: string;
 	budget_narrative: string | null;
+	budget_double_count_rules: string[];
 	evaluation_rules: string | null;
 	investment_range: string | null;
 	investment_gdp_percent: string | null;
@@ -74,6 +78,7 @@ function rowToTopic(row: TopicRow): Topic {
 		documentTitle: row.document_title ?? undefined,
 		problemIntro: row.problem_intro,
 		budgetNarrative: row.budget_narrative ?? undefined,
+		budgetDoubleCountRules: row.budget_double_count_rules ?? [],
 		evaluationRules: row.evaluation_rules ?? undefined,
 		investmentRange: row.investment_range ?? undefined,
 		investmentGdpPercent: row.investment_gdp_percent ?? undefined,
@@ -149,6 +154,8 @@ interface MeasureRow {
 	how_it_works: string | null;
 	responsible_scope: string | null;
 	estimated_cost: string | null;
+	estimated_cost_min: number | null;
+	estimated_cost_max: number | null;
 	timeframe: string | null;
 	arguments_for: string | null;
 	risks: string | null;
@@ -172,6 +179,8 @@ function rowToMeasure(row: MeasureRow): TopicMeasure {
 		howItWorks: row.how_it_works ?? undefined,
 		responsibleScope: row.responsible_scope ?? undefined,
 		estimatedCost: row.estimated_cost ?? undefined,
+		estimatedCostMin: row.estimated_cost_min ?? undefined,
+		estimatedCostMax: row.estimated_cost_max ?? undefined,
 		timeframe: row.timeframe ?? undefined,
 		argumentsFor: row.arguments_for ?? undefined,
 		risks: row.risks ?? undefined,
@@ -588,6 +597,110 @@ export async function deleteTopicDataPoint(dataPointId: string): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Desglose económico estructurado (sección "Coste")
+// ---------------------------------------------------------------------------
+
+interface BudgetLineRow {
+	id: string;
+	topic_id: string;
+	name: string;
+	min_amount: number;
+	max_amount: number;
+	description: string | null;
+	note: string | null;
+	color_token: string;
+	sort_order: number;
+}
+
+function rowToBudgetLine(row: BudgetLineRow): TopicBudgetLine {
+	return {
+		id: row.id,
+		topicId: row.topic_id,
+		name: row.name,
+		minAmount: row.min_amount,
+		maxAmount: row.max_amount,
+		description: row.description ?? undefined,
+		note: row.note ?? undefined,
+		colorToken: row.color_token,
+		sortOrder: row.sort_order
+	};
+}
+
+export async function listTopicBudgetLines(topicId: string): Promise<TopicBudgetLine[]> {
+	const { data, error } = await supabase
+		.from('topic_budget_lines')
+		.select('*')
+		.eq('topic_id', topicId)
+		.order('sort_order', { ascending: true });
+	if (error) throw error;
+	return (data ?? []).map(rowToBudgetLine);
+}
+
+interface BudgetScenarioRow {
+	id: string;
+	topic_id: string;
+	key: string;
+	label: string;
+	total: number;
+	description: string | null;
+	sort_order: number;
+}
+
+function rowToBudgetScenario(row: BudgetScenarioRow): TopicBudgetScenario {
+	return {
+		id: row.id,
+		topicId: row.topic_id,
+		key: row.key as TopicBudgetScenario['key'],
+		label: row.label,
+		total: row.total,
+		description: row.description ?? undefined,
+		sortOrder: row.sort_order
+	};
+}
+
+export async function listTopicBudgetScenarios(topicId: string): Promise<TopicBudgetScenario[]> {
+	const { data, error } = await supabase
+		.from('topic_budget_scenarios')
+		.select('*')
+		.eq('topic_id', topicId)
+		.order('sort_order', { ascending: true });
+	if (error) throw error;
+	return (data ?? []).map(rowToBudgetScenario);
+}
+
+interface BudgetTimelineRow {
+	id: string;
+	topic_id: string;
+	year: number;
+	min_amount: number;
+	max_amount: number;
+	note: string | null;
+	is_period_average: boolean;
+}
+
+function rowToBudgetTimelineEntry(row: BudgetTimelineRow): TopicBudgetTimelineEntry {
+	return {
+		id: row.id,
+		topicId: row.topic_id,
+		year: row.year,
+		minAmount: row.min_amount,
+		maxAmount: row.max_amount,
+		note: row.note ?? undefined,
+		isPeriodAverage: row.is_period_average
+	};
+}
+
+export async function listTopicBudgetTimeline(topicId: string): Promise<TopicBudgetTimelineEntry[]> {
+	const { data, error } = await supabase
+		.from('topic_budget_timeline')
+		.select('*')
+		.eq('topic_id', topicId)
+		.order('year', { ascending: true });
+	if (error) throw error;
+	return (data ?? []).map(rowToBudgetTimelineEntry);
+}
+
+// ---------------------------------------------------------------------------
 // Preguntas de Pulso vinculadas ("lo que dice la ciudadanía")
 // ---------------------------------------------------------------------------
 
@@ -854,7 +967,7 @@ export async function setMeasureResponse(
 	const { error } = await supabase.rpc('set_measure_response', {
 		p_measure_id: measureId,
 		p_stance: stance,
-		p_priority: priority ?? null
+		p_priority: priority ?? undefined
 	});
 	if (error) throw new Error(error.message || 'No se ha podido guardar tu valoración.');
 }

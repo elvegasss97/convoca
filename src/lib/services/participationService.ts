@@ -262,11 +262,11 @@ export async function setMeasureParticipationResponse(
 		p_round_id: roundId,
 		p_measure_id: measureId,
 		p_position: input.position,
-		p_reason_code: input.reasonCode ?? null,
-		p_reason_other: input.reasonOther ?? null,
-		p_comment: input.comment ?? null,
-		p_urgency: input.urgency ?? null,
-		p_quick_change: input.quickChange ?? null
+		p_reason_code: input.reasonCode ?? undefined,
+		p_reason_other: input.reasonOther ?? undefined,
+		p_comment: input.comment ?? undefined,
+		p_urgency: input.urgency ?? undefined,
+		p_quick_change: input.quickChange ?? undefined
 	});
 	if (error) throw new Error(error.message || 'No se ha podido guardar tu respuesta.');
 }
@@ -311,9 +311,9 @@ export async function setGeneralParticipationResponse(
 	const { error } = await supabase.rpc('set_general_participation_response', {
 		p_round_id: roundId,
 		p_general_position: input.generalPosition,
-		p_investment_opinion: input.investmentOpinion ?? null,
-		p_pace_preference: input.pacePreference ?? null,
-		p_unaddressed_problem: input.unaddressedProblem ?? null
+		p_investment_opinion: input.investmentOpinion ?? undefined,
+		p_pace_preference: input.pacePreference ?? undefined,
+		p_unaddressed_problem: input.unaddressedProblem ?? undefined
 	});
 	if (error) throw new Error(error.message || 'No se ha podido guardar tu valoración general.');
 }
@@ -385,8 +385,8 @@ export async function setParticipantContext(
 	}
 	const { error } = await supabase.rpc('set_participant_context', {
 		p_round_id: roundId,
-		p_community: input.community ?? null,
-		p_housing_situation: input.housingSituation ?? null
+		p_community: input.community ?? undefined,
+		p_housing_situation: input.housingSituation ?? undefined
 	});
 	if (error) throw new Error(error.message || 'No se ha podido guardar tu contexto.');
 }

@@ -469,6 +469,44 @@ export interface TopicDataPoint {
 	createdAt: string;
 }
 
+/** Línea presupuestaria del desglose económico estructurado (sección "Coste"). */
+export interface TopicBudgetLine {
+	id: string;
+	topicId: string;
+	name: string;
+	minAmount: number;
+	maxAmount: number;
+	description?: string;
+	note?: string;
+	/** Token de color del proyecto, p. ej. "brand-700" — nunca un hex suelto. */
+	colorToken: string;
+	sortOrder: number;
+}
+
+/** Escenario de inversión (mínimo/central/máximo) del desglose económico. */
+export interface TopicBudgetScenario {
+	id: string;
+	topicId: string;
+	key: 'min' | 'central' | 'max';
+	label: string;
+	/** Inversión media anual del escenario, en millones de euros. */
+	total: number;
+	description?: string;
+	sortOrder: number;
+}
+
+/** Distribución anual de la inversión (2027-2036 en Vivienda) para la barra temporal. */
+export interface TopicBudgetTimelineEntry {
+	id: string;
+	topicId: string;
+	year: number;
+	minAmount: number;
+	maxAmount: number;
+	note?: string;
+	/** true cuando la cifra es la media de un tramo plurianual repartida a partes iguales, no un dato distinto por año. */
+	isPeriodAverage: boolean;
+}
+
 export interface Topic {
 	id: string;
 	slug: string;
@@ -483,6 +521,8 @@ export interface Topic {
 	problemIntro: string;
 	/** Desglose económico largo (líneas presupuestarias, escenarios, distribución temporal). Se muestra expandible, igual que problemIntro. */
 	budgetNarrative?: string;
+	/** Reglas para evitar doble contabilización en el desglose económico (p. ej. "una transferencia del Estado a una comunidad se cuenta una sola vez"). */
+	budgetDoubleCountRules: string[];
 	/** Reglas de comprobación (evaluación anual/bienal/intermedia/final, condiciones para ampliar/modificar/suspender una medida). Se muestra en su propio acordeón. */
 	evaluationRules?: string;
 	/** Cifra de inversión en formato ya legible (p. ej. "10.000–12.000 M€/año"). Nunca calculada aquí. */
@@ -531,6 +571,10 @@ export interface TopicMeasure {
 	howItWorks?: string;
 	responsibleScope?: string;
 	estimatedCost?: string;
+	/** Límite inferior de estimatedCost en millones de euros, para gráficos. Aditivo: estimatedCost sigue siendo el texto mostrado en tarjetas y mapa. */
+	estimatedCostMin?: number;
+	/** Límite superior de estimatedCost en millones de euros, para gráficos. */
+	estimatedCostMax?: number;
 	timeframe?: string;
 	argumentsFor?: string;
 	risks?: string;

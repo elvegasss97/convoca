@@ -12,6 +12,7 @@
 		CalendarClock,
 		Cog,
 		ShieldAlert,
+		ShieldCheck,
 		Gauge,
 		BookText
 	} from '@lucide/svelte';
@@ -37,6 +38,8 @@
 		results: MeasureParticipationResults;
 		myResponse?: MeasureParticipationResponse;
 		sources?: TopicSource[];
+		expanded: boolean;
+		onToggle: () => void;
 	}
 
 	let {
@@ -45,10 +48,11 @@
 		round,
 		results = $bindable(),
 		myResponse = $bindable(),
-		sources = []
+		sources = [],
+		expanded,
+		onToggle
 	}: Props = $props();
 
-	let expanded = $state(false);
 	const roundOpen = $derived(round?.status === 'open');
 
 	let hydrated = $state(false);
@@ -114,10 +118,14 @@
 	}
 </script>
 
-<div class="overflow-hidden rounded-2xl border border-ink-100 bg-white">
+<div
+	class="overflow-hidden rounded-2xl border bg-white transition-colors {expanded
+		? 'border-brand-200'
+		: 'border-ink-100'}"
+>
 	<button
 		type="button"
-		onclick={() => (expanded = !expanded)}
+		onclick={onToggle}
 		disabled={!hydrated}
 		aria-expanded={expanded}
 		aria-controls={`measure-panel-${measure.id}`}
@@ -133,6 +141,23 @@
 				{#if measure.summary}
 					<p class="mt-1 text-sm leading-relaxed text-ink-600">{measure.summary}</p>
 				{/if}
+				{#if !expanded && (measure.estimatedCost || measure.timeframe)}
+					<div class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+						{#if measure.estimatedCost}
+							<span class="flex items-center gap-1 text-xs text-ink-500">
+								<Coins class="size-3 shrink-0 text-brand-600" />{measure.estimatedCost}
+							</span>
+						{/if}
+						{#if measure.timeframe}
+							<span class="flex items-center gap-1 text-xs text-ink-500">
+								<CalendarClock class="size-3 shrink-0 text-brand-600" />{measure.timeframe.replace(
+									'Plazo: ',
+									''
+								)}
+							</span>
+						{/if}
+					</div>
+				{/if}
 				{#if myResponse}
 					<span
 						class="mt-2 inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700"
@@ -141,11 +166,7 @@
 					</span>
 				{/if}
 				<span class="mt-2 block text-xs font-semibold text-brand-700">
-					{#if !hydrated}
-						Preparando…
-					{:else}
-						{expanded ? 'Ocultar medida' : 'Ver medida'}
-					{/if}
+					{expanded ? 'Ocultar medida' : 'Ver medida'}
 				</span>
 			</div>
 		</div>
@@ -169,81 +190,90 @@
 			</p>
 
 			{#if measure.howItWorks}
-				<div class="mt-3 rounded-xl border border-ink-100 bg-ink-50 p-3">
-					<p class="flex items-center gap-1.5 text-xs font-semibold text-ink-800">
-						<Cog class="size-3.5 text-ink-500" /> Cómo funcionaría
-					</p>
-					<p class="mt-1.5 text-sm leading-relaxed whitespace-pre-line text-ink-700">
-						{measure.howItWorks}
-					</p>
-				</div>
+				<p class="mt-3 flex items-start gap-2 text-sm leading-relaxed text-ink-700">
+					<Cog class="mt-0.5 size-4 shrink-0 text-ink-400" />
+					<span
+						><strong class="font-semibold text-ink-900">Cómo funcionaría:</strong>
+						{measure.howItWorks}</span
+					>
+				</p>
 			{/if}
 
-			<div class="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-				{#if measure.responsibleScope}
-					<div class="flex items-start gap-2 text-xs text-ink-600">
-						<Landmark class="mt-0.5 size-3.5 shrink-0 text-brand-600" />
-						<span
-							><strong class="font-semibold text-ink-800">Quién lo aplicaría:</strong>
-							{measure.responsibleScope}</span
-						>
-					</div>
-				{/if}
+			{#if measure.responsibleScope}
+				<p class="mt-2 flex items-start gap-2 text-sm leading-relaxed text-ink-700">
+					<Landmark class="mt-0.5 size-4 shrink-0 text-ink-400" />
+					<span
+						><strong class="font-semibold text-ink-900">Quién lo aplicaría:</strong>
+						{measure.responsibleScope}</span
+					>
+				</p>
+			{/if}
+
+			<div class="mt-3 grid grid-cols-1 gap-2.5 rounded-xl bg-brand-50/60 p-3 sm:grid-cols-2">
 				{#if measure.estimatedCost}
-					<div class="flex items-start gap-2 text-xs text-ink-600">
+					<div class="flex items-start gap-2 text-xs text-ink-700">
 						<Coins class="mt-0.5 size-3.5 shrink-0 text-brand-600" />
 						<span
-							><strong class="font-semibold text-ink-800">Inversión estimada:</strong>
+							><strong class="font-semibold text-ink-900">Inversión estimada:</strong>
 							{measure.estimatedCost}</span
 						>
 					</div>
 				{/if}
 				{#if measure.timeframe}
-					<div class="flex items-start gap-2 text-xs text-ink-600">
+					<div class="flex items-start gap-2 text-xs text-ink-700">
 						<CalendarClock class="mt-0.5 size-3.5 shrink-0 text-brand-600" />
 						<span
-							><strong class="font-semibold text-ink-800">Plazo:</strong>
-							{measure.timeframe}</span
+							><strong class="font-semibold text-ink-900">Plazo:</strong>
+							{measure.timeframe.replace('Plazo: ', '')}</span
 						>
 					</div>
 				{/if}
 			</div>
 
-			{#if measure.argumentsFor}
-				<div class="mt-3 rounded-xl border border-brand-100 bg-brand-50 p-3 text-sm text-brand-900">
-					<strong class="font-semibold">Ventajas:</strong>
-					{measure.argumentsFor}
-				</div>
-			{/if}
-			{#if measure.risks}
-				<div class="mt-2 rounded-xl border border-ink-200 bg-ink-50 p-3 text-sm text-ink-700">
-					<strong class="font-semibold">Riesgos o dificultades:</strong>
-					{measure.risks}
-				</div>
-			{/if}
-
-			{#if measure.indicators.length > 0}
-				<div class="mt-3">
-					<p class="flex items-center gap-1.5 text-xs font-semibold text-ink-700">
-						<Gauge class="size-3.5 text-brand-600" /> Cómo se medirá
+			{#if measure.argumentsFor || measure.risks || measure.indicators.length > 0 || measure.safeguard}
+				<div class="mt-4 border-t border-ink-100 pt-3">
+					<p
+						class="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-ink-500 uppercase"
+					>
+						<ShieldCheck class="size-3.5 text-ink-400" /> Riesgos, garantías e indicadores
 					</p>
-					<ul class="mt-1.5 flex flex-col gap-1">
-						{#each measure.indicators as indicator (indicator)}
-							<li class="text-xs text-ink-600">· {indicator}</li>
-						{/each}
-					</ul>
-				</div>
-			{/if}
+					{#if measure.argumentsFor}
+						<p class="mt-2 text-sm leading-relaxed text-ink-700">
+							<strong class="font-semibold text-brand-800">Ventajas:</strong>
+							{measure.argumentsFor}
+						</p>
+					{/if}
+					{#if measure.risks}
+						<p class="mt-2 text-sm leading-relaxed text-ink-700">
+							<strong class="font-semibold text-ink-900">Riesgos o dificultades:</strong>
+							{measure.risks}
+						</p>
+					{/if}
 
-			{#if measure.safeguard}
-				<div
-					class="border-warning-200 mt-3 flex items-start gap-2 rounded-xl border bg-warning-50 p-3"
-				>
-					<ShieldAlert class="mt-0.5 size-4 shrink-0 text-warning-700" />
-					<p class="text-warning-800 text-sm leading-relaxed">
-						<strong class="font-semibold">Qué no contará como éxito:</strong>
-						{measure.safeguard}
-					</p>
+					{#if measure.indicators.length > 0}
+						<div class="mt-2">
+							<p class="flex items-center gap-1.5 text-xs font-semibold text-ink-700">
+								<Gauge class="size-3.5 text-brand-600" /> Cómo se medirá
+							</p>
+							<ul class="mt-1.5 flex flex-col gap-1">
+								{#each measure.indicators as indicator (indicator)}
+									<li class="text-xs text-ink-600">· {indicator}</li>
+								{/each}
+							</ul>
+						</div>
+					{/if}
+
+					{#if measure.safeguard}
+						<div
+							class="border-warning-200 mt-2 flex items-start gap-2 rounded-xl border bg-warning-50 p-3"
+						>
+							<ShieldAlert class="mt-0.5 size-4 shrink-0 text-warning-700" />
+							<p class="text-warning-800 text-sm leading-relaxed">
+								<strong class="font-semibold">Qué no contará como éxito:</strong>
+								{measure.safeguard}
+							</p>
+						</div>
+					{/if}
 				</div>
 			{/if}
 
