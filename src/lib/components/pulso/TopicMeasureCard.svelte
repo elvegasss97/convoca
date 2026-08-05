@@ -15,7 +15,8 @@
 		Gauge,
 		MessagesSquare,
 		BookText,
-		Clock3
+		Clock3,
+		ShieldCheck
 	} from '@lucide/svelte';
 	import type {
 		MeasureParticipationResults,
@@ -53,6 +54,8 @@
 		results: MeasureParticipationResults;
 		myResponse?: MeasureParticipationResponse;
 		sources?: TopicSource[];
+		expanded: boolean;
+		onToggle: () => void;
 	}
 
 	let {
@@ -62,10 +65,11 @@
 		round,
 		results = $bindable(),
 		myResponse = $bindable(),
-		sources = []
+		sources = [],
+		expanded,
+		onToggle
 	}: Props = $props();
 
-	let expanded = $state(false);
 	const roundOpen = $derived(round?.status === 'open');
 
 	// La página se renderiza en servidor y parece lista antes de que el
@@ -160,20 +164,20 @@
 	let myProposals = $state<TopicMeasureAlternative[]>([]);
 	let publicProposals = $state<TopicMeasureAlternative[]>([]);
 	let proposalsLoaded = $state(false);
-	async function toggleExpanded() {
-		expanded = !expanded;
+	$effect(() => {
 		if (expanded && !proposalsLoaded) {
-			const [mine, published] = await Promise.all([
+			proposalsLoaded = true;
+			Promise.all([
 				round && authState.session
 					? listMyDevelopedProposalsForMeasure(round.id, measure.id)
 					: Promise.resolve([]),
 				listPublicDevelopedProposals(measure.id)
-			]);
-			myProposals = mine;
-			publicProposals = published;
-			proposalsLoaded = true;
+			]).then(([mine, published]) => {
+				myProposals = mine;
+				publicProposals = published;
+			});
 		}
-	}
+	});
 
 	let showProposalForm = $state(false);
 	const emptyProposalForm: DevelopedProposalInput = {
@@ -216,12 +220,17 @@
 	}
 </script>
 
-<div class="overflow-hidden rounded-2xl border border-ink-100 bg-white">
+<div
+	class="overflow-hidden rounded-2xl border bg-white transition-colors {expanded
+		? 'border-brand-200'
+		: 'border-ink-100'}"
+>
 	<button
 		type="button"
-		onclick={toggleExpanded}
+		onclick={onToggle}
 		disabled={!hydrated}
 		aria-expanded={expanded}
+		aria-controls={`topic-measure-panel-${measure.id}`}
 		class="flex w-full items-start justify-between gap-3 p-4 text-left disabled:cursor-wait disabled:opacity-90"
 	>
 		<div class="flex min-w-0 gap-3">
@@ -234,11 +243,22 @@
 				{#if measure.summary}
 					<p class="mt-1 text-sm leading-relaxed text-ink-600">{measure.summary}</p>
 				{/if}
-				{#if measure.problemAddressed}
-					<p class="mt-1.5 text-xs text-ink-500">
-						<strong class="font-semibold text-ink-700">Problema que resuelve:</strong>
-						{measure.problemAddressed}
-					</p>
+				{#if !expanded && (measure.estimatedCost || measure.timeframe)}
+					<div class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+						{#if measure.estimatedCost}
+							<span class="flex items-center gap-1 text-xs text-ink-500">
+								<Coins class="size-3 shrink-0 text-brand-600" />{measure.estimatedCost}
+							</span>
+						{/if}
+						{#if measure.timeframe}
+							<span class="flex items-center gap-1 text-xs text-ink-500">
+								<CalendarClock class="size-3 shrink-0 text-brand-600" />{measure.timeframe.replace(
+									'Plazo: ',
+									''
+								)}
+							</span>
+						{/if}
+					</div>
 				{/if}
 				{#if myResponse}
 					<span
@@ -248,11 +268,7 @@
 					</span>
 				{/if}
 				<span class="mt-2 block text-xs font-semibold text-brand-700">
-					{#if !hydrated}
-						Preparando…
-					{:else}
-						{expanded ? 'Ocultar medida' : 'Ver medida'}
-					{/if}
+					{expanded ? 'Ocultar medida' : 'Ver medida'}
 				</span>
 			</div>
 		</div>
@@ -264,7 +280,7 @@
 	</button>
 
 	{#if expanded}
-		<div class="border-t border-ink-100 p-4">
+		<div id={`topic-measure-panel-${measure.id}`} class="border-t border-ink-100 p-4">
 			<div
 				class="mb-3 flex items-start gap-2 rounded-xl bg-warning-50 p-3 text-xs leading-relaxed text-warning-700"
 			>
@@ -272,72 +288,89 @@
 				Borrador elaborado por Convoca. No representa automáticamente la opinión de los participantes.
 			</div>
 
-			<p class="text-sm leading-relaxed whitespace-pre-line text-ink-700">{measure.explanation}</p>
+			{#if measure.problemAddressed}
+				<p class="text-xs text-ink-500">
+					<strong class="font-semibold text-ink-700">Problema que resuelve:</strong>
+					{measure.problemAddressed}
+				</p>
+			{/if}
+
+			<p class="mt-3 text-sm leading-relaxed whitespace-pre-line text-ink-700">
+				{measure.explanation}
+			</p>
 
 			{#if measure.howItWorks}
-				<div class="mt-3 flex items-start gap-2 rounded-xl border border-ink-100 bg-ink-50 p-3">
-					<Cog class="mt-0.5 size-4 shrink-0 text-ink-500" />
-					<p class="text-sm leading-relaxed text-ink-700">
-						<strong class="font-semibold text-ink-900">Cómo funcionaría:</strong>
-						{measure.howItWorks}
-					</p>
-				</div>
+				<p class="mt-3 flex items-start gap-2 text-sm leading-relaxed text-ink-700">
+					<Cog class="mt-0.5 size-4 shrink-0 text-ink-400" />
+					<span
+						><strong class="font-semibold text-ink-900">Cómo funcionaría:</strong>
+						{measure.howItWorks}</span
+					>
+				</p>
 			{/if}
 
 			{#if measure.responsibleScope}
-				<div class="mt-3 flex items-start gap-2 rounded-xl border border-ink-100 bg-ink-50 p-3">
-					<Landmark class="mt-0.5 size-4 shrink-0 text-ink-500" />
-					<p class="text-sm leading-relaxed text-ink-700">
-						<strong class="font-semibold text-ink-900">Quién lo aplicaría:</strong>
-						{measure.responsibleScope}
-					</p>
-				</div>
+				<p class="mt-2 flex items-start gap-2 text-sm leading-relaxed text-ink-700">
+					<Landmark class="mt-0.5 size-4 shrink-0 text-ink-400" />
+					<span
+						><strong class="font-semibold text-ink-900">Quién lo aplicaría:</strong>
+						{measure.responsibleScope}</span
+					>
+				</p>
 			{/if}
 
-			<div class="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+			<div class="mt-3 grid grid-cols-1 gap-2.5 rounded-xl bg-brand-50/60 p-3 sm:grid-cols-2">
 				{#if measure.estimatedCost}
-					<div class="flex items-start gap-2 text-xs text-ink-600">
+					<div class="flex items-start gap-2 text-xs text-ink-700">
 						<Coins class="mt-0.5 size-3.5 shrink-0 text-brand-600" />
 						<span
-							><strong class="font-semibold text-ink-800">Inversión estimada:</strong>
+							><strong class="font-semibold text-ink-900">Inversión estimada:</strong>
 							{measure.estimatedCost}</span
 						>
 					</div>
 				{/if}
 				{#if measure.timeframe}
-					<div class="flex items-start gap-2 text-xs text-ink-600">
+					<div class="flex items-start gap-2 text-xs text-ink-700">
 						<CalendarClock class="mt-0.5 size-3.5 shrink-0 text-brand-600" />
 						<span
-							><strong class="font-semibold text-ink-800">Plazo:</strong>
-							{measure.timeframe}</span
+							><strong class="font-semibold text-ink-900">Plazo:</strong>
+							{measure.timeframe.replace('Plazo: ', '')}</span
 						>
 					</div>
 				{/if}
 			</div>
 
-			{#if measure.argumentsFor}
-				<div class="mt-3 rounded-xl border border-brand-100 bg-brand-50 p-3 text-sm text-brand-900">
-					<strong class="font-semibold">Ventajas:</strong>
-					{measure.argumentsFor}
-				</div>
-			{/if}
-			{#if measure.risks}
-				<div class="mt-2 rounded-xl border border-ink-200 bg-ink-50 p-3 text-sm text-ink-700">
-					<strong class="font-semibold">Riesgos o dificultades:</strong>
-					{measure.risks}
-				</div>
-			{/if}
-
-			{#if measure.indicators.length > 0}
-				<div class="mt-3">
-					<p class="flex items-center gap-1.5 text-xs font-semibold text-ink-700">
-						<Gauge class="size-3.5 text-brand-600" /> Indicadores para medirla
+			{#if measure.argumentsFor || measure.risks || measure.indicators.length > 0}
+				<div class="mt-4 border-t border-ink-100 pt-3">
+					<p
+						class="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-ink-500 uppercase"
+					>
+						<ShieldCheck class="size-3.5 text-ink-400" /> Riesgos, garantías e indicadores
 					</p>
-					<ul class="mt-1.5 flex flex-col gap-1">
-						{#each measure.indicators as indicator (indicator)}
-							<li class="text-xs text-ink-600">· {indicator}</li>
-						{/each}
-					</ul>
+					{#if measure.argumentsFor}
+						<p class="mt-2 text-sm leading-relaxed text-ink-700">
+							<strong class="font-semibold text-brand-800">Ventajas:</strong>
+							{measure.argumentsFor}
+						</p>
+					{/if}
+					{#if measure.risks}
+						<p class="mt-2 text-sm leading-relaxed text-ink-700">
+							<strong class="font-semibold text-ink-900">Riesgos o dificultades:</strong>
+							{measure.risks}
+						</p>
+					{/if}
+					{#if measure.indicators.length > 0}
+						<div class="mt-2">
+							<p class="flex items-center gap-1.5 text-xs font-semibold text-ink-700">
+								<Gauge class="size-3.5 text-brand-600" /> Indicadores para medirla
+							</p>
+							<ul class="mt-1.5 flex flex-col gap-1">
+								{#each measure.indicators as indicator (indicator)}
+									<li class="text-xs text-ink-600">· {indicator}</li>
+								{/each}
+							</ul>
+						</div>
+					{/if}
 				</div>
 			{/if}
 
