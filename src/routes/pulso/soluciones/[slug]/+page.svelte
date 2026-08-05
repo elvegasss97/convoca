@@ -22,6 +22,7 @@
 		ArrowRight
 	} from '@lucide/svelte';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
+	import { tick } from 'svelte';
 	import type { PageData } from './$types';
 	import type {
 		MeasureParticipationResponse,
@@ -41,6 +42,8 @@
 	import GeneralParticipationBlock from '$lib/components/pulso/GeneralParticipationBlock.svelte';
 	import SimpleMeasureCard from '$lib/components/pulso/SimpleMeasureCard.svelte';
 	import SimpleGeneralParticipationBlock from '$lib/components/pulso/SimpleGeneralParticipationBlock.svelte';
+	import PlanMap from '$lib/components/pulso/PlanMap.svelte';
+	import { viviendaMapData, sanidadMapData } from '$lib/data/planMapData';
 	import { submitMeasureAlternative } from '$lib/services/topicsService';
 	import {
 		listMyMeasureParticipationResponses,
@@ -128,11 +131,21 @@
 		{ id: 'fuentes', label: 'Fuentes' }
 	]);
 
+	// Horizonte temporal derivado de las fases del calendario ya publicadas
+	// (años mín/máx encontrados en sus títulos), no un dato nuevo inventado.
+	const planHorizon = $derived.by(() => {
+		const years = data.timelinePhases.flatMap((p) => (p.title.match(/\d{4}/g) ?? []).map(Number));
+		if (years.length === 0) return null;
+		return `${Math.min(...years)}–${Math.max(...years)}`;
+	});
+
 	// "El problema": si el texto es largo, se colapsa tras unos ~220
 	// caracteres para no abrir la página con un muro de texto.
 	const PROBLEM_PREVIEW_LENGTH = 220;
 	let problemExpanded = $state(false);
 	let budgetExpanded = $state(false);
+	let dataPointsExpanded = $state(false);
+	const DATA_POINTS_PREVIEW_COUNT = 4;
 	const problemIsLong = $derived((topic.problemIntro ?? '').length > PROBLEM_PREVIEW_LENGTH);
 	const problemPreview = $derived(
 		problemIsLong
@@ -186,6 +199,25 @@
 		for (const group of measureGroups) for (const m of group.measures) map.set(m.id, n++);
 		return map;
 	});
+
+	// Acordeón exclusivo: solo una medida abierta a la vez para no saturar la
+	// página con varios paneles largos desplegados simultáneamente.
+	let expandedMeasureId = $state<string | null>(null);
+	function toggleMeasure(id: string) {
+		expandedMeasureId = expandedMeasureId === id ? null : id;
+	}
+
+	// Usado por el mapa visual: fuerza la apertura (no toggle) y desplaza
+	// hasta la tarjeta de la medida en el contenido detallado de abajo.
+	async function openMeasure(id: string) {
+		expandedMeasureId = id;
+		await tick();
+		const el =
+			document.getElementById(`topic-measure-panel-${id}`) ??
+			document.getElementById(`measure-panel-${id}`);
+		const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		el?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
+	}
 
 	let riskAccordionOpen = $state(false);
 	let indicatorsAccordionOpen = $state(false);
@@ -350,39 +382,58 @@
 	<p class="mt-2 text-sm leading-relaxed text-ink-700">
 		{topic.summary || 'Resumen pendiente.'}
 	</p>
-	<p class="mt-2 text-xs text-ink-400">
+
+	{#if planHorizon || topic.investmentRange || data.measures.length > 0}
+		<dl class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm">
+			{#if planHorizon}
+				<div class="flex items-baseline gap-1.5">
+					<dt class="text-xs text-ink-500">Horizonte</dt>
+					<dd class="font-semibold text-ink-900">{planHorizon}</dd>
+				</div>
+			{/if}
+			{#if topic.investmentRange}
+				<div class="flex items-baseline gap-1.5">
+					<dt class="text-xs text-ink-500">Inversión global</dt>
+					<dd class="font-semibold text-ink-900">{topic.investmentRange}</dd>
+				</div>
+			{/if}
+			{#if data.measures.length > 0}
+				<div class="flex items-baseline gap-1.5">
+					<dt class="text-xs text-ink-500">Medidas</dt>
+					<dd class="font-semibold text-ink-900">{data.measures.length}</dd>
+				</div>
+			{/if}
+		</dl>
+	{/if}
+
+	{#if topic.category === 'vivienda' || topic.category === 'sanidad'}
+		<div class="mt-5">
+			<h2 class="font-display text-lg font-semibold text-ink-900 sm:text-xl">
+				Así funciona {topic.documentTitle || `el ${topic.title}`}
+			</h2>
+			<p class="mt-1 text-sm text-ink-600">
+				{topic.category === 'vivienda'
+					? 'Explora cómo cada problema se conecta con una medida, una inversión y un resultado.'
+					: 'Explora cómo cada causa se conecta con una medida, un plazo y un compromiso verificable.'}
+			</p>
+		</div>
+		<div class="mt-3">
+			<PlanMap
+				{topic}
+				measures={data.measures}
+				axes={data.axes}
+				timelinePhases={data.timelinePhases}
+				{measureNumberById}
+				mapData={topic.category === 'vivienda' ? viviendaMapData : sanidadMapData}
+				onOpenMeasure={openMeasure}
+			/>
+		</div>
+	{/if}
+
+	<p class="mt-4 text-xs text-ink-400">
 		{#if topic.publishedAt}Publicado el {formatEventDate(topic.publishedAt)} ·{/if}
 		Actualizado el {formatEventDate(topic.updatedAt)}
 	</p>
-
-	{#if data.measures.length > 0 || topic.investmentRange || topic.investmentGdpPercent || topic.referenceGoal}
-		<dl class="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-			<div class="rounded-xl border border-ink-100 p-3">
-				<dt class="text-xs text-ink-500">Medidas</dt>
-				<dd class="mt-0.5 text-sm font-semibold text-ink-900">
-					{data.measures.length > 0 ? data.measures.length : 'Pendiente'}
-				</dd>
-			</div>
-			<div class="rounded-xl border border-ink-100 p-3">
-				<dt class="text-xs text-ink-500">Inversión estimada</dt>
-				<dd class="mt-0.5 text-sm font-semibold text-ink-900">
-					{topic.investmentRange || 'Pendiente'}
-				</dd>
-			</div>
-			<div class="rounded-xl border border-ink-100 p-3">
-				<dt class="text-xs text-ink-500">Esfuerzo</dt>
-				<dd class="mt-0.5 text-sm font-semibold text-ink-900">
-					{topic.investmentGdpPercent || 'Pendiente'}
-				</dd>
-			</div>
-			<div class="rounded-xl border border-ink-100 p-3">
-				<dt class="text-xs text-ink-500">Objetivo de referencia</dt>
-				<dd class="mt-0.5 text-sm font-semibold text-ink-900">
-					{topic.referenceGoal || 'Pendiente'}
-				</dd>
-			</div>
-		</dl>
-	{/if}
 
 	{#if topic.publicNotice}
 		<div
@@ -402,12 +453,12 @@
 	<!-- Navegación interna -->
 	<nav
 		aria-label="Secciones del tema"
-		class="no-scrollbar mt-4 flex gap-1.5 overflow-x-auto border-y border-ink-100 py-2.5"
+		class="no-scrollbar mt-4 flex gap-3 overflow-x-auto border-b border-ink-100"
 	>
 		{#each NAV_SECTIONS as section (section.id)}
 			<a
 				href={`#${section.id}`}
-				class="shrink-0 rounded-full border border-ink-200 px-3 py-1.5 text-xs font-medium text-ink-600 hover:border-brand-300 hover:bg-brand-50"
+				class="shrink-0 py-2.5 text-xs font-medium text-ink-500 hover:text-brand-700 hover:underline focus-visible:underline focus-visible:outline-none"
 			>
 				{section.label}
 			</a>
@@ -441,8 +492,11 @@
 		{/if}
 
 		{#if data.dataPoints.length > 0}
+			{@const visiblePoints = dataPointsExpanded
+				? data.dataPoints
+				: data.dataPoints.slice(0, DATA_POINTS_PREVIEW_COUNT)}
 			<dl class="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-				{#each data.dataPoints as point (point.id)}
+				{#each visiblePoints as point (point.id)}
 					{@const source = sourceById(point.sourceId)}
 					<div class="rounded-xl border border-ink-100 p-3">
 						<dt class="text-xs font-medium text-ink-500">{point.label}</dt>
@@ -471,6 +525,17 @@
 					</div>
 				{/each}
 			</dl>
+			{#if data.dataPoints.length > DATA_POINTS_PREVIEW_COUNT}
+				<button
+					type="button"
+					onclick={() => (dataPointsExpanded = !dataPointsExpanded)}
+					class="mt-2 text-sm font-semibold text-brand-700 hover:underline"
+				>
+					{dataPointsExpanded
+						? 'Mostrar menos datos'
+						: `Ver ${data.dataPoints.length - DATA_POINTS_PREVIEW_COUNT} datos más`}
+				</button>
+			{/if}
 		{:else}
 			<p class="mt-3 text-xs text-ink-400">Datos destacados pendientes de incorporar.</p>
 		{/if}
@@ -482,13 +547,14 @@
 	{#if data.commitments.length > 0}
 		<section
 			id="compromisos"
-			class="mt-4 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
+			class="mt-8 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
 		>
 			<h2 class="flex items-center gap-1.5 font-display text-base font-semibold text-ink-900">
 				<ShieldCheck class="size-4 text-brand-700" /> Cinco compromisos que deben poder comprobarse
 			</h2>
 			<ContentTypeTag type="convoca" class="mt-2" />
 			<p class="mt-2 text-sm leading-relaxed text-ink-700">
+				{topic.category === 'sanidad' ? 'El' : 'La propuesta de'}
 				{topic.documentTitle || topic.title} no se limita a proponer más recursos: establece compromisos
 				concretos, plazos, indicadores y mecanismos de evaluación.
 			</p>
@@ -513,7 +579,7 @@
 	{/if}
 
 	<!-- 3 + 4. Organización de medidas y tarjetas -->
-	<section id="medidas" class="mt-4 scroll-mt-20">
+	<section id="medidas" class="mt-8 scroll-mt-20">
 		<h2 class="flex items-center gap-1.5 font-display text-base font-semibold text-ink-900">
 			<Lightbulb class="size-4 text-brand-700" /> Medidas
 		</h2>
@@ -554,6 +620,8 @@
 										{results}
 										myResponse={myMeasureResponses.get(measure.id)}
 										sources={measureSources}
+										expanded={expandedMeasureId === measure.id}
+										onToggle={() => toggleMeasure(measure.id)}
 									/>
 								{:else}
 									<TopicMeasureCard
@@ -564,6 +632,8 @@
 										{results}
 										myResponse={myMeasureResponses.get(measure.id)}
 										sources={measureSources}
+										expanded={expandedMeasureId === measure.id}
+										onToggle={() => toggleMeasure(measure.id)}
 									/>
 								{/if}
 							{/each}
@@ -579,7 +649,7 @@
 	</section>
 
 	<!-- Participar (cierre de participación general) -->
-	<section id="participar" class="mt-4 scroll-mt-20">
+	<section id="participar" class="mt-8 scroll-mt-20">
 		{#if usesSimpleParticipation}
 			<SimpleGeneralParticipationBlock
 				{round}
@@ -605,7 +675,7 @@
 	<!-- 6. Coste y calendario -->
 	<section
 		id="coste"
-		class="mt-4 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
+		class="mt-8 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
 	>
 		<h2 class="flex items-center gap-1.5 font-display text-base font-semibold text-ink-900">
 			<Coins class="size-4 text-brand-700" /> Coste
@@ -655,31 +725,40 @@
 
 	<section
 		id="calendario"
-		class="mt-4 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
+		class="mt-8 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
 	>
 		<h2 class="flex items-center gap-1.5 font-display text-base font-semibold text-ink-900">
 			<CalendarRange class="size-4 text-brand-700" /> Calendario
 		</h2>
 		<ContentTypeTag type="convoca" class="mt-2" />
 		{#if data.timelinePhases.length > 0}
-			<ol class="mt-3 flex flex-col gap-3">
+			<ol class="relative mt-4 flex flex-col gap-6">
+				<div class="absolute top-2 bottom-2 left-[15px] w-px bg-ink-200" aria-hidden="true"></div>
 				{#each data.timelinePhases as phase, i (phase.id)}
-					<li class="rounded-xl border border-ink-100 p-3">
-						<div class="flex items-center gap-2">
-							<span
-								class="flex size-6 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-800"
-								>{i + 1}</span
-							>
-							<p class="text-sm font-semibold text-ink-900">{phase.title}</p>
-						</div>
+					{@const isFirst100 = /100\s*d[ií]as/i.test(phase.title)}
+					<li class="relative pl-10">
+						<span
+							class="absolute top-0 left-0 flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold {isFirst100
+								? 'bg-warning-100 text-warning-700'
+								: 'bg-brand-100 text-brand-800'}">{i + 1}</span
+						>
+						<p class="pt-1 text-sm font-semibold text-ink-900">
+							{phase.title}
+							{#if isFirst100}
+								<span
+									class="ml-1.5 rounded-full bg-warning-50 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-warning-700 uppercase"
+									>Arranque, no ejecución</span
+								>
+							{/if}
+						</p>
 						{#if phase.description}
-							<p class="mt-1.5 pl-8 text-sm leading-relaxed text-ink-700">{phase.description}</p>
+							<p class="mt-1.5 text-sm leading-relaxed text-ink-700">{phase.description}</p>
 						{/if}
 						{#if phase.items.length > 0}
-							<ol class="mt-2 flex flex-col gap-2 pl-8">
+							<ol class="mt-2.5 flex flex-col gap-1.5 border-l-2 border-ink-100 pl-3">
 								{#each phase.items as item, j (item)}
-									<li class="rounded-lg bg-ink-50 p-2.5 text-sm leading-relaxed text-ink-700">
-										<span class="font-semibold text-ink-900">{j + 1}.</span>
+									<li class="text-sm leading-relaxed text-ink-700">
+										<span class="font-semibold text-ink-500">{j + 1}.</span>
 										{item}
 									</li>
 								{/each}
@@ -696,7 +775,7 @@
 	<!-- 7. Riesgos y comprobación -->
 	<section
 		id="riesgos"
-		class="mt-4 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
+		class="mt-8 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
 	>
 		<h2 class="flex items-center gap-1.5 font-display text-base font-semibold text-ink-900">
 			<AlertTriangle class="size-4 text-brand-700" /> Riesgos y comprobación
@@ -879,7 +958,7 @@
 	<!-- 8. Pulso ciudadano -->
 	<section
 		id="pulso"
-		class="mt-4 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
+		class="mt-8 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
 	>
 		<h2 class="flex items-center gap-1.5 font-display text-base font-semibold text-ink-900">
 			<Activity class="size-4 text-brand-700" /> Lo que dice la ciudadanía
@@ -922,7 +1001,7 @@
 	<!-- Fuentes -->
 	<section
 		id="fuentes"
-		class="mt-4 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
+		class="mt-8 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
 	>
 		<h2 class="flex items-center gap-1.5 font-display text-base font-semibold text-ink-900">
 			<BookText class="size-4 text-brand-700" /> Fuentes
@@ -955,7 +1034,7 @@
 	<!-- 9. Cierre de página -->
 	<section
 		id="cierre"
-		class="mt-4 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
+		class="mt-8 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
 	>
 		<h2 class="flex items-center gap-1.5 font-display text-base font-semibold text-ink-900">
 			<History class="size-4 text-brand-700" /> Historial de versiones
@@ -1045,7 +1124,7 @@
 	<!-- Acción -->
 	<section
 		id="accion"
-		class="mt-4 scroll-mt-20 rounded-2xl border border-dashed border-ink-200 bg-white p-4 sm:p-5"
+		class="mt-8 scroll-mt-20 rounded-2xl border border-dashed border-ink-200 bg-white p-4 sm:p-5"
 	>
 		<h2 class="flex items-center gap-1.5 font-display text-base font-semibold text-ink-900">
 			<Rocket class="size-4 text-brand-700" /> Acción
