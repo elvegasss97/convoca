@@ -25,6 +25,7 @@ import type {
 	TopicMeasureAlternative,
 	TopicMeasureAlternativeStatus,
 	TopicMeasureAxis,
+	TopicMeasurePhaseStatus,
 	TopicCommitment,
 	TopicRisk,
 	TopicSource,
@@ -690,7 +691,9 @@ function rowToBudgetTimelineEntry(row: BudgetTimelineRow): TopicBudgetTimelineEn
 	};
 }
 
-export async function listTopicBudgetTimeline(topicId: string): Promise<TopicBudgetTimelineEntry[]> {
+export async function listTopicBudgetTimeline(
+	topicId: string
+): Promise<TopicBudgetTimelineEntry[]> {
 	const { data, error } = await supabase
 		.from('topic_budget_timeline')
 		.select('*')
@@ -1319,6 +1322,36 @@ export async function updateTopicTimelinePhase(
 export async function deleteTopicTimelinePhase(phaseId: string): Promise<void> {
 	const { error } = await supabase.from('topic_timeline_phases').delete().eq('id', phaseId);
 	if (error) throw error;
+}
+
+interface MeasurePhaseStatusRow {
+	id: string;
+	topic_id: string;
+	measure_id: string;
+	phase_id: string;
+	status: string;
+}
+
+function rowToMeasurePhaseStatus(row: MeasurePhaseStatusRow): TopicMeasurePhaseStatus {
+	return {
+		id: row.id,
+		topicId: row.topic_id,
+		measureId: row.measure_id,
+		phaseId: row.phase_id,
+		status: row.status as TopicMeasurePhaseStatus['status']
+	};
+}
+
+/** Cruce medida×fase×estado para la vista Gantt del Calendario. Vacío mientras un tema no tenga este dato estructurado (usar el listado simple de fases como fallback). */
+export async function listTopicMeasurePhaseStatuses(
+	topicId: string
+): Promise<TopicMeasurePhaseStatus[]> {
+	const { data, error } = await supabase
+		.from('topic_measure_phase_status')
+		.select('*')
+		.eq('topic_id', topicId);
+	if (error) throw error;
+	return (data ?? []).map(rowToMeasurePhaseStatus);
 }
 
 // ---------------------------------------------------------------------------

@@ -14,7 +14,8 @@ import {
 	listMeasureSourceIdsForMeasures,
 	listTopicBudgetLines,
 	listTopicBudgetScenarios,
-	listTopicBudgetTimeline
+	listTopicBudgetTimeline,
+	listTopicMeasurePhaseStatuses
 } from '$lib/services/topicsService';
 import { getConcernResults } from '$lib/services/concernsService';
 import {
@@ -42,7 +43,8 @@ export const load: PageLoad = async ({ params }) => {
 		round,
 		budgetLines,
 		budgetScenarios,
-		budgetTimeline
+		budgetTimeline,
+		measurePhaseStatuses
 	] = await Promise.all([
 		listTopicSources(topic.id),
 		listTopicDataPoints(topic.id),
@@ -56,7 +58,8 @@ export const load: PageLoad = async ({ params }) => {
 		getLatestRound(topic.id),
 		listTopicBudgetLines(topic.id),
 		listTopicBudgetScenarios(topic.id),
-		listTopicBudgetTimeline(topic.id)
+		listTopicBudgetTimeline(topic.id),
+		listTopicMeasurePhaseStatuses(topic.id)
 	]);
 
 	const measureIds = measures.map((m) => m.id);
@@ -96,6 +99,7 @@ export const load: PageLoad = async ({ params }) => {
 		summary,
 		budgetLines,
 		budgetScenarios,
-		budgetTimeline
+		budgetTimeline,
+		measurePhaseStatuses
 	};
 };
