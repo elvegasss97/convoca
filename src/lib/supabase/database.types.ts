@@ -1506,6 +1506,50 @@ export type Database = {
 					}
 				];
 			};
+			topic_evaluation_moments: {
+				Row: {
+					created_at: string;
+					description: string;
+					frequency_label: string;
+					id: string;
+					key: string;
+					sort_order: number;
+					title: string;
+					topic_id: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					description: string;
+					frequency_label: string;
+					id?: string;
+					key: string;
+					sort_order?: number;
+					title: string;
+					topic_id: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					description?: string;
+					frequency_label?: string;
+					id?: string;
+					key?: string;
+					sort_order?: number;
+					title?: string;
+					topic_id?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_evaluation_moments_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			topic_measure_alternatives: {
 				Row: {
 					acknowledged_risks: string | null;
@@ -1622,6 +1666,47 @@ export type Database = {
 				Relationships: [
 					{
 						foreignKeyName: 'topic_measure_axes_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topic_measure_change_conditions: {
+				Row: {
+					created_at: string;
+					id: string;
+					items: string[];
+					key: string;
+					sort_order: number;
+					title: string;
+					topic_id: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					items?: string[];
+					key: string;
+					sort_order?: number;
+					title: string;
+					topic_id: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					items?: string[];
+					key?: string;
+					sort_order?: number;
+					title?: string;
+					topic_id?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_measure_change_conditions_topic_id_fkey';
 						columns: ['topic_id'];
 						isOneToOne: false;
 						referencedRelation: 'topics';
@@ -1803,6 +1888,7 @@ export type Database = {
 			};
 			topic_risks: {
 				Row: {
+					category: string | null;
 					created_at: string;
 					decision_trigger: string | null;
 					description: string | null;
@@ -1815,6 +1901,7 @@ export type Database = {
 					updated_at: string;
 				};
 				Insert: {
+					category?: string | null;
 					created_at?: string;
 					decision_trigger?: string | null;
 					description?: string | null;
@@ -1827,6 +1914,7 @@ export type Database = {
 					updated_at?: string;
 				};
 				Update: {
+					category?: string | null;
 					created_at?: string;
 					decision_trigger?: string | null;
 					description?: string | null;
