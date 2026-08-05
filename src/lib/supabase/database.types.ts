@@ -1,23 +1,37 @@
 /**
  * Tipos generados automáticamente a partir del esquema remoto real
  * (proyecto ihwzbdaeggvkzwevozra) con
- * `mcp__supabase__generate_typescript_types`. No editar a mano: si el
- * esquema cambia, añade una migración nueva y vuelve a generar este
- * archivo.
+ * `supabase gen types typescript --project-id ihwzbdaeggvkzwevozra`.
+ * No editar a mano: si el esquema cambia, añade una migración nueva y
+ * vuelve a generar este archivo.
  */
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
+	// Allows to automatically instantiate createClient with right options
+	// instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
 	__InternalSupabase: {
 		PostgrestVersion: '14.15';
 	};
 	public: {
 		Tables: {
 			attendance_rate_limits: {
-				Row: { called_at: string; dedup_token: string; id: number };
-				Insert: { called_at?: string; dedup_token: string; id?: never };
-				Update: { called_at?: string; dedup_token?: string; id?: never };
+				Row: {
+					called_at: string;
+					dedup_token: string;
+					id: number;
+				};
+				Insert: {
+					called_at?: string;
+					dedup_token: string;
+					id?: never;
+				};
+				Update: {
+					called_at?: string;
+					dedup_token?: string;
+					id?: never;
+				};
 				Relationships: [];
 			};
 			attendance_responses: {
@@ -142,9 +156,21 @@ export type Database = {
 				];
 			};
 			concern_events: {
-				Row: { concern_id: string; created_at: string; event_id: string };
-				Insert: { concern_id: string; created_at?: string; event_id: string };
-				Update: { concern_id?: string; created_at?: string; event_id?: string };
+				Row: {
+					concern_id: string;
+					created_at: string;
+					event_id: string;
+				};
+				Insert: {
+					concern_id: string;
+					created_at?: string;
+					event_id: string;
+				};
+				Update: {
+					concern_id?: string;
+					created_at?: string;
+					event_id?: string;
+				};
 				Relationships: [
 					{
 						foreignKeyName: 'concern_events_concern_id_fkey';
@@ -158,6 +184,241 @@ export type Database = {
 						columns: ['event_id'];
 						isOneToOne: false;
 						referencedRelation: 'events';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			concern_listening_completions: {
+				Row: {
+					completed_at: string;
+					round_id: string;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					completed_at?: string;
+					round_id: string;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					completed_at?: string;
+					round_id?: string;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'concern_listening_completions_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'concern_listening_rounds';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			concern_listening_contexts: {
+				Row: {
+					area_type: string | null;
+					community: string | null;
+					created_at: string;
+					housing_situation: string | null;
+					id: string;
+					round_id: string;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					area_type?: string | null;
+					community?: string | null;
+					created_at?: string;
+					housing_situation?: string | null;
+					id?: string;
+					round_id: string;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					area_type?: string | null;
+					community?: string | null;
+					created_at?: string;
+					housing_situation?: string | null;
+					id?: string;
+					round_id?: string;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'concern_listening_contexts_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'concern_listening_rounds';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			concern_listening_responses: {
+				Row: {
+					cause_code: string | null;
+					cause_other: string | null;
+					comment: string | null;
+					created_at: string;
+					evolution: string | null;
+					id: string;
+					option_code: string;
+					personal_relation: string | null;
+					rank: number | null;
+					round_id: string;
+					severity: string | null;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					cause_code?: string | null;
+					cause_other?: string | null;
+					comment?: string | null;
+					created_at?: string;
+					evolution?: string | null;
+					id?: string;
+					option_code: string;
+					personal_relation?: string | null;
+					rank?: number | null;
+					round_id: string;
+					severity?: string | null;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					cause_code?: string | null;
+					cause_other?: string | null;
+					comment?: string | null;
+					created_at?: string;
+					evolution?: string | null;
+					id?: string;
+					option_code?: string;
+					personal_relation?: string | null;
+					rank?: number | null;
+					round_id?: string;
+					severity?: string | null;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'concern_listening_responses_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'concern_listening_rounds';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			concern_listening_rounds: {
+				Row: {
+					category: string;
+					closes_at: string | null;
+					created_at: string;
+					created_by: string | null;
+					id: string;
+					opens_at: string | null;
+					status: string;
+					updated_at: string;
+					version_label: string;
+				};
+				Insert: {
+					category: string;
+					closes_at?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					id?: string;
+					opens_at?: string | null;
+					status?: string;
+					updated_at?: string;
+					version_label: string;
+				};
+				Update: {
+					category?: string;
+					closes_at?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					id?: string;
+					opens_at?: string | null;
+					status?: string;
+					updated_at?: string;
+					version_label?: string;
+				};
+				Relationships: [];
+			};
+			concern_listening_survey_responses: {
+				Row: {
+					area_type: string | null;
+					commitment_most_difficult_id: string | null;
+					commitment_most_urgent_id: string | null;
+					community: string | null;
+					created_at: string;
+					id: string;
+					main_cause: string | null;
+					missing_improvement: string | null;
+					other_problem_text: string | null;
+					prioritized_measure_ids: string[];
+					problems: string[];
+					round_id: string;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					area_type?: string | null;
+					commitment_most_difficult_id?: string | null;
+					commitment_most_urgent_id?: string | null;
+					community?: string | null;
+					created_at?: string;
+					id?: string;
+					main_cause?: string | null;
+					missing_improvement?: string | null;
+					other_problem_text?: string | null;
+					prioritized_measure_ids?: string[];
+					problems?: string[];
+					round_id: string;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					area_type?: string | null;
+					commitment_most_difficult_id?: string | null;
+					commitment_most_urgent_id?: string | null;
+					community?: string | null;
+					created_at?: string;
+					id?: string;
+					main_cause?: string | null;
+					missing_improvement?: string | null;
+					other_problem_text?: string | null;
+					prioritized_measure_ids?: string[];
+					problems?: string[];
+					round_id?: string;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'concern_listening_survey_resp_commitment_most_difficult_id_fkey';
+						columns: ['commitment_most_difficult_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_commitments';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'concern_listening_survey_respons_commitment_most_urgent_id_fkey';
+						columns: ['commitment_most_urgent_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_commitments';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'concern_listening_survey_responses_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'concern_listening_rounds';
 						referencedColumns: ['id'];
 					}
 				];
@@ -494,6 +755,113 @@ export type Database = {
 					}
 				];
 			};
+			general_participation_responses: {
+				Row: {
+					created_at: string;
+					general_position: string;
+					id: string;
+					investment_opinion: string | null;
+					measures_considered_count: number;
+					pace_preference: string | null;
+					round_id: string;
+					unaddressed_problem: string | null;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					created_at?: string;
+					general_position: string;
+					id?: string;
+					investment_opinion?: string | null;
+					measures_considered_count?: number;
+					pace_preference?: string | null;
+					round_id: string;
+					unaddressed_problem?: string | null;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					created_at?: string;
+					general_position?: string;
+					id?: string;
+					investment_opinion?: string | null;
+					measures_considered_count?: number;
+					pace_preference?: string | null;
+					round_id?: string;
+					unaddressed_problem?: string | null;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'general_participation_responses_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'participation_rounds';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			measure_participation_responses: {
+				Row: {
+					comment: string | null;
+					created_at: string;
+					id: string;
+					measure_id: string;
+					position_value: string;
+					quick_change: string | null;
+					reason_code: string | null;
+					reason_other: string | null;
+					round_id: string;
+					updated_at: string;
+					urgency: string | null;
+					user_id: string;
+				};
+				Insert: {
+					comment?: string | null;
+					created_at?: string;
+					id?: string;
+					measure_id: string;
+					position_value: string;
+					quick_change?: string | null;
+					reason_code?: string | null;
+					reason_other?: string | null;
+					round_id: string;
+					updated_at?: string;
+					urgency?: string | null;
+					user_id: string;
+				};
+				Update: {
+					comment?: string | null;
+					created_at?: string;
+					id?: string;
+					measure_id?: string;
+					position_value?: string;
+					quick_change?: string | null;
+					reason_code?: string | null;
+					reason_other?: string | null;
+					round_id?: string;
+					updated_at?: string;
+					urgency?: string | null;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'measure_participation_responses_measure_id_fkey';
+						columns: ['measure_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_measures';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'measure_participation_responses_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'participation_rounds';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			measure_responses: {
 				Row: {
 					created_at: string;
@@ -528,6 +896,74 @@ export type Database = {
 						columns: ['measure_id'];
 						isOneToOne: false;
 						referencedRelation: 'topic_measures';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			next_block_vote_rounds: {
+				Row: {
+					closes_at: string | null;
+					created_at: string;
+					created_by: string | null;
+					id: string;
+					opens_at: string | null;
+					status: string;
+					updated_at: string;
+					version_label: string;
+				};
+				Insert: {
+					closes_at?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					id?: string;
+					opens_at?: string | null;
+					status?: string;
+					updated_at?: string;
+					version_label: string;
+				};
+				Update: {
+					closes_at?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					id?: string;
+					opens_at?: string | null;
+					status?: string;
+					updated_at?: string;
+					version_label?: string;
+				};
+				Relationships: [];
+			};
+			next_block_votes: {
+				Row: {
+					created_at: string;
+					id: string;
+					option_code: string;
+					round_id: string;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					option_code: string;
+					round_id: string;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					option_code?: string;
+					round_id?: string;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'next_block_votes_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'next_block_vote_rounds';
 						referencedColumns: ['id'];
 					}
 				];
@@ -621,10 +1057,107 @@ export type Database = {
 				};
 				Relationships: [];
 			};
+			participant_contexts: {
+				Row: {
+					community: string | null;
+					created_at: string;
+					housing_situation: string | null;
+					id: string;
+					round_id: string;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					community?: string | null;
+					created_at?: string;
+					housing_situation?: string | null;
+					id?: string;
+					round_id: string;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					community?: string | null;
+					created_at?: string;
+					housing_situation?: string | null;
+					id?: string;
+					round_id?: string;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'participant_contexts_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'participation_rounds';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			participation_rounds: {
+				Row: {
+					closes_at: string | null;
+					created_at: string;
+					created_by: string | null;
+					id: string;
+					opens_at: string | null;
+					status: string;
+					topic_id: string;
+					updated_at: string;
+					version_label: string;
+				};
+				Insert: {
+					closes_at?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					id?: string;
+					opens_at?: string | null;
+					status?: string;
+					topic_id: string;
+					updated_at?: string;
+					version_label: string;
+				};
+				Update: {
+					closes_at?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					id?: string;
+					opens_at?: string | null;
+					status?: string;
+					topic_id?: string;
+					updated_at?: string;
+					version_label?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'participation_rounds_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			profiles: {
-				Row: { created_at: string; id: string; role: string; updated_at: string };
-				Insert: { created_at?: string; id: string; role?: string; updated_at?: string };
-				Update: { created_at?: string; id?: string; role?: string; updated_at?: string };
+				Row: {
+					created_at: string;
+					id: string;
+					role: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					id: string;
+					role?: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					role?: string;
+					updated_at?: string;
+				};
 				Relationships: [];
 			};
 			reports: {
@@ -668,8 +1201,231 @@ export type Database = {
 					}
 				];
 			};
+			response_priorities: {
+				Row: {
+					created_at: string;
+					id: string;
+					measure_id: string;
+					rank: number;
+					round_id: string;
+					user_id: string;
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					measure_id: string;
+					rank: number;
+					round_id: string;
+					user_id: string;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					measure_id?: string;
+					rank?: number;
+					round_id?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'response_priorities_measure_id_fkey';
+						columns: ['measure_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_measures';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'response_priorities_round_id_fkey';
+						columns: ['round_id'];
+						isOneToOne: false;
+						referencedRelation: 'participation_rounds';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topic_budget_lines: {
+				Row: {
+					color_token: string;
+					created_at: string;
+					description: string | null;
+					id: string;
+					max_amount: number;
+					min_amount: number;
+					name: string;
+					note: string | null;
+					sort_order: number;
+					topic_id: string;
+					updated_at: string;
+				};
+				Insert: {
+					color_token: string;
+					created_at?: string;
+					description?: string | null;
+					id?: string;
+					max_amount: number;
+					min_amount: number;
+					name: string;
+					note?: string | null;
+					sort_order?: number;
+					topic_id: string;
+					updated_at?: string;
+				};
+				Update: {
+					color_token?: string;
+					created_at?: string;
+					description?: string | null;
+					id?: string;
+					max_amount?: number;
+					min_amount?: number;
+					name?: string;
+					note?: string | null;
+					sort_order?: number;
+					topic_id?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_budget_lines_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topic_budget_scenarios: {
+				Row: {
+					created_at: string;
+					description: string | null;
+					id: string;
+					key: string;
+					label: string;
+					sort_order: number;
+					topic_id: string;
+					total: number;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					description?: string | null;
+					id?: string;
+					key: string;
+					label: string;
+					sort_order?: number;
+					topic_id: string;
+					total: number;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					description?: string | null;
+					id?: string;
+					key?: string;
+					label?: string;
+					sort_order?: number;
+					topic_id?: string;
+					total?: number;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_budget_scenarios_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topic_budget_timeline: {
+				Row: {
+					created_at: string;
+					id: string;
+					is_period_average: boolean;
+					max_amount: number;
+					min_amount: number;
+					note: string | null;
+					topic_id: string;
+					updated_at: string;
+					year: number;
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					is_period_average?: boolean;
+					max_amount: number;
+					min_amount: number;
+					note?: string | null;
+					topic_id: string;
+					updated_at?: string;
+					year: number;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					is_period_average?: boolean;
+					max_amount?: number;
+					min_amount?: number;
+					note?: string | null;
+					topic_id?: string;
+					updated_at?: string;
+					year?: number;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_budget_timeline_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topic_commitments: {
+				Row: {
+					created_at: string;
+					description: string;
+					id: string;
+					sort_order: number;
+					title: string;
+					topic_id: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					description: string;
+					id?: string;
+					sort_order?: number;
+					title: string;
+					topic_id: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					description?: string;
+					id?: string;
+					sort_order?: number;
+					title?: string;
+					topic_id?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_commitments_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			topic_concerns: {
-				Row: { concern_id: string; created_at: string; sort_order: number; topic_id: string };
+				Row: {
+					concern_id: string;
+					created_at: string;
+					sort_order: number;
+					topic_id: string;
+				};
 				Insert: {
 					concern_id: string;
 					created_at?: string;
@@ -702,36 +1458,36 @@ export type Database = {
 			topic_data_points: {
 				Row: {
 					created_at: string;
+					explanation: string | null;
 					id: string;
 					label: string;
-					value: string;
-					explanation: string | null;
-					time_scope: string | null;
-					source_id: string | null;
 					sort_order: number;
+					source_id: string | null;
+					time_scope: string | null;
 					topic_id: string;
+					value: string;
 				};
 				Insert: {
 					created_at?: string;
+					explanation?: string | null;
 					id?: string;
 					label: string;
-					value: string;
-					explanation?: string | null;
-					time_scope?: string | null;
-					source_id?: string | null;
 					sort_order?: number;
+					source_id?: string | null;
+					time_scope?: string | null;
 					topic_id: string;
+					value: string;
 				};
 				Update: {
 					created_at?: string;
+					explanation?: string | null;
 					id?: string;
 					label?: string;
-					value?: string;
-					explanation?: string | null;
-					time_scope?: string | null;
-					source_id?: string | null;
 					sort_order?: number;
+					source_id?: string | null;
+					time_scope?: string | null;
 					topic_id?: string;
+					value?: string;
 				};
 				Relationships: [
 					{
@@ -826,633 +1582,14 @@ export type Database = {
 						referencedColumns: ['id'];
 					},
 					{
-						foreignKeyName: 'topic_measure_alternatives_topic_id_fkey';
-						columns: ['topic_id'];
-						isOneToOne: false;
-						referencedRelation: 'topics';
-						referencedColumns: ['id'];
-					},
-					{
 						foreignKeyName: 'topic_measure_alternatives_round_id_fkey';
 						columns: ['round_id'];
 						isOneToOne: false;
 						referencedRelation: 'participation_rounds';
 						referencedColumns: ['id'];
-					}
-				];
-			};
-			participation_rounds: {
-				Row: {
-					closes_at: string | null;
-					created_at: string;
-					created_by: string | null;
-					id: string;
-					opens_at: string | null;
-					status: string;
-					topic_id: string;
-					updated_at: string;
-					version_label: string;
-				};
-				Insert: {
-					closes_at?: string | null;
-					created_at?: string;
-					created_by?: string | null;
-					id?: string;
-					opens_at?: string | null;
-					status?: string;
-					topic_id: string;
-					updated_at?: string;
-					version_label: string;
-				};
-				Update: {
-					closes_at?: string | null;
-					created_at?: string;
-					created_by?: string | null;
-					id?: string;
-					opens_at?: string | null;
-					status?: string;
-					topic_id?: string;
-					updated_at?: string;
-					version_label?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'participation_rounds_topic_id_fkey';
-						columns: ['topic_id'];
-						isOneToOne: false;
-						referencedRelation: 'topics';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			measure_participation_responses: {
-				Row: {
-					comment: string | null;
-					created_at: string;
-					id: string;
-					measure_id: string;
-					position_value: string;
-					quick_change: string | null;
-					reason_code: string | null;
-					reason_other: string | null;
-					round_id: string;
-					updated_at: string;
-					urgency: string | null;
-					user_id: string;
-				};
-				Insert: {
-					comment?: string | null;
-					created_at?: string;
-					id?: string;
-					measure_id: string;
-					position_value: string;
-					quick_change?: string | null;
-					reason_code?: string | null;
-					reason_other?: string | null;
-					round_id: string;
-					updated_at?: string;
-					urgency?: string | null;
-					user_id: string;
-				};
-				Update: {
-					comment?: string | null;
-					created_at?: string;
-					id?: string;
-					measure_id?: string;
-					position_value?: string;
-					quick_change?: string | null;
-					reason_code?: string | null;
-					reason_other?: string | null;
-					round_id?: string;
-					updated_at?: string;
-					urgency?: string | null;
-					user_id?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'measure_participation_responses_round_id_fkey';
-						columns: ['round_id'];
-						isOneToOne: false;
-						referencedRelation: 'participation_rounds';
-						referencedColumns: ['id'];
 					},
 					{
-						foreignKeyName: 'measure_participation_responses_measure_id_fkey';
-						columns: ['measure_id'];
-						isOneToOne: false;
-						referencedRelation: 'topic_measures';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			general_participation_responses: {
-				Row: {
-					created_at: string;
-					general_position: string;
-					id: string;
-					investment_opinion: string | null;
-					measures_considered_count: number;
-					pace_preference: string | null;
-					round_id: string;
-					unaddressed_problem: string | null;
-					updated_at: string;
-					user_id: string;
-				};
-				Insert: {
-					created_at?: string;
-					general_position: string;
-					id?: string;
-					investment_opinion?: string | null;
-					measures_considered_count?: number;
-					pace_preference?: string | null;
-					round_id: string;
-					unaddressed_problem?: string | null;
-					updated_at?: string;
-					user_id: string;
-				};
-				Update: {
-					created_at?: string;
-					general_position?: string;
-					id?: string;
-					investment_opinion?: string | null;
-					measures_considered_count?: number;
-					pace_preference?: string | null;
-					round_id?: string;
-					unaddressed_problem?: string | null;
-					updated_at?: string;
-					user_id?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'general_participation_responses_round_id_fkey';
-						columns: ['round_id'];
-						isOneToOne: false;
-						referencedRelation: 'participation_rounds';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			response_priorities: {
-				Row: {
-					created_at: string;
-					id: string;
-					measure_id: string;
-					rank: number;
-					round_id: string;
-					user_id: string;
-				};
-				Insert: {
-					created_at?: string;
-					id?: string;
-					measure_id: string;
-					rank: number;
-					round_id: string;
-					user_id: string;
-				};
-				Update: {
-					created_at?: string;
-					id?: string;
-					measure_id?: string;
-					rank?: number;
-					round_id?: string;
-					user_id?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'response_priorities_round_id_fkey';
-						columns: ['round_id'];
-						isOneToOne: false;
-						referencedRelation: 'participation_rounds';
-						referencedColumns: ['id'];
-					},
-					{
-						foreignKeyName: 'response_priorities_measure_id_fkey';
-						columns: ['measure_id'];
-						isOneToOne: false;
-						referencedRelation: 'topic_measures';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			participant_contexts: {
-				Row: {
-					community: string | null;
-					created_at: string;
-					housing_situation: string | null;
-					id: string;
-					round_id: string;
-					updated_at: string;
-					user_id: string;
-				};
-				Insert: {
-					community?: string | null;
-					created_at?: string;
-					housing_situation?: string | null;
-					id?: string;
-					round_id: string;
-					updated_at?: string;
-					user_id: string;
-				};
-				Update: {
-					community?: string | null;
-					created_at?: string;
-					housing_situation?: string | null;
-					id?: string;
-					round_id?: string;
-					updated_at?: string;
-					user_id?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'participant_contexts_round_id_fkey';
-						columns: ['round_id'];
-						isOneToOne: false;
-						referencedRelation: 'participation_rounds';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			concern_listening_rounds: {
-				Row: {
-					category: string;
-					closes_at: string | null;
-					created_at: string;
-					created_by: string | null;
-					id: string;
-					opens_at: string | null;
-					status: string;
-					updated_at: string;
-					version_label: string;
-				};
-				Insert: {
-					category: string;
-					closes_at?: string | null;
-					created_at?: string;
-					created_by?: string | null;
-					id?: string;
-					opens_at?: string | null;
-					status?: string;
-					updated_at?: string;
-					version_label: string;
-				};
-				Update: {
-					category?: string;
-					closes_at?: string | null;
-					created_at?: string;
-					created_by?: string | null;
-					id?: string;
-					opens_at?: string | null;
-					status?: string;
-					updated_at?: string;
-					version_label?: string;
-				};
-				Relationships: [];
-			};
-			concern_listening_responses: {
-				Row: {
-					cause_code: string | null;
-					cause_other: string | null;
-					comment: string | null;
-					created_at: string;
-					evolution: string | null;
-					id: string;
-					option_code: string;
-					personal_relation: string | null;
-					rank: number | null;
-					round_id: string;
-					severity: string | null;
-					updated_at: string;
-					user_id: string;
-				};
-				Insert: {
-					cause_code?: string | null;
-					cause_other?: string | null;
-					comment?: string | null;
-					created_at?: string;
-					evolution?: string | null;
-					id?: string;
-					option_code: string;
-					personal_relation?: string | null;
-					rank?: number | null;
-					round_id: string;
-					severity?: string | null;
-					updated_at?: string;
-					user_id: string;
-				};
-				Update: {
-					cause_code?: string | null;
-					cause_other?: string | null;
-					comment?: string | null;
-					created_at?: string;
-					evolution?: string | null;
-					id?: string;
-					option_code?: string;
-					personal_relation?: string | null;
-					rank?: number | null;
-					round_id?: string;
-					severity?: string | null;
-					updated_at?: string;
-					user_id?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'concern_listening_responses_round_id_fkey';
-						columns: ['round_id'];
-						isOneToOne: false;
-						referencedRelation: 'concern_listening_rounds';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			concern_listening_contexts: {
-				Row: {
-					area_type: string | null;
-					community: string | null;
-					created_at: string;
-					housing_situation: string | null;
-					id: string;
-					round_id: string;
-					updated_at: string;
-					user_id: string;
-				};
-				Insert: {
-					area_type?: string | null;
-					community?: string | null;
-					created_at?: string;
-					housing_situation?: string | null;
-					id?: string;
-					round_id: string;
-					updated_at?: string;
-					user_id: string;
-				};
-				Update: {
-					area_type?: string | null;
-					community?: string | null;
-					created_at?: string;
-					housing_situation?: string | null;
-					id?: string;
-					round_id?: string;
-					updated_at?: string;
-					user_id?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'concern_listening_contexts_round_id_fkey';
-						columns: ['round_id'];
-						isOneToOne: false;
-						referencedRelation: 'concern_listening_rounds';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			concern_listening_completions: {
-				Row: {
-					completed_at: string;
-					round_id: string;
-					updated_at: string;
-					user_id: string;
-				};
-				Insert: {
-					completed_at?: string;
-					round_id: string;
-					updated_at?: string;
-					user_id: string;
-				};
-				Update: {
-					completed_at?: string;
-					round_id?: string;
-					updated_at?: string;
-					user_id?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'concern_listening_completions_round_id_fkey';
-						columns: ['round_id'];
-						isOneToOne: false;
-						referencedRelation: 'concern_listening_rounds';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			concern_listening_survey_responses: {
-				Row: {
-					area_type: string | null;
-					commitment_most_difficult_id: string | null;
-					commitment_most_urgent_id: string | null;
-					community: string | null;
-					created_at: string;
-					id: string;
-					main_cause: string | null;
-					missing_improvement: string | null;
-					other_problem_text: string | null;
-					prioritized_measure_ids: string[];
-					problems: string[];
-					round_id: string;
-					updated_at: string;
-					user_id: string;
-				};
-				Insert: {
-					area_type?: string | null;
-					commitment_most_difficult_id?: string | null;
-					commitment_most_urgent_id?: string | null;
-					community?: string | null;
-					created_at?: string;
-					id?: string;
-					main_cause?: string | null;
-					missing_improvement?: string | null;
-					other_problem_text?: string | null;
-					prioritized_measure_ids?: string[];
-					problems?: string[];
-					round_id: string;
-					updated_at?: string;
-					user_id: string;
-				};
-				Update: {
-					area_type?: string | null;
-					commitment_most_difficult_id?: string | null;
-					commitment_most_urgent_id?: string | null;
-					community?: string | null;
-					created_at?: string;
-					id?: string;
-					main_cause?: string | null;
-					missing_improvement?: string | null;
-					other_problem_text?: string | null;
-					prioritized_measure_ids?: string[];
-					problems?: string[];
-					round_id?: string;
-					updated_at?: string;
-					user_id?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'concern_listening_survey_responses_round_id_fkey';
-						columns: ['round_id'];
-						isOneToOne: false;
-						referencedRelation: 'concern_listening_rounds';
-						referencedColumns: ['id'];
-					},
-					{
-						foreignKeyName: 'concern_listening_survey_responses_commitment_most_urgent_id_fkey';
-						columns: ['commitment_most_urgent_id'];
-						isOneToOne: false;
-						referencedRelation: 'topic_commitments';
-						referencedColumns: ['id'];
-					},
-					{
-						foreignKeyName: 'concern_listening_survey_responses_commitment_most_difficult_id_fkey';
-						columns: ['commitment_most_difficult_id'];
-						isOneToOne: false;
-						referencedRelation: 'topic_commitments';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			// Añadidas a mano a partir de 0038_proximo_bloque.sql: esa migración
-			// todavía no está aplicada al esquema remoto, así que no se puede
-			// regenerar este archivo con generate_typescript_types todavía.
-			// Sustituir por la regeneración real en cuanto se aplique.
-			next_block_vote_rounds: {
-				Row: {
-					closes_at: string | null;
-					created_at: string;
-					created_by: string | null;
-					id: string;
-					opens_at: string | null;
-					status: string;
-					updated_at: string;
-					version_label: string;
-				};
-				Insert: {
-					closes_at?: string | null;
-					created_at?: string;
-					created_by?: string | null;
-					id?: string;
-					opens_at?: string | null;
-					status?: string;
-					updated_at?: string;
-					version_label: string;
-				};
-				Update: {
-					closes_at?: string | null;
-					created_at?: string;
-					created_by?: string | null;
-					id?: string;
-					opens_at?: string | null;
-					status?: string;
-					updated_at?: string;
-					version_label?: string;
-				};
-				Relationships: [];
-			};
-			next_block_votes: {
-				Row: {
-					created_at: string;
-					id: string;
-					option_code: string;
-					round_id: string;
-					updated_at: string;
-					user_id: string;
-				};
-				Insert: {
-					created_at?: string;
-					id?: string;
-					option_code: string;
-					round_id: string;
-					updated_at?: string;
-					user_id: string;
-				};
-				Update: {
-					created_at?: string;
-					id?: string;
-					option_code?: string;
-					round_id?: string;
-					updated_at?: string;
-					user_id?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'next_block_votes_round_id_fkey';
-						columns: ['round_id'];
-						isOneToOne: false;
-						referencedRelation: 'next_block_vote_rounds';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			topic_measures: {
-				Row: {
-					arguments_for: string | null;
-					axis_id: string | null;
-					created_at: string;
-					estimated_cost: string | null;
-					explanation: string;
-					how_it_works: string | null;
-					id: string;
-					indicators: string[];
-					is_published: boolean;
-					problem_addressed: string | null;
-					responsible_scope: string | null;
-					risks: string | null;
-					safeguard: string | null;
-					sort_order: number;
-					summary: string | null;
-					timeframe: string | null;
-					title: string;
-					topic_id: string;
-					updated_at: string;
-				};
-				Insert: {
-					arguments_for?: string | null;
-					axis_id?: string | null;
-					created_at?: string;
-					estimated_cost?: string | null;
-					explanation?: string;
-					how_it_works?: string | null;
-					id?: string;
-					indicators?: string[];
-					is_published?: boolean;
-					problem_addressed?: string | null;
-					responsible_scope?: string | null;
-					risks?: string | null;
-					safeguard?: string | null;
-					sort_order?: number;
-					summary?: string | null;
-					timeframe?: string | null;
-					title: string;
-					topic_id: string;
-					updated_at?: string;
-				};
-				Update: {
-					arguments_for?: string | null;
-					axis_id?: string | null;
-					created_at?: string;
-					estimated_cost?: string | null;
-					explanation?: string;
-					how_it_works?: string | null;
-					id?: string;
-					indicators?: string[];
-					is_published?: boolean;
-					problem_addressed?: string | null;
-					responsible_scope?: string | null;
-					risks?: string | null;
-					safeguard?: string | null;
-					sort_order?: number;
-					summary?: string | null;
-					timeframe?: string | null;
-					title?: string;
-					topic_id?: string;
-					updated_at?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'topic_measures_axis_id_fkey';
-						columns: ['axis_id'];
-						isOneToOne: false;
-						referencedRelation: 'topic_measure_axes';
-						referencedColumns: ['id'];
-					},
-					{
-						foreignKeyName: 'topic_measures_topic_id_fkey';
+						foreignKeyName: 'topic_measure_alternatives_topic_id_fkey';
 						columns: ['topic_id'];
 						isOneToOne: false;
 						referencedRelation: 'topics';
@@ -1493,9 +1630,21 @@ export type Database = {
 				];
 			};
 			topic_measure_sources: {
-				Row: { created_at: string; measure_id: string; source_id: string };
-				Insert: { created_at?: string; measure_id: string; source_id: string };
-				Update: { created_at?: string; measure_id?: string; source_id?: string };
+				Row: {
+					created_at: string;
+					measure_id: string;
+					source_id: string;
+				};
+				Insert: {
+					created_at?: string;
+					measure_id: string;
+					source_id: string;
+				};
+				Update: {
+					created_at?: string;
+					measure_id?: string;
+					source_id?: string;
+				};
 				Relationships: [
 					{
 						foreignKeyName: 'topic_measure_sources_measure_id_fkey';
@@ -1513,78 +1662,86 @@ export type Database = {
 					}
 				];
 			};
-			topic_timeline_phases: {
+			topic_measures: {
 				Row: {
+					arguments_for: string | null;
+					axis_id: string | null;
 					created_at: string;
-					description: string;
+					estimated_cost: string | null;
+					estimated_cost_max: number | null;
+					estimated_cost_min: number | null;
+					explanation: string;
+					how_it_works: string | null;
 					id: string;
-					items: string[];
+					indicators: string[];
+					is_published: boolean;
+					problem_addressed: string | null;
+					responsible_scope: string | null;
+					risks: string | null;
+					safeguard: string | null;
 					sort_order: number;
+					summary: string | null;
+					timeframe: string | null;
 					title: string;
 					topic_id: string;
 					updated_at: string;
 				};
 				Insert: {
+					arguments_for?: string | null;
+					axis_id?: string | null;
 					created_at?: string;
-					description?: string;
+					estimated_cost?: string | null;
+					estimated_cost_max?: number | null;
+					estimated_cost_min?: number | null;
+					explanation?: string;
+					how_it_works?: string | null;
 					id?: string;
-					items?: string[];
+					indicators?: string[];
+					is_published?: boolean;
+					problem_addressed?: string | null;
+					responsible_scope?: string | null;
+					risks?: string | null;
+					safeguard?: string | null;
 					sort_order?: number;
+					summary?: string | null;
+					timeframe?: string | null;
 					title: string;
 					topic_id: string;
 					updated_at?: string;
 				};
 				Update: {
+					arguments_for?: string | null;
+					axis_id?: string | null;
 					created_at?: string;
-					description?: string;
+					estimated_cost?: string | null;
+					estimated_cost_max?: number | null;
+					estimated_cost_min?: number | null;
+					explanation?: string;
+					how_it_works?: string | null;
 					id?: string;
-					items?: string[];
+					indicators?: string[];
+					is_published?: boolean;
+					problem_addressed?: string | null;
+					responsible_scope?: string | null;
+					risks?: string | null;
+					safeguard?: string | null;
 					sort_order?: number;
+					summary?: string | null;
+					timeframe?: string | null;
 					title?: string;
 					topic_id?: string;
 					updated_at?: string;
 				};
 				Relationships: [
 					{
-						foreignKeyName: 'topic_timeline_phases_topic_id_fkey';
-						columns: ['topic_id'];
+						foreignKeyName: 'topic_measures_axis_id_fkey';
+						columns: ['axis_id'];
 						isOneToOne: false;
-						referencedRelation: 'topics';
+						referencedRelation: 'topic_measure_axes';
 						referencedColumns: ['id'];
-					}
-				];
-			};
-			topic_commitments: {
-				Row: {
-					created_at: string;
-					description: string;
-					id: string;
-					sort_order: number;
-					title: string;
-					topic_id: string;
-					updated_at: string;
-				};
-				Insert: {
-					created_at?: string;
-					description: string;
-					id?: string;
-					sort_order?: number;
-					title: string;
-					topic_id: string;
-					updated_at?: string;
-				};
-				Update: {
-					created_at?: string;
-					description?: string;
-					id?: string;
-					sort_order?: number;
-					title?: string;
-					topic_id?: string;
-					updated_at?: string;
-				};
-				Relationships: [
+					},
 					{
-						foreignKeyName: 'topic_commitments_topic_id_fkey';
+						foreignKeyName: 'topic_measures_topic_id_fkey';
 						columns: ['topic_id'];
 						isOneToOne: false;
 						referencedRelation: 'topics';
@@ -1639,41 +1796,6 @@ export type Database = {
 					}
 				];
 			};
-			topic_versions: {
-				Row: {
-					id: string;
-					note: string | null;
-					published_at: string;
-					published_by: string | null;
-					topic_id: string;
-					version_label: string;
-				};
-				Insert: {
-					id?: string;
-					note?: string | null;
-					published_at?: string;
-					published_by?: string | null;
-					topic_id: string;
-					version_label: string;
-				};
-				Update: {
-					id?: string;
-					note?: string | null;
-					published_at?: string;
-					published_by?: string | null;
-					topic_id?: string;
-					version_label?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'topic_versions_topic_id_fkey';
-						columns: ['topic_id'];
-						isOneToOne: false;
-						referencedRelation: 'topics';
-						referencedColumns: ['id'];
-					}
-				];
-			};
 			topic_sources: {
 				Row: {
 					created_at: string;
@@ -1712,8 +1834,85 @@ export type Database = {
 					}
 				];
 			};
+			topic_timeline_phases: {
+				Row: {
+					created_at: string;
+					description: string;
+					id: string;
+					items: string[];
+					sort_order: number;
+					title: string;
+					topic_id: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					description?: string;
+					id?: string;
+					items?: string[];
+					sort_order?: number;
+					title: string;
+					topic_id: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					description?: string;
+					id?: string;
+					items?: string[];
+					sort_order?: number;
+					title?: string;
+					topic_id?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_timeline_phases_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			topic_versions: {
+				Row: {
+					id: string;
+					note: string | null;
+					published_at: string;
+					published_by: string | null;
+					topic_id: string;
+					version_label: string;
+				};
+				Insert: {
+					id?: string;
+					note?: string | null;
+					published_at?: string;
+					published_by?: string | null;
+					topic_id: string;
+					version_label: string;
+				};
+				Update: {
+					id?: string;
+					note?: string | null;
+					published_at?: string;
+					published_by?: string | null;
+					topic_id?: string;
+					version_label?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_versions_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			topics: {
 				Row: {
+					budget_double_count_rules: string[];
 					budget_narrative: string | null;
 					category: string | null;
 					cover_image_url: string | null;
@@ -1739,6 +1938,7 @@ export type Database = {
 					version: string;
 				};
 				Insert: {
+					budget_double_count_rules?: string[];
 					budget_narrative?: string | null;
 					category?: string | null;
 					cover_image_url?: string | null;
@@ -1764,6 +1964,7 @@ export type Database = {
 					version?: string;
 				};
 				Update: {
+					budget_double_count_rules?: string[];
 					budget_narrative?: string | null;
 					category?: string | null;
 					cover_image_url?: string | null;
@@ -1854,25 +2055,110 @@ export type Database = {
 		Functions: {
 			get_attendance_counts: {
 				Args: { p_event_ids?: string[] };
-				Returns: { event_id: string; going_count: number; interested_count: number }[];
+				Returns: {
+					event_id: string;
+					going_count: number;
+					interested_count: number;
+				}[];
+			};
+			get_concern_listening_survey_summary: {
+				Args: { p_round_id: string };
+				Returns: {
+					code: string;
+					dimension: string;
+					response_count: number;
+				}[];
+			};
+			get_concern_listening_survey_territory_breakdown: {
+				Args: { p_min_threshold?: number; p_round_id: string };
+				Returns: {
+					community: string;
+					response_count: number;
+				}[];
+			};
+			get_concern_listening_survey_total: {
+				Args: { p_round_id: string };
+				Returns: number;
 			};
 			get_concern_results: {
 				Args: { p_concern_ids?: string[] };
-				Returns: { concern_id: string; level: number; response_count: number }[];
+				Returns: {
+					concern_id: string;
+					level: number;
+					response_count: number;
+				}[];
 			};
-			get_pulso_participant_count: { Args: never; Returns: number };
+			get_general_participation_results: {
+				Args: { p_round_id: string };
+				Returns: {
+					dimension: string;
+					response_count: number;
+					value: string;
+				}[];
+			};
+			get_measure_position_counts: {
+				Args: { p_measure_ids: string[]; p_round_id: string };
+				Returns: {
+					measure_id: string;
+					position_value: string;
+					response_count: number;
+				}[];
+			};
+			get_measure_reason_counts: {
+				Args: { p_measure_ids: string[]; p_round_id: string };
+				Returns: {
+					measure_id: string;
+					reason_code: string;
+					response_count: number;
+				}[];
+			};
 			get_measure_results: {
 				Args: { p_measure_ids?: string[] };
-				Returns: { measure_id: string; stance: string; response_count: number }[];
+				Returns: {
+					measure_id: string;
+					response_count: number;
+					stance: string;
+				}[];
 			};
-			set_concern_response: {
-				Args: { p_concern_id: string; p_level: number };
-				Returns: undefined;
+			get_measure_urgency_counts: {
+				Args: { p_measure_ids: string[]; p_round_id: string };
+				Returns: {
+					measure_id: string;
+					response_count: number;
+					urgency: string;
+				}[];
 			};
-			set_measure_response: {
-				Args: { p_measure_id: string; p_stance: string; p_priority?: string | null };
-				Returns: undefined;
+			get_next_block_vote_results: {
+				Args: { p_round_id: string };
+				Returns: {
+					option_code: string;
+					vote_count: number;
+				}[];
 			};
+			get_next_block_vote_total: {
+				Args: { p_round_id: string };
+				Returns: number;
+			};
+			get_participation_summary: {
+				Args: { p_round_id: string };
+				Returns: {
+					last_updated_at: string;
+					proposals_published: number;
+					proposals_received: number;
+					total_general_responses: number;
+					total_measure_responses: number;
+					unique_participants: number;
+				}[];
+			};
+			get_priority_results: {
+				Args: { p_round_id: string };
+				Returns: {
+					avg_rank: number;
+					measure_id: string;
+					times_top3: number;
+				}[];
+			};
+			get_pulso_participant_count: { Args: never; Returns: number };
 			is_moderator_or_admin: { Args: never; Returns: boolean };
 			purge_old_attendance_rate_limits: { Args: never; Returns: undefined };
 			purge_old_attendance_responses: { Args: never; Returns: undefined };
@@ -1880,140 +2166,97 @@ export type Database = {
 				Args: { p_dedup_token: string; p_event_id: string; p_response?: string };
 				Returns: undefined;
 			};
-			set_measure_participation_response: {
-				Args: {
-					p_round_id: string;
-					p_measure_id: string;
-					p_position: string;
-					p_reason_code?: string | null;
-					p_reason_other?: string | null;
-					p_comment?: string | null;
-					p_urgency?: string | null;
-					p_quick_change?: string | null;
-				};
-				Returns: undefined;
-			};
-			set_general_participation_response: {
-				Args: {
-					p_round_id: string;
-					p_general_position: string;
-					p_investment_opinion?: string | null;
-					p_pace_preference?: string | null;
-					p_unaddressed_problem?: string | null;
-				};
-				Returns: undefined;
-			};
-			set_response_priorities: {
-				Args: { p_round_id: string; p_measure_ids: string[] };
-				Returns: undefined;
-			};
-			set_participant_context: {
-				Args: {
-					p_round_id: string;
-					p_community?: string | null;
-					p_housing_situation?: string | null;
-				};
-				Returns: undefined;
-			};
-			get_measure_position_counts: {
-				Args: { p_round_id: string; p_measure_ids?: string[] };
-				Returns: { measure_id: string; position_value: string; response_count: number }[];
-			};
-			get_measure_urgency_counts: {
-				Args: { p_round_id: string; p_measure_ids?: string[] };
-				Returns: { measure_id: string; urgency: string; response_count: number }[];
-			};
-			get_measure_reason_counts: {
-				Args: { p_round_id: string; p_measure_ids?: string[] };
-				Returns: { measure_id: string; reason_code: string; response_count: number }[];
-			};
-			get_general_participation_results: {
-				Args: { p_round_id: string };
-				Returns: { dimension: string; value: string; response_count: number }[];
-			};
-			get_priority_results: {
-				Args: { p_round_id: string };
-				Returns: { measure_id: string; times_top3: number; avg_rank: number }[];
-			};
-			get_participation_summary: {
-				Args: { p_round_id: string };
-				Returns: {
-					unique_participants: number;
-					total_measure_responses: number;
-					total_general_responses: number;
-					proposals_received: number;
-					proposals_published: number;
-					last_updated_at: string | null;
-				}[];
-			};
-			set_concern_listening_priorities: {
-				Args: { p_round_id: string; p_option_codes: string[] };
-				Returns: undefined;
-			};
-			set_concern_listening_detail: {
-				Args: {
-					p_round_id: string;
-					p_option_code: string;
-					p_severity?: string | null;
-					p_evolution?: string | null;
-					p_personal_relation?: string | null;
-					p_cause_code?: string | null;
-					p_cause_other?: string | null;
-					p_comment?: string | null;
-				};
-				Returns: undefined;
-			};
-			set_concern_listening_context: {
-				Args: {
-					p_round_id: string;
-					p_community?: string | null;
-					p_area_type?: string | null;
-					p_housing_situation?: string | null;
-				};
-				Returns: undefined;
-			};
 			set_concern_listening_completed: {
 				Args: { p_round_id: string };
 				Returns: undefined;
 			};
-			set_concern_listening_survey_response: {
+			set_concern_listening_context: {
 				Args: {
+					p_area_type?: string;
+					p_community?: string;
+					p_housing_situation?: string;
 					p_round_id: string;
-					p_problems: string[];
-					p_other_problem_text?: string | null;
-					p_main_cause?: string | null;
-					p_prioritized_measure_ids?: string[];
-					p_commitment_most_urgent_id?: string | null;
-					p_commitment_most_difficult_id?: string | null;
-					p_missing_improvement?: string | null;
-					p_community?: string | null;
-					p_area_type?: string | null;
 				};
 				Returns: undefined;
 			};
-			get_concern_listening_survey_summary: {
-				Args: { p_round_id: string };
-				Returns: { dimension: string; code: string; response_count: number }[];
-			};
-			get_concern_listening_survey_total: {
-				Args: { p_round_id: string };
-				Returns: number;
-			};
-			get_concern_listening_survey_territory_breakdown: {
-				Args: { p_round_id: string; p_min_threshold?: number };
-				Returns: { community: string; response_count: number }[];
-			};
-			set_next_block_vote: {
-				Args: { p_round_id: string; p_option_code: string };
+			set_concern_listening_detail: {
+				Args: {
+					p_cause_code?: string;
+					p_cause_other?: string;
+					p_comment?: string;
+					p_evolution?: string;
+					p_option_code: string;
+					p_personal_relation?: string;
+					p_round_id: string;
+					p_severity?: string;
+				};
 				Returns: undefined;
 			};
-			get_next_block_vote_total: {
-				Args: { p_round_id: string };
-				Returns: number;
+			set_concern_listening_priorities: {
+				Args: { p_option_codes: string[]; p_round_id: string };
+				Returns: undefined;
 			};
-			get_next_block_vote_results: {
-				Args: { p_round_id: string };
-				Returns: { option_code: string; vote_count: number }[];
+			set_concern_listening_survey_response: {
+				Args: {
+					p_area_type?: string;
+					p_commitment_most_difficult_id?: string;
+					p_commitment_most_urgent_id?: string;
+					p_community?: string;
+					p_main_cause?: string;
+					p_missing_improvement?: string;
+					p_other_problem_text?: string;
+					p_prioritized_measure_ids?: string[];
+					p_problems: string[];
+					p_round_id: string;
+				};
+				Returns: undefined;
+			};
+			set_concern_response: {
+				Args: { p_concern_id: string; p_level: number };
+				Returns: undefined;
+			};
+			set_general_participation_response: {
+				Args: {
+					p_general_position: string;
+					p_investment_opinion?: string;
+					p_pace_preference?: string;
+					p_round_id: string;
+					p_unaddressed_problem?: string;
+				};
+				Returns: undefined;
+			};
+			set_measure_participation_response: {
+				Args: {
+					p_comment?: string;
+					p_measure_id: string;
+					p_position: string;
+					p_quick_change?: string;
+					p_reason_code?: string;
+					p_reason_other?: string;
+					p_round_id: string;
+					p_urgency?: string;
+				};
+				Returns: undefined;
+			};
+			set_measure_response: {
+				Args: { p_measure_id: string; p_priority?: string; p_stance: string };
+				Returns: undefined;
+			};
+			set_next_block_vote: {
+				Args: { p_option_code: string; p_round_id: string };
+				Returns: undefined;
+			};
+			set_participant_context: {
+				Args: {
+					p_community?: string;
+					p_housing_situation?: string;
+					p_round_id: string;
+				};
+				Returns: undefined;
+			};
+			set_response_priorities: {
+				Args: { p_measure_ids: string[]; p_round_id: string };
+				Returns: undefined;
 			};
 		};
 		Enums: {

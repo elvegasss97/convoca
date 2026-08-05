@@ -854,7 +854,7 @@ export async function setMeasureResponse(
 	const { error } = await supabase.rpc('set_measure_response', {
 		p_measure_id: measureId,
 		p_stance: stance,
-		p_priority: priority ?? null
+		p_priority: priority ?? undefined
 	});
 	if (error) throw new Error(error.message || 'No se ha podido guardar tu valoración.');
 }

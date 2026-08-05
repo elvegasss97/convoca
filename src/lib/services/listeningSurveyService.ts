@@ -97,14 +97,14 @@ export async function setListeningSurveyResponse(
 	const { error } = await supabase.rpc('set_concern_listening_survey_response', {
 		p_round_id: roundId,
 		p_problems: input.problems,
-		p_other_problem_text: input.otherProblemText ?? null,
-		p_main_cause: input.mainCause ?? null,
+		p_other_problem_text: input.otherProblemText ?? undefined,
+		p_main_cause: input.mainCause ?? undefined,
 		p_prioritized_measure_ids: input.prioritizedMeasureIds,
-		p_commitment_most_urgent_id: input.commitmentMostUrgentId ?? null,
-		p_commitment_most_difficult_id: input.commitmentMostDifficultId ?? null,
-		p_missing_improvement: input.missingImprovement ?? null,
-		p_community: input.community ?? null,
-		p_area_type: input.areaType ?? null
+		p_commitment_most_urgent_id: input.commitmentMostUrgentId ?? undefined,
+		p_commitment_most_difficult_id: input.commitmentMostDifficultId ?? undefined,
+		p_missing_improvement: input.missingImprovement ?? undefined,
+		p_community: input.community ?? undefined,
+		p_area_type: input.areaType ?? undefined
 	});
 	if (error) throw new Error(error.message || 'No se ha podido guardar tu respuesta.');
 }

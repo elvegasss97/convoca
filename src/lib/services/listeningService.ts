@@ -189,12 +189,12 @@ export async function setListeningDetail(
 	const { error } = await supabase.rpc('set_concern_listening_detail', {
 		p_round_id: roundId,
 		p_option_code: optionCode,
-		p_severity: input.severity ?? null,
-		p_evolution: input.evolution ?? null,
-		p_personal_relation: input.personalRelation ?? null,
-		p_cause_code: input.causeCode ?? null,
-		p_cause_other: input.causeOther ?? null,
-		p_comment: input.comment ?? null
+		p_severity: input.severity ?? undefined,
+		p_evolution: input.evolution ?? undefined,
+		p_personal_relation: input.personalRelation ?? undefined,
+		p_cause_code: input.causeCode ?? undefined,
+		p_cause_other: input.causeOther ?? undefined,
+		p_comment: input.comment ?? undefined
 	});
 	if (error) throw new Error(error.message || 'No se ha podido guardar tu respuesta.');
 }
@@ -219,9 +219,9 @@ export async function setListeningContext(
 	}
 	const { error } = await supabase.rpc('set_concern_listening_context', {
 		p_round_id: roundId,
-		p_community: input.community ?? null,
-		p_area_type: input.areaType ?? null,
-		p_housing_situation: input.housingSituation ?? null
+		p_community: input.community ?? undefined,
+		p_area_type: input.areaType ?? undefined,
+		p_housing_situation: input.housingSituation ?? undefined
 	});
 	if (error) throw new Error(error.message || 'No se ha podido guardar tu contexto.');
 }
