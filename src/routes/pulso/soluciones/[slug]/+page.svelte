@@ -8,11 +8,9 @@
 		Rocket,
 		Link as LinkIcon,
 		Coins,
-		Target,
 		ListChecks,
 		CalendarRange,
 		AlertTriangle,
-		Gauge,
 		History,
 		ChevronDown,
 		ChevronUp,
@@ -43,6 +41,7 @@
 	import SimpleMeasureCard from '$lib/components/pulso/SimpleMeasureCard.svelte';
 	import SimpleGeneralParticipationBlock from '$lib/components/pulso/SimpleGeneralParticipationBlock.svelte';
 	import PlanMap from '$lib/components/pulso/PlanMap.svelte';
+	import CosteEconomico from '$lib/components/pulso/CosteEconomico.svelte';
 	import { viviendaMapData, sanidadMapData } from '$lib/data/planMapData';
 	import { submitMeasureAlternative } from '$lib/services/topicsService';
 	import {
@@ -143,7 +142,6 @@
 	// caracteres para no abrir la página con un muro de texto.
 	const PROBLEM_PREVIEW_LENGTH = 220;
 	let problemExpanded = $state(false);
-	let budgetExpanded = $state(false);
 	let dataPointsExpanded = $state(false);
 	const DATA_POINTS_PREVIEW_COUNT = 4;
 	const problemIsLong = $derived((topic.problemIntro ?? '').length > PROBLEM_PREVIEW_LENGTH);
@@ -681,46 +679,16 @@
 			<Coins class="size-4 text-brand-700" /> Coste
 		</h2>
 		<ContentTypeTag type="convoca" class="mt-2" />
-		<dl class="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-			<div class="rounded-xl border border-ink-100 p-3">
-				<dt class="text-xs text-ink-500">Inversión estimada</dt>
-				<dd class="mt-0.5 text-sm font-semibold text-ink-900">
-					{topic.investmentRange || 'Pendiente'}
-				</dd>
-			</div>
-			<div class="rounded-xl border border-ink-100 p-3">
-				<dt class="flex items-center gap-1 text-xs text-ink-500">
-					<Gauge class="size-3.5" /> Esfuerzo
-				</dt>
-				<dd class="mt-0.5 text-sm font-semibold text-ink-900">
-					{topic.investmentGdpPercent || 'Pendiente'}
-				</dd>
-			</div>
-			<div class="rounded-xl border border-ink-100 p-3">
-				<dt class="flex items-center gap-1 text-xs text-ink-500">
-					<Target class="size-3.5" /> Objetivo
-				</dt>
-				<dd class="mt-0.5 text-sm font-semibold text-ink-900">
-					{topic.referenceGoal || 'Pendiente'}
-				</dd>
-			</div>
-		</dl>
-		{#if topic.budgetNarrative}
-			<div class="mt-3 border-t border-ink-100 pt-3">
-				{#if budgetExpanded}
-					<p class="text-sm leading-relaxed whitespace-pre-line text-ink-700">
-						{topic.budgetNarrative}
-					</p>
-				{/if}
-				<button
-					type="button"
-					onclick={() => (budgetExpanded = !budgetExpanded)}
-					class="mt-1.5 text-sm font-semibold text-brand-700 hover:underline"
-				>
-					{budgetExpanded ? 'Mostrar menos' : 'Ver desglose económico completo'}
-				</button>
-			</div>
-		{/if}
+		<div class="mt-3">
+			<CosteEconomico
+				{topic}
+				measures={data.measures}
+				axes={data.axes}
+				budgetLines={data.budgetLines}
+				budgetScenarios={data.budgetScenarios}
+				budgetTimeline={data.budgetTimeline}
+			/>
+		</div>
 	</section>
 
 	<section
