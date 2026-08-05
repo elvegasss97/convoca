@@ -21,10 +21,12 @@ import type {
 	TopicBudgetScenario,
 	TopicBudgetTimelineEntry,
 	TopicDataPoint,
+	TopicEvaluationMoment,
 	TopicMeasure,
 	TopicMeasureAlternative,
 	TopicMeasureAlternativeStatus,
 	TopicMeasureAxis,
+	TopicMeasureChangeCondition,
 	TopicMeasurePhaseStatus,
 	TopicCommitment,
 	TopicRisk,
@@ -266,6 +268,7 @@ interface RiskRow {
 	signals: string | null;
 	mitigation: string | null;
 	decision_trigger: string | null;
+	category: string | null;
 	sort_order: number;
 	created_at: string;
 	updated_at: string;
@@ -280,6 +283,7 @@ function rowToRisk(row: RiskRow): TopicRisk {
 		signals: row.signals ?? undefined,
 		mitigation: row.mitigation ?? undefined,
 		decisionTrigger: row.decision_trigger ?? undefined,
+		category: row.category ?? undefined,
 		sortOrder: row.sort_order,
 		createdAt: row.created_at,
 		updatedAt: row.updated_at
@@ -1560,4 +1564,70 @@ export async function updateTopicRisk(riskId: string, input: TopicRiskInput): Pr
 export async function deleteTopicRisk(riskId: string): Promise<void> {
 	const { error } = await supabase.from('topic_risks').delete().eq('id', riskId);
 	if (error) throw error;
+}
+
+interface EvaluationMomentRow {
+	id: string;
+	topic_id: string;
+	key: string;
+	title: string;
+	frequency_label: string;
+	description: string;
+	sort_order: number;
+}
+
+function rowToEvaluationMoment(row: EvaluationMomentRow): TopicEvaluationMoment {
+	return {
+		id: row.id,
+		topicId: row.topic_id,
+		key: row.key as TopicEvaluationMoment['key'],
+		title: row.title,
+		frequencyLabel: row.frequency_label,
+		description: row.description,
+		sortOrder: row.sort_order
+	};
+}
+
+export async function listTopicEvaluationMoments(
+	topicId: string
+): Promise<TopicEvaluationMoment[]> {
+	const { data, error } = await supabase
+		.from('topic_evaluation_moments')
+		.select('*')
+		.eq('topic_id', topicId)
+		.order('sort_order', { ascending: true });
+	if (error) throw error;
+	return (data ?? []).map(rowToEvaluationMoment);
+}
+
+interface MeasureChangeConditionRow {
+	id: string;
+	topic_id: string;
+	key: string;
+	title: string;
+	items: string[];
+	sort_order: number;
+}
+
+function rowToMeasureChangeCondition(row: MeasureChangeConditionRow): TopicMeasureChangeCondition {
+	return {
+		id: row.id,
+		topicId: row.topic_id,
+		key: row.key as TopicMeasureChangeCondition['key'],
+		title: row.title,
+		items: row.items ?? [],
+		sortOrder: row.sort_order
+	};
+}
+
+export async function listTopicMeasureChangeConditions(
+	topicId: string
+): Promise<TopicMeasureChangeCondition[]> {
+	const { data, error } = await supabase
+		.from('topic_measure_change_conditions')
+		.select('*')
+		.eq('topic_id', topicId)
+		.order('sort_order', { ascending: true });
+	if (error) throw error;
+	return (data ?? []).map(rowToMeasureChangeCondition);
 }
