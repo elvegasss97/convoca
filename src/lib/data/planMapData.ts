@@ -276,12 +276,13 @@ export const viviendaMapData: PlanMapData = {
 // Sanidad — Plan Sanidad 2036
 // ---------------------------------------------------------------------------
 //
-// NOTA: este primer borrador de causas/ejes de Sanidad está pendiente de tu
-// revisión explícita (punto de control 3). Lo dejo funcionalmente completo
-// para que el tipo compile y la página no se rompa, con el mismo rigor de
-// no inventar relaciones, pero decíamos que Sanidad se revisaría aparte y
-// sin copiar la estructura de Vivienda — trátalo como borrador, no como
-// definitivo.
+// Revisado y validado (punto de control 3, 2026-08-05): causas tomadas
+// literalmente del problem_intro, ejes de las 6 categorías porcentuales de
+// budget_narrative, resultados de los 5 topic_commitments. phaseStates
+// corregido tras contrastar cada medida contra su timeframe real: listas de
+// espera (fase 1: despliegue→consolidación), y cronicidad/prevención/
+// cohesión territorial/información y datos (fase 0: preparación→piloto, ya
+// describían acciones concretas dentro de 2027-2029).
 
 const SANIDAD_MEASURE = {
 	atencionPrimaria: 'e8c3c0c5-aa16-4618-9f4d-5e5a0e4e329d',
@@ -450,7 +451,7 @@ export const sanidadMapData: PlanMapData = {
 		{ measureId: SANIDAD_MEASURE.atencionPrimaria, phaseIndex: 2, state: 'consolidacion' },
 		// 2. Listas de espera
 		{ measureId: SANIDAD_MEASURE.listasEspera, phaseIndex: 0, state: 'preparacion' },
-		{ measureId: SANIDAD_MEASURE.listasEspera, phaseIndex: 1, state: 'despliegue' },
+		{ measureId: SANIDAD_MEASURE.listasEspera, phaseIndex: 1, state: 'consolidacion' },
 		// 3. Pacto profesionales
 		{ measureId: SANIDAD_MEASURE.pactoProfesionales, phaseIndex: 0, state: 'preparacion' },
 		{ measureId: SANIDAD_MEASURE.pactoProfesionales, phaseIndex: 1, state: 'despliegue' },
@@ -460,19 +461,19 @@ export const sanidadMapData: PlanMapData = {
 		{ measureId: SANIDAD_MEASURE.saludMental, phaseIndex: 1, state: 'despliegue' },
 		{ measureId: SANIDAD_MEASURE.saludMental, phaseIndex: 2, state: 'consolidacion' },
 		// 5. Cronicidad
-		{ measureId: SANIDAD_MEASURE.cronicidad, phaseIndex: 0, state: 'preparacion' },
+		{ measureId: SANIDAD_MEASURE.cronicidad, phaseIndex: 0, state: 'piloto' },
 		{ measureId: SANIDAD_MEASURE.cronicidad, phaseIndex: 1, state: 'despliegue' },
 		{ measureId: SANIDAD_MEASURE.cronicidad, phaseIndex: 2, state: 'consolidacion' },
 		// 6. Prevención
-		{ measureId: SANIDAD_MEASURE.prevencion, phaseIndex: 0, state: 'preparacion' },
+		{ measureId: SANIDAD_MEASURE.prevencion, phaseIndex: 0, state: 'piloto' },
 		{ measureId: SANIDAD_MEASURE.prevencion, phaseIndex: 1, state: 'evaluacion' },
 		{ measureId: SANIDAD_MEASURE.prevencion, phaseIndex: 2, state: 'evaluacion' },
 		// 7. Cohesión territorial
-		{ measureId: SANIDAD_MEASURE.cohesionTerritorial, phaseIndex: 0, state: 'preparacion' },
+		{ measureId: SANIDAD_MEASURE.cohesionTerritorial, phaseIndex: 0, state: 'piloto' },
 		{ measureId: SANIDAD_MEASURE.cohesionTerritorial, phaseIndex: 1, state: 'despliegue' },
 		{ measureId: SANIDAD_MEASURE.cohesionTerritorial, phaseIndex: 2, state: 'evaluacion' },
 		// 8. Información y datos
-		{ measureId: SANIDAD_MEASURE.informacionDatos, phaseIndex: 0, state: 'preparacion' },
+		{ measureId: SANIDAD_MEASURE.informacionDatos, phaseIndex: 0, state: 'piloto' },
 		{ measureId: SANIDAD_MEASURE.informacionDatos, phaseIndex: 1, state: 'despliegue' },
 		{ measureId: SANIDAD_MEASURE.informacionDatos, phaseIndex: 2, state: 'consolidacion' }
 	]
