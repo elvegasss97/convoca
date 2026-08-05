@@ -1629,6 +1629,58 @@ export type Database = {
 					}
 				];
 			};
+			topic_measure_phase_status: {
+				Row: {
+					created_at: string;
+					id: string;
+					measure_id: string;
+					phase_id: string;
+					status: string;
+					topic_id: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					measure_id: string;
+					phase_id: string;
+					status: string;
+					topic_id: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					measure_id?: string;
+					phase_id?: string;
+					status?: string;
+					topic_id?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'topic_measure_phase_status_measure_id_fkey';
+						columns: ['measure_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_measures';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'topic_measure_phase_status_phase_id_fkey';
+						columns: ['phase_id'];
+						isOneToOne: false;
+						referencedRelation: 'topic_timeline_phases';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'topic_measure_phase_status_topic_id_fkey';
+						columns: ['topic_id'];
+						isOneToOne: false;
+						referencedRelation: 'topics';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			topic_measure_sources: {
 				Row: {
 					created_at: string;

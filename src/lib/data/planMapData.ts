@@ -13,15 +13,12 @@
  * como "causas"), las medidas son las actuaciones concretas.
  */
 
-export type MeasureState = 'preparacion' | 'piloto' | 'despliegue' | 'consolidacion' | 'evaluacion';
-
-export const measureStateLabels: Record<MeasureState, string> = {
-	preparacion: 'Preparación',
-	piloto: 'Piloto',
-	despliegue: 'Despliegue',
-	consolidacion: 'Consolidación',
-	evaluacion: 'Evaluación'
-};
+// El estado de una medida (MeasureState) y sus etiquetas viven en $lib/types
+// y $lib/labels — misma fuente que usa la tabla topic_measure_phase_status
+// (Calendario). Se reexportan aquí para no romper los imports existentes.
+import type { MeasureState } from '$lib/types';
+export type { MeasureState };
+export { measureStateLabels } from '$lib/labels';
 
 export interface PlanMapCause {
 	id: string;

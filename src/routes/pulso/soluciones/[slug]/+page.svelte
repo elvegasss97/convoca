@@ -42,6 +42,7 @@
 	import SimpleGeneralParticipationBlock from '$lib/components/pulso/SimpleGeneralParticipationBlock.svelte';
 	import PlanMap from '$lib/components/pulso/PlanMap.svelte';
 	import CosteEconomico from '$lib/components/pulso/CosteEconomico.svelte';
+	import CalendarioVisual from '$lib/components/pulso/CalendarioVisual.svelte';
 	import { viviendaMapData, sanidadMapData } from '$lib/data/planMapData';
 	import { submitMeasureAlternative } from '$lib/services/topicsService';
 	import {
@@ -699,45 +700,14 @@
 			<CalendarRange class="size-4 text-brand-700" /> Calendario
 		</h2>
 		<ContentTypeTag type="convoca" class="mt-2" />
-		{#if data.timelinePhases.length > 0}
-			<ol class="relative mt-4 flex flex-col gap-6">
-				<div class="absolute top-2 bottom-2 left-[15px] w-px bg-ink-200" aria-hidden="true"></div>
-				{#each data.timelinePhases as phase, i (phase.id)}
-					{@const isFirst100 = /100\s*d[ií]as/i.test(phase.title)}
-					<li class="relative pl-10">
-						<span
-							class="absolute top-0 left-0 flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold {isFirst100
-								? 'bg-warning-100 text-warning-700'
-								: 'bg-brand-100 text-brand-800'}">{i + 1}</span
-						>
-						<p class="pt-1 text-sm font-semibold text-ink-900">
-							{phase.title}
-							{#if isFirst100}
-								<span
-									class="ml-1.5 rounded-full bg-warning-50 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-warning-700 uppercase"
-									>Arranque, no ejecución</span
-								>
-							{/if}
-						</p>
-						{#if phase.description}
-							<p class="mt-1.5 text-sm leading-relaxed text-ink-700">{phase.description}</p>
-						{/if}
-						{#if phase.items.length > 0}
-							<ol class="mt-2.5 flex flex-col gap-1.5 border-l-2 border-ink-100 pl-3">
-								{#each phase.items as item, j (item)}
-									<li class="text-sm leading-relaxed text-ink-700">
-										<span class="font-semibold text-ink-500">{j + 1}.</span>
-										{item}
-									</li>
-								{/each}
-							</ol>
-						{/if}
-					</li>
-				{/each}
-			</ol>
-		{:else}
-			<p class="mt-3 text-sm text-ink-500">Calendario detallado pendiente de incorporar.</p>
-		{/if}
+		<div class="mt-4">
+			<CalendarioVisual
+				measures={data.measures}
+				axes={data.axes}
+				phases={data.timelinePhases}
+				phaseStatuses={data.measurePhaseStatuses}
+			/>
+		</div>
 	</section>
 
 	<!-- 7. Riesgos y comprobación -->

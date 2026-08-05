@@ -21,6 +21,7 @@ import type {
 	MeasurePosition,
 	MeasurePriority,
 	MeasureStance,
+	MeasureState,
 	MeasureUrgency,
 	ModerationAction,
 	NextBlockVoteRoundStatus,
@@ -238,6 +239,14 @@ export const measureStanceLabels: Record<MeasureStance, string> = {
 	favor: 'A favor',
 	en_contra: 'En contra',
 	modificaria: 'La modificaría'
+};
+
+export const measureStateLabels: Record<MeasureState, string> = {
+	preparacion: 'Preparación',
+	piloto: 'Piloto',
+	despliegue: 'Despliegue',
+	consolidacion: 'Consolidación',
+	evaluacion: 'Evaluación'
 };
 
 export const measurePriorityLabels: Record<MeasurePriority, string> = {

@@ -663,6 +663,18 @@ export interface TopicTimelinePhase {
 	updatedAt: string;
 }
 
+/** Estado de avance de una medida (mismo vocabulario que usa el mapa visual interactivo del plan). */
+export type MeasureState = 'preparacion' | 'piloto' | 'despliegue' | 'consolidacion' | 'evaluacion';
+
+/** En qué estado está una medida concreta en una fase concreta del calendario, para la vista Gantt de la sección Calendario. */
+export interface TopicMeasurePhaseStatus {
+	id: string;
+	topicId: string;
+	measureId: string;
+	phaseId: string;
+	status: MeasureState;
+}
+
 /**
  * Riesgo general de un tema (no de una medida concreta), con 4 partes.
  * Los campos opcionales quedan sin rellenar mientras no se proporcione ese
