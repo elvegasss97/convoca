@@ -708,9 +708,36 @@ export interface TopicRisk {
 	mitigation?: string;
 	/** "Qué decisión debería tomarse" si el riesgo ocurre. */
 	decisionTrigger?: string;
+	/** Categoría para el mapa de riesgos filtrable (p. ej. "Ejecución y presupuesto"). */
+	category?: string;
 	sortOrder: number;
 	createdAt: string;
 	updatedAt: string;
+}
+
+export type EvaluationMomentKey = 'anual' | 'bienal' | 'intermedia' | 'final';
+
+/** Un momento del calendario de evaluación del plan (anual, bienal, intermedia, final). */
+export interface TopicEvaluationMoment {
+	id: string;
+	topicId: string;
+	key: EvaluationMomentKey;
+	title: string;
+	frequencyLabel: string;
+	description: string;
+	sortOrder: number;
+}
+
+export type MeasureChangeConditionKey = 'ampliar' | 'modificar' | 'suspender';
+
+/** Bajo qué condiciones una medida se amplía, modifica o suspende. */
+export interface TopicMeasureChangeCondition {
+	id: string;
+	topicId: string;
+	key: MeasureChangeConditionKey;
+	title: string;
+	items: string[];
+	sortOrder: number;
 }
 
 export interface TopicVersion {

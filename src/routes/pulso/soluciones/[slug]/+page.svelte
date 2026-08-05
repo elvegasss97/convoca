@@ -8,18 +8,15 @@
 		Rocket,
 		Link as LinkIcon,
 		Coins,
-		ListChecks,
 		CalendarRange,
 		AlertTriangle,
 		History,
-		ChevronDown,
-		ChevronUp,
 		MessagesSquare,
 		ShieldCheck,
 		Ear,
 		ArrowRight
 	} from '@lucide/svelte';
-	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
+	import { SvelteMap } from 'svelte/reactivity';
 	import { tick } from 'svelte';
 	import type { PageData } from './$types';
 	import type {
@@ -43,6 +40,7 @@
 	import PlanMap from '$lib/components/pulso/PlanMap.svelte';
 	import CosteEconomico from '$lib/components/pulso/CosteEconomico.svelte';
 	import CalendarioVisual from '$lib/components/pulso/CalendarioVisual.svelte';
+	import RiesgosComprobacion from '$lib/components/pulso/RiesgosComprobacion.svelte';
 	import { viviendaMapData, sanidadMapData } from '$lib/data/planMapData';
 	import { submitMeasureAlternative } from '$lib/services/topicsService';
 	import {
@@ -217,82 +215,6 @@
 		const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		el?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
 	}
-
-	let riskAccordionOpen = $state(false);
-	let indicatorsAccordionOpen = $state(false);
-	let evaluationAccordionOpen = $state(false);
-	let governanceAccordionOpen = $state(false);
-
-	// Agrupación puramente visual de los riesgos generales en 5 categorías,
-	// sin tocar el contenido guardado en cada topic_risks.title.
-	const RISK_CATEGORY_BY_TITLE: Record<string, string> = {
-		'Retrasos y falta de capacidad administrativa': 'Ejecución y presupuesto',
-		Sobrecostes: 'Ejecución y presupuesto',
-		'Falta de mantenimiento del parque público': 'Ejecución y presupuesto',
-		'Sostenibilidad presupuestaria': 'Ejecución y presupuesto',
-		'Escasez de suelo preparado': 'Territorio y planificación',
-		'Construcción en territorios sin demanda suficiente': 'Territorio y planificación',
-		'Diferencias territoriales de ejecución': 'Territorio y planificación',
-		'Concentración y segregación residencial': 'Territorio y planificación',
-		'Traslado de ayudas a los precios': 'Mercado y acceso',
-		'Reducción o desplazamiento de la oferta de alquiler': 'Mercado y acceso',
-		'Fraude y manipulación de registros': 'Integridad y datos',
-		'Falta de datos fiables': 'Integridad y datos',
-		'Incumplimiento de la protección permanente': 'Integridad y datos',
-		'Conflictos competenciales o jurídicos': 'Continuidad jurídica y política',
-		'Dependencia de cambios políticos': 'Continuidad jurídica y política'
-	};
-	const RISK_CATEGORY_ORDER = [
-		'Ejecución y presupuesto',
-		'Territorio y planificación',
-		'Mercado y acceso',
-		'Integridad y datos',
-		'Continuidad jurídica y política'
-	];
-	interface RiskGroup {
-		category: string;
-		risks: import('$lib/types').TopicRisk[];
-	}
-	const riskGroups = $derived.by<RiskGroup[]>(() => {
-		const map = new SvelteMap<string, import('$lib/types').TopicRisk[]>();
-		for (const risk of data.risks) {
-			const category = RISK_CATEGORY_BY_TITLE[risk.title] ?? 'Otros riesgos';
-			const list = map.get(category) ?? [];
-			list.push(risk);
-			map.set(category, list);
-		}
-		return [
-			...RISK_CATEGORY_ORDER,
-			...[...map.keys()].filter((c) => !RISK_CATEGORY_ORDER.includes(c))
-		]
-			.filter((c) => map.has(c))
-			.map((category) => ({ category, risks: map.get(category) ?? [] }));
-	});
-	const expandedRiskIds = new SvelteSet<string>();
-	function toggleRisk(id: string) {
-		if (expandedRiskIds.has(id)) expandedRiskIds.delete(id);
-		else expandedRiskIds.add(id);
-	}
-
-	// Los 69 indicadores generales llegan como una lista plana con el
-	// prefijo de su categoría ("A. Parque público — ..."); se agrupan aquí
-	// solo para la presentación, sin tocar el contenido guardado.
-	interface IndicatorGroup {
-		category: string;
-		items: string[];
-	}
-	const indicatorGroups = $derived.by<IndicatorGroup[]>(() => {
-		const map = new SvelteMap<string, string[]>();
-		for (const line of topic.successIndicators) {
-			const sepIndex = line.indexOf(' — ');
-			const category = sepIndex >= 0 ? line.slice(0, sepIndex) : 'Otros indicadores';
-			const text = sepIndex >= 0 ? line.slice(sepIndex + 3) : line;
-			const list = map.get(category) ?? [];
-			list.push(text);
-			map.set(category, list);
-		}
-		return [...map.entries()].map(([category, items]) => ({ category, items }));
-	});
 
 	const totalPulsoResponses = $derived(
 		[...data.concernResults.values()].reduce((sum, r) => sum + r.totalResponses, 0)
@@ -719,178 +641,14 @@
 			<AlertTriangle class="size-4 text-brand-700" /> Riesgos y comprobación
 		</h2>
 		<ContentTypeTag type="convoca" class="mt-2" />
-
-		<div class="mt-3 rounded-xl border border-ink-100">
-			<button
-				type="button"
-				onclick={() => (riskAccordionOpen = !riskAccordionOpen)}
-				aria-expanded={riskAccordionOpen}
-				class="flex w-full items-center justify-between gap-2 p-3 text-left text-sm font-semibold text-ink-900"
-			>
-				Qué podría salir mal
-				{#if riskAccordionOpen}<ChevronUp class="size-4 text-ink-400" />{:else}<ChevronDown
-						class="size-4 text-ink-400"
-					/>{/if}
-			</button>
-			{#if riskAccordionOpen}
-				<div class="border-t border-ink-100 p-3">
-					{#if riskGroups.length > 0}
-						<div class="flex flex-col gap-4">
-							{#each riskGroups as group (group.category)}
-								<div>
-									<p class="text-xs font-semibold text-ink-800">{group.category}</p>
-									<ul class="mt-1.5 flex flex-col gap-2">
-										{#each group.risks as risk (risk.id)}
-											{@const isOpen = expandedRiskIds.has(risk.id)}
-											<li class="overflow-hidden rounded-xl border border-ink-100">
-												<button
-													type="button"
-													onclick={() => toggleRisk(risk.id)}
-													aria-expanded={isOpen}
-													class="flex w-full items-start justify-between gap-2 p-3 text-left"
-												>
-													<div class="min-w-0">
-														<p class="text-sm font-semibold text-ink-900">{risk.title}</p>
-														{#if !isOpen && risk.description}
-															<p class="mt-0.5 truncate text-xs text-ink-500">
-																{risk.description}
-															</p>
-														{/if}
-													</div>
-													{#if isOpen}<ChevronUp
-															class="mt-0.5 size-4 shrink-0 text-ink-400"
-														/>{:else}<ChevronDown
-															class="mt-0.5 size-4 shrink-0 text-ink-400"
-														/>{/if}
-												</button>
-												{#if isOpen}
-													<dl
-														class="flex flex-col gap-2 border-t border-ink-100 p-3 text-xs text-ink-600"
-													>
-														<div>
-															<dt class="font-semibold text-ink-700">En qué consiste</dt>
-															<dd class="mt-0.5">{risk.description ?? 'Contenido pendiente.'}</dd>
-														</div>
-														<div>
-															<dt class="font-semibold text-ink-700">Señales de alerta</dt>
-															<dd class="mt-0.5">{risk.signals ?? 'Contenido pendiente.'}</dd>
-														</div>
-														<div>
-															<dt class="font-semibold text-ink-700">Cómo reducirlo</dt>
-															<dd class="mt-0.5">{risk.mitigation ?? 'Contenido pendiente.'}</dd>
-														</div>
-														<div>
-															<dt class="font-semibold text-ink-700">Decisión si ocurre</dt>
-															<dd class="mt-0.5">
-																{risk.decisionTrigger ?? 'Contenido pendiente.'}
-															</dd>
-														</div>
-													</dl>
-												{/if}
-											</li>
-										{/each}
-									</ul>
-								</div>
-							{/each}
-						</div>
-					{:else}
-						<p class="text-xs text-ink-400">Pendiente de incorporar.</p>
-					{/if}
-				</div>
-			{/if}
+		<div class="mt-4">
+			<RiesgosComprobacion
+				{topic}
+				risks={data.risks}
+				evaluationMoments={data.evaluationMoments}
+				measureChangeConditions={data.measureChangeConditions}
+			/>
 		</div>
-
-		<div class="mt-2 rounded-xl border border-ink-100">
-			<button
-				type="button"
-				onclick={() => (indicatorsAccordionOpen = !indicatorsAccordionOpen)}
-				aria-expanded={indicatorsAccordionOpen}
-				class="flex w-full items-center justify-between gap-2 p-3 text-left text-sm font-semibold text-ink-900"
-			>
-				Indicadores para medir los resultados
-				{#if indicatorsAccordionOpen}<ChevronUp class="size-4 text-ink-400" />{:else}<ChevronDown
-						class="size-4 text-ink-400"
-					/>{/if}
-			</button>
-			{#if indicatorsAccordionOpen}
-				<div class="border-t border-ink-100 p-3">
-					{#if indicatorGroups.length > 0}
-						<p class="text-xs leading-relaxed text-ink-500">
-							Cada indicador deberá mostrar: definición exacta, valor inicial, fecha, fuente, ámbito
-							territorial, objetivo, evolución, última actualización y limitaciones del dato. <strong
-								class="font-semibold text-ink-700"
-								>Pendiente de establecer mediante la línea de base</strong
-							> mientras no exista ese seguimiento real.
-						</p>
-						<div class="mt-3 flex flex-col gap-3">
-							{#each indicatorGroups as group (group.category)}
-								<div>
-									<p class="text-xs font-semibold text-ink-800">{group.category}</p>
-									<ul class="mt-1 flex flex-col gap-1">
-										{#each group.items as item (item)}
-											<li class="flex items-start gap-1.5 text-sm text-ink-700">
-												<ListChecks class="mt-0.5 size-3.5 shrink-0 text-brand-600" />
-												{item}
-											</li>
-										{/each}
-									</ul>
-								</div>
-							{/each}
-						</div>
-					{:else}
-						<p class="text-xs text-ink-400">Pendiente de incorporar.</p>
-					{/if}
-				</div>
-			{/if}
-		</div>
-
-		<div class="mt-2 rounded-xl border border-ink-100">
-			<button
-				type="button"
-				onclick={() => (evaluationAccordionOpen = !evaluationAccordionOpen)}
-				aria-expanded={evaluationAccordionOpen}
-				class="flex w-full items-center justify-between gap-2 p-3 text-left text-sm font-semibold text-ink-900"
-			>
-				Calendario y reglas de evaluación
-				{#if evaluationAccordionOpen}<ChevronUp class="size-4 text-ink-400" />{:else}<ChevronDown
-						class="size-4 text-ink-400"
-					/>{/if}
-			</button>
-			{#if evaluationAccordionOpen}
-				<div class="border-t border-ink-100 p-3">
-					{#if topic.evaluationRules}
-						<p class="text-sm leading-relaxed whitespace-pre-line text-ink-700">
-							{topic.evaluationRules}
-						</p>
-					{:else}
-						<p class="text-xs text-ink-400">Pendiente de incorporar.</p>
-					{/if}
-				</div>
-			{/if}
-		</div>
-
-		{#if topic.governanceNarrative}
-			<div class="mt-2 rounded-xl border border-ink-100">
-				<button
-					type="button"
-					onclick={() => (governanceAccordionOpen = !governanceAccordionOpen)}
-					aria-expanded={governanceAccordionOpen}
-					class="flex w-full items-center justify-between gap-2 p-3 text-left text-sm font-semibold text-ink-900"
-				>
-					Gobernanza: quién puede hacer qué
-					{#if governanceAccordionOpen}<ChevronUp class="size-4 text-ink-400" />{:else}<ChevronDown
-							class="size-4 text-ink-400"
-						/>{/if}
-				</button>
-				{#if governanceAccordionOpen}
-					<div class="border-t border-ink-100 p-3">
-						<p class="text-sm leading-relaxed whitespace-pre-line text-ink-700">
-							{topic.governanceNarrative}
-						</p>
-					</div>
-				{/if}
-			</div>
-		{/if}
 	</section>
 
 	<!-- 8. Pulso ciudadano -->
