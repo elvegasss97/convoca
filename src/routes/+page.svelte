@@ -130,8 +130,8 @@
 	     Deliberadamente breve: reservado para alojar más adelante otro
 	     artifact o una pieza visual horizontal sobre la aspiración final
 	     de Convoca. No añadir aquí explicaciones de funcionamiento. -->
-	<section use:reveal class="reveal-section border-t border-ink-100">
-		<div class="mx-auto max-w-2xl px-4 pt-20 text-center sm:px-6 sm:pt-28">
+	<section class="reveal-section border-t border-ink-100">
+		<div use:reveal class="mx-auto max-w-2xl px-4 pt-20 text-center sm:px-6 sm:pt-28">
 			<h2 class="font-display text-2xl font-semibold text-ink-900 sm:text-3xl">
 				Una infraestructura democrática al alcance de cualquiera
 			</h2>
@@ -148,8 +148,13 @@
 		     nervioso ciudadano". Solo versión móvil por ahora; la versión
 		     desktop se añadirá en una segunda pasada con <picture> como en
 		     el diseño anterior. Cada escena conserva su propio ratio de
-		     imagen (object-contain) para no recortar contenido. -->
-		<div class="mx-auto mt-4 max-w-xs px-4 text-center sm:mt-6 sm:max-w-sm sm:px-6">
+		     imagen (object-contain) para no recortar contenido.
+		     `use:reveal` va en cada escena individual, no en la <section>:
+		     con 9 escenas la sección es demasiado alta para que el 15% de
+		     intersección del propio elemento se alcance pronto, así que
+		     aplicarlo a toda la sección dejaba el bloque entero en opacidad
+		     0 (en blanco) durante gran parte del scroll. -->
+		<div use:reveal class="mx-auto mt-4 max-w-xs px-4 text-center sm:mt-6 sm:max-w-sm sm:px-6">
 			<figure>
 				<img
 					src="/vision/vision-sistema-nervioso-01-mobile.webp"
@@ -169,7 +174,7 @@
 			</figure>
 		</div>
 
-		<div class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
+		<div use:reveal class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
 			<figure>
 				<img
 					src="/vision/vision-sistema-nervioso-02-mobile.webp"
@@ -189,7 +194,7 @@
 			</figure>
 		</div>
 
-		<div class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
+		<div use:reveal class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
 			<figure>
 				<img
 					src="/vision/vision-sistema-nervioso-03-mobile.webp"
@@ -209,7 +214,7 @@
 			</figure>
 		</div>
 
-		<div class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
+		<div use:reveal class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
 			<figure>
 				<img
 					src="/vision/vision-sistema-nervioso-04-mobile.webp"
@@ -229,7 +234,7 @@
 			</figure>
 		</div>
 
-		<div class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
+		<div use:reveal class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
 			<figure>
 				<img
 					src="/vision/vision-sistema-nervioso-05-mobile.webp"
@@ -249,7 +254,7 @@
 			</figure>
 		</div>
 
-		<div class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
+		<div use:reveal class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
 			<figure>
 				<img
 					src="/vision/vision-sistema-nervioso-06-mobile.webp"
@@ -270,7 +275,7 @@
 			</figure>
 		</div>
 
-		<div class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
+		<div use:reveal class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
 			<figure>
 				<img
 					src="/vision/vision-sistema-nervioso-07-mobile.webp"
@@ -290,7 +295,7 @@
 			</figure>
 		</div>
 
-		<div class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
+		<div use:reveal class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
 			<figure>
 				<img
 					src="/vision/vision-sistema-nervioso-08-mobile.webp"
@@ -310,7 +315,7 @@
 			</figure>
 		</div>
 
-		<div class="mx-auto mt-10 max-w-xs px-4 pb-16 text-center sm:mt-14 sm:max-w-sm sm:px-6 sm:pb-20">
+		<div use:reveal class="mx-auto mt-10 max-w-xs px-4 pb-16 text-center sm:mt-14 sm:max-w-sm sm:px-6 sm:pb-20">
 			<figure>
 				<img
 					src="/vision/vision-sistema-nervioso-09-mobile.webp"
