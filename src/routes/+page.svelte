@@ -135,10 +135,38 @@
 			<h2 class="font-display text-2xl font-semibold text-ink-900 sm:text-3xl">
 				Una infraestructura democrática al alcance de cualquiera
 			</h2>
+			<p class="mt-2 text-xs font-semibold tracking-wide text-accent-600 uppercase">
+				La visión futura de CONVOCA
+			</p>
 			<p class="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ink-700 sm:text-lg">
 				Convoca aspira a que cualquier persona pueda abrir el mapa de su país o de su municipio y
 				comprender qué preocupa a su comunidad.
 			</p>
+
+			<!-- Escena piloto (1/9) — prueba de integración de una única escena de
+			     la futura secuencia visual aspiracional. No generar el resto de
+			     escenas ni construir galería/carrusel hasta validar esta prueba. -->
+			<figure class="mx-auto mt-10 max-w-xs sm:max-w-sm">
+				<img
+					src="/vision/vision-sistema-nervioso-01-mobile.webp"
+					alt="Un grupo de personas observa desde una colina un mapa de España iluminado por una red de nodos conectados entre municipios: la visión de Convoca como un sistema nervioso ciudadano."
+					width="1024"
+					height="1536"
+					loading="lazy"
+					decoding="async"
+					class="h-auto w-full rounded-2xl border border-ink-100 shadow-sm"
+				/>
+				<figcaption class="mt-3">
+					<p class="text-xs font-medium text-ink-400">1 / 9</p>
+					<p class="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-ink-500">
+						Cada municipio escucha. Los patrones se conectan. La ciudadanía decide: la visión busca
+						convertir voces ciudadanas en planes públicos verificables.
+					</p>
+					<p class="mt-3 text-[11px] text-ink-400 italic">
+						Primera escena de una secuencia en desarrollo.
+					</p>
+				</figcaption>
+			</figure>
 		</div>
 	</section>
 
