@@ -1,12 +1,22 @@
 import type { DateFilter } from '$lib/types';
 
 const dateFormatter = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'long' });
+const dateFormatterWithYear = new Intl.DateTimeFormat('es-ES', {
+	day: 'numeric',
+	month: 'long',
+	year: 'numeric'
+});
 const dateFormatterShort = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
 const weekdayFormatter = new Intl.DateTimeFormat('es-ES', { weekday: 'long' });
 const timeFormatter = new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit' });
 
 export function formatEventDate(iso: string): string {
 	return capitalize(dateFormatter.format(new Date(iso)));
+}
+
+/** Igual que formatEventDate, pero con el año incluido (p. ej. "6 de agosto de 2026"). */
+export function formatEventDateWithYear(iso: string): string {
+	return capitalize(dateFormatterWithYear.format(new Date(iso)));
 }
 
 export function formatEventDateShort(iso: string): string {

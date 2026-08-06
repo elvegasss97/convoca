@@ -29,7 +29,7 @@
 		topicStatusLabels,
 		TOPIC_CATEGORY_PENDING_LABEL
 	} from '$lib/labels';
-	import { formatEventDate } from '$lib/utils/date';
+	import { formatEventDate, formatEventDateWithYear } from '$lib/utils/date';
 	import Seo from '$lib/components/Seo.svelte';
 	import ContentTypeTag from '$lib/components/pulso/ContentTypeTag.svelte';
 	import ConcernResultsChart from '$lib/components/pulso/ConcernResultsChart.svelte';
@@ -354,7 +354,9 @@
 
 	<p class="mt-4 text-xs text-ink-400">
 		{#if topic.publishedAt}Publicado el {formatEventDate(topic.publishedAt)} ·{/if}
-		Actualizado el {formatEventDate(topic.updatedAt)}
+		Actualizado el {topic.slug === 'plan-sanidad-2036'
+			? formatEventDateWithYear(topic.updatedAt)
+			: formatEventDate(topic.updatedAt)}
 	</p>
 
 	{#if topic.publicNotice}

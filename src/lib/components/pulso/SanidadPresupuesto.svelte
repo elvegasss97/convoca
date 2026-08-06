@@ -122,7 +122,7 @@
 			Escenario central · 2032
 		</div>
 		<div class="mt-1.5 font-display text-2xl font-bold text-brand-900 sm:text-3xl">
-			{eur(heroCentral)}<span class="ml-1 text-sm font-medium text-brand-600">M€ / año</span>
+			{eur(heroCentral)}<span class="text-sm font-medium text-brand-600">&nbsp;M€/año</span>
 		</div>
 		<div class="mt-1 text-xs text-ink-500">Gasto adicional frente a no aplicar el plan</div>
 	</div>
@@ -131,8 +131,8 @@
 			Banda de escenarios · 2032
 		</div>
 		<div class="mt-1.5 font-display text-2xl font-bold text-brand-900 sm:text-3xl">
-			{eur(heroBajo)}–{eur(heroAlto)}<span class="ml-1 text-sm font-medium text-brand-600"
-				>M€ / año</span
+			{eur(heroBajo)}–{eur(heroAlto)}<span class="text-sm font-medium text-brand-600"
+				>&nbsp;M€/año</span
 			>
 		</div>
 		<div class="mt-1 text-xs text-ink-500">Según intensidad y cobertura elegidas</div>
@@ -142,7 +142,7 @@
 			Acumulado 2027–2036
 		</div>
 		<div class="mt-1.5 font-display text-2xl font-bold text-brand-900 sm:text-3xl">
-			{eur(heroAcumulado)}<span class="ml-1 text-sm font-medium text-brand-600">M€</span>
+			{eur(heroAcumulado)}<span class="text-sm font-medium text-brand-600">&nbsp;M€</span>
 		</div>
 		<div class="mt-1 text-xs text-ink-500">Suma del gasto incremental de los diez años</div>
 	</div>

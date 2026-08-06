@@ -53,7 +53,7 @@
 				Gasto recurrente · desde 2032
 			</div>
 			<div class="mt-2 font-display text-2xl font-bold text-brand-700 sm:text-3xl">
-				{eur(recurrente2032)} M€ <span class="text-base font-medium text-ink-400">/ año</span>
+				{eur(recurrente2032)} M€<span class="text-base font-medium text-ink-400">/año</span>
 			</div>
 			<p class="mt-1.5 text-[13.5px] text-ink-600">
 				Capacidad de reserva estructural, coordinación entre servicios de salud, transparencia y

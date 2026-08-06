@@ -90,7 +90,7 @@
 				{m.nombre}
 			</div>
 			<div class="font-display text-xl font-bold text-brand-900">
-				{eur(val)}<span class="ml-0.5 text-[.48em] font-medium text-ink-400">M€ · {year}</span>
+				{eur(val)}<span class="text-[.48em] font-medium text-ink-400">&nbsp;M€ · {year}</span>
 			</div>
 			<div class="mt-0.5 font-mono text-[10.5px] text-ink-400">
 				2032 central: {eur(bandaCentral)} M€
@@ -131,7 +131,7 @@
 					{year} · {scenario}
 				</div>
 				<div class="mt-1.5 font-display text-lg font-bold">
-					{eur(valYear)}<span class="ml-0.5 text-[.5em] font-medium text-brand-300">M€</span>
+					{eur(valYear)}<span class="text-[.5em] font-medium text-brand-300">&nbsp;M€</span>
 				</div>
 			</div>
 			<div class="rounded-2xl border border-white/10 bg-white/5 p-3.5">
@@ -139,7 +139,7 @@
 					2032 · {scenario}
 				</div>
 				<div class="mt-1.5 font-display text-lg font-bold">
-					{eur(val2032)}<span class="ml-0.5 text-[.5em] font-medium text-brand-300">M€</span>
+					{eur(val2032)}<span class="text-[.5em] font-medium text-brand-300">&nbsp;M€</span>
 				</div>
 			</div>
 			<div class="col-span-2 rounded-2xl border border-white/10 bg-white/5 p-3.5 sm:col-span-1">
@@ -147,8 +147,8 @@
 					Banda de escenarios 2032
 				</div>
 				<div class="mt-1.5 font-display text-base font-bold">
-					{eur(banda.bajo)}–{eur(banda.alto)}<span
-						class="ml-0.5 text-[.5em] font-medium text-brand-300">M€</span
+					{eur(banda.bajo)}–{eur(banda.alto)}<span class="text-[.5em] font-medium text-brand-300"
+						>&nbsp;M€</span
 					>
 				</div>
 			</div>
