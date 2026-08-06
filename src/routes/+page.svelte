@@ -163,7 +163,7 @@
 						alt="Mapa iluminado con nodos de conversación conectando los municipios de un territorio, con la etiqueta 'Tu municipio' señalando un punto concreto."
 						width="864"
 						height="1821"
-						loading="lazy"
+						loading="eager"
 						decoding="async"
 						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
@@ -183,7 +183,7 @@
 						alt="Un medidor en forma de arco que va de 'Aún no suficiente' a 'Participación suficiente', mostrando cuándo se activa el agente municipal de CONVOCA."
 						width="862"
 						height="1825"
-						loading="lazy"
+						loading="eager"
 						decoding="async"
 						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
@@ -203,7 +203,7 @@
 						alt="Un cerebro conectado a múltiples burbujas de conversación de colores que la IA agrupa y ordena en categorías: casos individuales, patrones, alertas y aportaciones."
 						width="863"
 						height="1823"
-						loading="lazy"
+						loading="eager"
 						decoding="async"
 						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
@@ -223,7 +223,7 @@
 						alt="Un cerebro central conectado a varios grupos de personas repartidos por un mapa de municipios, representando patrones compartidos entre territorios."
 						width="864"
 						height="1821"
-						loading="lazy"
+						loading="eager"
 						decoding="async"
 						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
@@ -243,7 +243,7 @@
 						alt="Un diagrama que conecta problemas detectados en los municipios —vivienda, transporte, contaminación, salud mental, servicios sociales, cobertura digital— con el nivel institucional competente: ayuntamiento, diputación, comunidad autónoma o Estado."
 						width="1024"
 						height="1536"
-						loading="lazy"
+						loading="eager"
 						decoding="async"
 						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
@@ -263,7 +263,7 @@
 						alt="Un borrador de plan en el centro rodeado de seis agentes de IA especializados: económico, jurídico, de evidencia, de implementación, de riesgos y de participación ciudadana."
 						width="1024"
 						height="1536"
-						loading="lazy"
+						loading="eager"
 						decoding="async"
 						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
@@ -284,7 +284,7 @@
 						alt="Un plan propuesto con medidas, coste, calendario y nivel de consenso, junto a tres opciones para la ciudadanía: aprobar, corregir o rechazar."
 						width="878"
 						height="1792"
-						loading="lazy"
+						loading="eager"
 						decoding="async"
 						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
@@ -304,7 +304,7 @@
 						alt="Un mapa de España con nodos iluminados mostrando el escalado territorial de una propuesta: de municipio a comarca, provincia, comunidad autónoma y Estado."
 						width="863"
 						height="1822"
-						loading="lazy"
+						loading="eager"
 						decoding="async"
 						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
@@ -324,7 +324,7 @@
 						alt="Iconos de código abierto, datos abiertos, gobernanza ciudadana, financiación transparente y sostenibilidad, junto a las formas de participar en CONVOCA."
 						width="1024"
 						height="1536"
-						loading="lazy"
+						loading="eager"
 						decoding="async"
 						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
