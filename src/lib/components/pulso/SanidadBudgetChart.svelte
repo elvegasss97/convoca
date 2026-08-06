@@ -107,18 +107,21 @@
 
 	const YEARS: readonly string[] = SANIDAD_BUDGET_YEARS;
 
-	const activeYear = $derived(hoverYear ?? year);
+	// El tooltip y la línea vertical de referencia solo aparecen mientras se
+	// pasa el cursor por una zona del gráfico: en reposo (y en pantallas
+	// táctiles, donde no hay hover) no deben tapar nada — el mismo detalle ya
+	// está disponible siempre en el desglose por medida de más abajo.
 	const tooltipData = $derived.by(() => {
-		const y = activeYear;
-		const row = SANIDAD_BUDGET_SERIE[scenario][y];
+		if (!hoverYear) return null;
+		const row = SANIDAD_BUDGET_SERIE[scenario][hoverYear];
 		return {
-			year: y,
+			year: hoverYear,
 			total: row.TOTAL,
 			rows: SANIDAD_BUDGET_MEASURES.map((m) => ({ id: m.id, value: row[m.id] }))
 		};
 	});
-	const tooltipLeftPct = $derived((xFor(YEARS.indexOf(activeYear)) / CW) * 100);
-	const hoverLineX = $derived(xFor(YEARS.indexOf(activeYear)));
+	const tooltipLeftPct = $derived(hoverYear ? (xFor(YEARS.indexOf(hoverYear)) / CW) * 100 : 0);
+	const hoverLineX = $derived(hoverYear ? xFor(YEARS.indexOf(hoverYear)) : null);
 </script>
 
 <div class="rounded-2xl border border-ink-100 bg-white p-4 sm:p-5">
@@ -238,15 +241,17 @@
 				/>
 			{/if}
 
-			<line
-				x1={hoverLineX}
-				x2={hoverLineX}
-				y1={PAD_T}
-				y2={PAD_T + plotH}
-				stroke="var(--color-ink-400)"
-				stroke-width="1"
-				stroke-dasharray="3 3"
-			/>
+			{#if hoverLineX !== null}
+				<line
+					x1={hoverLineX}
+					x2={hoverLineX}
+					y1={PAD_T}
+					y2={PAD_T + plotH}
+					stroke="var(--color-ink-400)"
+					stroke-width="1"
+					stroke-dasharray="3 3"
+				/>
+			{/if}
 		</svg>
 
 		<!-- Zonas de hover/click por año, superpuestas al SVG. La superficie realmente accesible por teclado es el selector de años de abajo. -->
@@ -264,21 +269,23 @@
 			{/each}
 		</div>
 
-		<div
-			class="pointer-events-none absolute top-1 min-w-[180px] -translate-x-1/2 rounded-xl bg-brand-950 px-3.5 py-3 text-xs text-white shadow-lg"
-			style={`left:${tooltipLeftPct}%`}
-		>
-			<div class="mb-1.5 font-mono text-[11px] tracking-wide text-brand-300">
-				{tooltipData.year} · {SANIDAD_BUDGET_SCENARIOS.find((s) => s.key === scenario)?.label}
-			</div>
-			<div class="mb-1.5 font-display text-base font-bold">{eur(tooltipData.total)} M€</div>
-			{#each tooltipData.rows as row (row.id)}
-				<div class="flex justify-between gap-3 py-0.5 text-white/80">
-					<span>{row.id}</span>
-					<span class="font-mono font-medium text-white">{eur(row.value)}</span>
+		{#if tooltipData}
+			<div
+				class="pointer-events-none absolute top-1 min-w-[180px] -translate-x-1/2 rounded-xl bg-brand-950 px-3.5 py-3 text-xs text-white shadow-lg"
+				style={`left:${tooltipLeftPct}%`}
+			>
+				<div class="mb-1.5 font-mono text-[11px] tracking-wide text-brand-300">
+					{tooltipData.year} · {SANIDAD_BUDGET_SCENARIOS.find((s) => s.key === scenario)?.label}
 				</div>
-			{/each}
-		</div>
+				<div class="mb-1.5 font-display text-base font-bold">{eur(tooltipData.total)} M€</div>
+				{#each tooltipData.rows as row (row.id)}
+					<div class="flex justify-between gap-3 py-0.5 text-white/80">
+						<span>{row.id}</span>
+						<span class="font-mono font-medium text-white">{eur(row.value)}</span>
+					</div>
+				{/each}
+			</div>
+		{/if}
 	</div>
 
 	<div
