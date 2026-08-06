@@ -153,7 +153,7 @@
 		     por debajo de eso el móvil sigue viendo exactamente la misma
 		     imagen vertical de antes. -->
 		<div
-			class="mx-auto mt-4 max-w-xs px-4 pb-16 text-center sm:mt-6 sm:max-w-4xl sm:px-6 sm:pb-20 lg:max-w-6xl"
+			class="mx-auto mt-4 max-w-xs px-4 pb-16 text-center sm:mt-6 sm:max-w-4xl sm:translate-x-1 sm:px-6 sm:pb-20 lg:max-w-6xl lg:translate-x-2"
 		>
 			<figure>
 				<picture>
