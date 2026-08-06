@@ -14,6 +14,7 @@
 	} from '@lucide/svelte';
 	import Seo from '$lib/components/Seo.svelte';
 	import { reveal } from '$lib/actions/reveal';
+	import HomeIntro from '$lib/components/HomeIntro.svelte';
 
 	const journey = [
 		{
@@ -101,82 +102,7 @@
 />
 
 <article>
-	<!-- 1. HERO -->
-	<section class="mx-auto max-w-3xl px-4 pt-14 pb-10 text-center sm:px-6 sm:pt-20">
-		<h1
-			class="font-display text-3xl font-semibold text-balance text-ink-900 sm:text-4xl md:text-5xl"
-		>
-			De la preocupación a la propuesta.<br />
-			De la propuesta a la acción.
-		</h1>
-		<p class="mx-auto mt-5 max-w-xl text-base leading-relaxed text-ink-600 sm:text-lg">
-			Convoca es una herramienta ciudadana para escuchar lo que importa, construir soluciones
-			abiertas y convertirlas en pasos reales.
-		</p>
-		<div class="mt-7 flex flex-wrap items-center justify-center gap-3">
-			<a
-				href="/pulso"
-				class="flex items-center gap-1.5 rounded-full bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800"
-			>
-				Explorar Pulso Ciudadano <ArrowRight class="size-4" />
-			</a>
-			<a
-				href="/pulso/escucha"
-				class="flex items-center gap-1.5 rounded-full bg-accent-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-600"
-			>
-				Participar en Convoca <ArrowRight class="size-4" />
-			</a>
-		</div>
-	</section>
-
-	<!-- 2. QUÉ ES CONVOCA -->
-	<section use:reveal class="reveal-section border-t border-ink-100 bg-white">
-		<div class="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
-			<h2 class="font-display text-2xl font-semibold text-ink-900 sm:text-3xl">
-				Un lugar para construir, no solo para opinar
-			</h2>
-			<p class="mt-4 text-base leading-relaxed text-ink-700 sm:text-lg">
-				Cada día miles de personas comparten las mismas preocupaciones, pero esas voces suelen
-				quedar dispersas entre titulares, comentarios y conversaciones aisladas. Convoca quiere
-				reunirlas, hacerlas comprensibles y convertirlas en propuestas que puedan avanzar.
-			</p>
-
-			<ul class="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-				<li class="rounded-2xl border border-ink-100 px-4 py-3.5 text-center">
-					<p class="font-display text-sm font-semibold text-ink-900">No es un partido.</p>
-				</li>
-				<li class="rounded-2xl border border-ink-100 px-4 py-3.5 text-center">
-					<p class="font-display text-sm font-semibold text-ink-900">No te dice qué pensar.</p>
-				</li>
-				<li class="rounded-2xl border border-ink-100 px-4 py-3.5 text-center">
-					<p class="font-display text-sm font-semibold text-ink-900">
-						No promete tener todas las respuestas.
-					</p>
-				</li>
-			</ul>
-
-			<p class="mt-8 text-base leading-relaxed font-medium text-ink-800 sm:text-lg">
-				Es una infraestructura ciudadana en construcción para escuchar, debatir, proponer,
-				organizarse y comprobar si las soluciones funcionan.
-			</p>
-
-			<div class="mt-8 rounded-2xl border border-ink-100 bg-ink-50 p-5 sm:p-6">
-				<p class="text-sm leading-relaxed text-ink-700 sm:text-base">
-					Organizarse también tiene una forma muy concreta: las <strong class="font-semibold"
-						>convocatorias</strong
-					>, manifestaciones, concentraciones, recogidas de firmas y otras acciones ciudadanas que
-					cualquiera puede publicar, descubrir cerca de su ciudad y confirmar su asistencia sin
-					exponer su identidad.
-				</p>
-				<a
-					href="/descubrir"
-					class="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:underline"
-				>
-					Explorar convocatorias activas <ArrowRight class="size-3.5" />
-				</a>
-			</div>
-		</div>
-	</section>
+	<HomeIntro />
 
 	<!-- 3. CÓMO NACIÓ -->
 	<section use:reveal class="reveal-section">
