@@ -226,7 +226,7 @@
 		     versión horizontal propia desde `sm` (≥640px), con su encuadre
 		     completo (mismo ratio 1717/1145, sin recortes). -->
 		<div
-			class="mx-auto mt-10 max-w-xs px-4 pb-16 text-center sm:mt-14 sm:max-w-4xl sm:translate-x-1 sm:px-6 sm:pb-20 lg:max-w-6xl lg:translate-x-2"
+			class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-4xl sm:translate-x-1 sm:px-6 lg:max-w-6xl lg:translate-x-2"
 		>
 			<figure>
 				<picture>
@@ -252,6 +252,35 @@
 					</p>
 					<p class="mt-3 text-[11px] text-ink-400 italic">
 						Tercera escena de una secuencia en desarrollo.
+					</p>
+				</figcaption>
+			</figure>
+		</div>
+
+		<!-- Escena 4 (4/9) — todavía sin versión panorámica propia, por eso
+		     conserva el tratamiento vertical (mismo patrón que las escenas
+		     2 y 3 antes de recibir su versión desktop). -->
+		<div
+			class="mx-auto mt-10 max-w-xs px-4 pb-16 text-center sm:mt-14 sm:max-w-sm sm:px-6 sm:pb-20"
+		>
+			<figure>
+				<img
+					src="/vision/vision-sistema-nervioso-04-mobile.webp"
+					alt="Una persona consulta en su móvil el plan de CONVOCA en construcción con la ciudadanía: prioridades, recursos, acciones y seguimiento del avance."
+					width="1024"
+					height="1536"
+					loading="lazy"
+					decoding="async"
+					class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+				/>
+				<figcaption class="mt-3">
+					<p class="text-xs font-medium text-ink-400">4 / 9</p>
+					<p class="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-ink-500">
+						Lo que importa se convierte en prioridades, recursos y acciones verificables: un plan
+						que nace de las personas y se revisa, mide y ajusta junto a la ciudadanía.
+					</p>
+					<p class="mt-3 text-[11px] text-ink-400 italic">
+						Cuarta escena de una secuencia en desarrollo.
 					</p>
 				</figcaption>
 			</figure>
