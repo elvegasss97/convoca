@@ -190,7 +190,7 @@
 		     encuadre completo (título y franja inferior íntegros), por eso
 		     usa su propio ratio (1717/1145) en vez del de la escena 1. -->
 		<div
-			class="mx-auto mt-10 max-w-xs px-4 pb-16 text-center sm:mt-14 sm:max-w-4xl sm:translate-x-1 sm:px-6 sm:pb-20 lg:max-w-6xl lg:translate-x-2"
+			class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-4xl sm:translate-x-1 sm:px-6 lg:max-w-6xl lg:translate-x-2"
 		>
 			<figure>
 				<picture>
@@ -217,6 +217,35 @@
 					</p>
 					<p class="mt-3 text-[11px] text-ink-400 italic">
 						Segunda escena de una secuencia en desarrollo.
+					</p>
+				</figcaption>
+			</figure>
+		</div>
+
+		<!-- Escena 3 (3/9) — todavía sin versión panorámica propia, por eso
+		     conserva el tratamiento vertical (mismo patrón que la escena 2
+		     antes de recibir su versión desktop). -->
+		<div
+			class="mx-auto mt-10 max-w-xs px-4 pb-16 text-center sm:mt-14 sm:max-w-sm sm:px-6 sm:pb-20"
+		>
+			<figure>
+				<img
+					src="/vision/vision-sistema-nervioso-03-mobile.webp"
+					alt="Una persona consulta la aplicación de CONVOCA en su móvil sobre la ciudad: sus propuestas se priorizan junto a las de miles de ciudadanos y se convierten en planes de acción."
+					width="1024"
+					height="1536"
+					loading="lazy"
+					decoding="async"
+					class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+				/>
+				<figcaption class="mt-3">
+					<p class="text-xs font-medium text-ink-400">3 / 9</p>
+					<p class="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-ink-500">
+						La participación ciudadana se organiza, se estructura y se transforma en propuestas
+						reales: de las preocupaciones a planes verificables que la comunidad puede impulsar.
+					</p>
+					<p class="mt-3 text-[11px] text-ink-400 italic">
+						Tercera escena de una secuencia en desarrollo.
 					</p>
 				</figcaption>
 			</figure>
