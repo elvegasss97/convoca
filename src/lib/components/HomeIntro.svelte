@@ -1060,7 +1060,7 @@
 	.panel-cta {
 		align-self: flex-start;
 		background: var(--naranja-500);
-		color: #0a2620;
+		color: #fff;
 		font-weight: 700;
 		font-size: 13.5px;
 		padding: 12px 20px;
@@ -1199,7 +1199,7 @@
 		color: var(--tinta);
 	}
 	.acc-cta {
-		background: var(--verde-900);
+		background: var(--naranja-500);
 		color: #fff;
 		font-weight: 700;
 		font-size: 13px;
@@ -1209,6 +1209,9 @@
 		align-items: center;
 		gap: 7px;
 		min-height: 44px;
+	}
+	.acc-cta:hover {
+		background: var(--naranja-400);
 	}
 	.acc-noaccion {
 		font-size: 12.5px;
