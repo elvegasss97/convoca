@@ -11,14 +11,10 @@
 	} from '$lib/data/homeIntroData';
 
 	let containerEl = $state<HTMLDivElement | null>(null);
-	let cicloSectionEl = $state<HTMLElement | null>(null);
 	let circuitSize = $state(0);
 
 	let active = $state<HomeStageId | null>(null);
 	let exampleTab = $state<HomeExampleId>('sanidad');
-
-	const prefersReducedMotion =
-		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	const exampleIds = EXAMPLES.map((e) => e.id);
 	const activeStage = $derived(active ? ALL_STAGES.find((s) => s.id === active) : undefined);
@@ -63,17 +59,6 @@
 		const next = i < 0 || i >= ALL_STAGES.length - 1 ? 0 : i + 1;
 		goToStage(ALL_STAGES[next].id);
 	}
-	function scrollToCiclo() {
-		cicloSectionEl?.scrollIntoView({
-			behavior: prefersReducedMotion ? 'auto' : 'smooth',
-			block: 'start'
-		});
-	}
-	function miniGoto(id: HomeStageId) {
-		scrollToCiclo();
-		selectStage(id);
-	}
-
 	function activateExampleTab(id: HomeExampleId, moveFocus: boolean) {
 		exampleTab = id;
 		if (moveFocus) {
@@ -101,42 +86,38 @@
 		<div class="hero-c"></div>
 		<div class="hero-c2"></div>
 		<div class="wrap">
+			<div class="hero-eyebrow">Plataforma de participación ciudadana</div>
 			<h1 class="hero-title">
-				Deja de elegir paquetes cerrados.<br /><em>Participa en decisiones concretas.</em>
+				Convierte un problema compartido en una propuesta y una acción colectiva.
 			</h1>
 			<p class="hero-sub">
-				CONVOCA conecta problemas ciudadanos, planes verificables y acción colectiva en un mismo
-				proceso.
+				CONVOCA es una plataforma ciudadana para señalar problemas, revisar soluciones concretas y
+				organizar convocatorias.
+			</p>
+			<p class="hero-sub-secondary">
+				Participa en decisiones concretas, sin tener que aceptar un paquete político completo.
 			</p>
 
-			<div class="doors" role="group" aria-label="Puertas de entrada">
+			<h2 class="doors-heading" id="doors-heading">¿Qué quieres hacer hoy?</h2>
+			<div class="doors" role="group" aria-labelledby="doors-heading">
 				<a class="door" href="/pulso">
 					<span class="d-ic" aria-hidden="true">◉</span>
-					<span class="d-tt">Quiero señalar un problema</span>
+					<span class="d-tt">Contar un problema</span>
+					<span class="d-desc">Explica qué ocurre, dónde pasa y cómo te afecta.</span>
 					<span class="d-go">Ir a Pulso Ciudadano →</span>
 				</a>
 				<a class="door" href="/pulso/soluciones">
 					<span class="d-ic" aria-hidden="true">✎</span>
-					<span class="d-tt">Quiero revisar una propuesta</span>
+					<span class="d-tt">Revisar soluciones</span>
+					<span class="d-desc">Consulta medidas, costes, plazos, riesgos y fuentes.</span>
 					<span class="d-go">Ver soluciones →</span>
 				</a>
 				<a class="door" href="/descubrir">
 					<span class="d-ic" aria-hidden="true">▶</span>
-					<span class="d-tt">Quiero participar en una convocatoria</span>
+					<span class="d-tt">Ver convocatorias</span>
+					<span class="d-desc">Encuentra una cerca de ti o crea una nueva.</span>
 					<span class="d-go">Ir al mapa →</span>
 				</a>
-			</div>
-
-			<div class="hero-mini">
-				<div class="hero-mini-label">El ciclo completo, de un vistazo</div>
-				<nav class="mini-cycle" aria-label="Vista previa del ciclo de CONVOCA">
-					{#each STAGES as s, i (s.id)}
-						<button type="button" class="mini-node" onclick={() => miniGoto(s.id)}
-							><span aria-hidden="true">{s.icono}</span> {s.nombre}</button
-						>
-						{#if i < STAGES.length - 1}<span class="mini-arrow" aria-hidden="true">→</span>{/if}
-					{/each}
-				</nav>
 			</div>
 
 			<div class="hero-note">
@@ -155,17 +136,15 @@
 					/><circle cx="12" cy="16" r="1" fill="currentColor" /></svg
 				>
 				<span
-					>CONVOCA combina herramientas <b>ya disponibles</b> —como Pulso Ciudadano, las
-					convocatorias o los planes de Vivienda y Sanidad— con funciones que
-					<b>todavía están en desarrollo</b>, como la priorización automática o la conexión completa
-					entre todas las etapas.</span
+					>Ya puedes explorar convocatorias, participar en propuestas y consultar los planes de
+					Vivienda y Sanidad.</span
 				>
 			</div>
 		</div>
 	</header>
 
 	<!-- ============ CICLO INTERACTIVO ============ -->
-	<section class="block" id="ciclo" bind:this={cicloSectionEl}>
+	<section class="block" id="ciclo">
 		<div class="wrap">
 			<div class="section-head">
 				<span class="eyebrow">De una preocupación a una solución real</span>
@@ -554,32 +533,50 @@
 		pointer-events: none;
 	}
 
+	.hero-eyebrow {
+		font-family: var(--ff-mono);
+		font-size: 11.5px;
+		text-transform: uppercase;
+		letter-spacing: 0.09em;
+		color: var(--verde-300);
+		font-weight: 600;
+		margin-bottom: 12px;
+	}
 	.hero-title {
 		font-family: var(--ff-display);
 		font-weight: 700;
-		font-size: clamp(30px, 4.6vw, 50px);
-		line-height: 1.07;
+		font-size: clamp(28px, 4.2vw, 46px);
+		line-height: 1.1;
 		letter-spacing: -0.01em;
-		max-width: 760px;
+		max-width: 720px;
 		margin: 0 0 14px;
-	}
-	.hero-title em {
-		font-style: normal;
-		color: var(--naranja-400);
 	}
 	.hero-sub {
 		font-size: 16px;
 		color: var(--verde-100);
 		max-width: 600px;
-		margin: 0 0 26px;
+		margin: 0 0 8px;
 		opacity: 0.94;
 	}
+	.hero-sub-secondary {
+		font-size: 13.5px;
+		color: var(--verde-300);
+		max-width: 560px;
+		margin: 0 0 26px;
+	}
 
+	.doors-heading {
+		font-family: var(--ff-display);
+		font-weight: 600;
+		font-size: 15px;
+		color: var(--verde-100);
+		margin: 0 0 12px;
+	}
 	.doors {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
 		gap: 10px;
-		margin-bottom: 26px;
+		margin-bottom: 22px;
 	}
 	@media (max-width: 820px) {
 		.doors {
@@ -593,7 +590,7 @@
 		padding: 16px 18px;
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: 6px;
 		min-height: 44px;
 		transition:
 			background 0.15s,
@@ -613,6 +610,11 @@
 		font-size: 14.5px;
 		color: #fff;
 	}
+	.door .d-desc {
+		font-size: 12.5px;
+		color: rgba(255, 255, 255, 0.72);
+		line-height: 1.4;
+	}
 	.door .d-go {
 		align-self: flex-start;
 		font-family: var(--ff-mono);
@@ -622,45 +624,6 @@
 		align-items: center;
 		gap: 5px;
 		margin-top: 2px;
-	}
-
-	.hero-mini {
-		margin-bottom: 22px;
-	}
-	.hero-mini-label {
-		font-family: var(--ff-mono);
-		font-size: 11px;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--verde-300);
-		margin-bottom: 10px;
-	}
-	.mini-cycle {
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		flex-wrap: wrap;
-	}
-	.mini-node {
-		background: rgba(255, 255, 255, 0.07);
-		border: 1px solid rgba(255, 255, 255, 0.16);
-		border-radius: 999px;
-		padding: 8px 13px;
-		font-size: 12.5px;
-		font-weight: 600;
-		color: var(--verde-100);
-		cursor: pointer;
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		min-height: 44px;
-	}
-	.mini-node:hover {
-		background: rgba(255, 255, 255, 0.14);
-	}
-	.mini-arrow {
-		color: rgba(255, 255, 255, 0.35);
-		font-size: 13px;
 	}
 
 	.hero-note {
@@ -674,9 +637,6 @@
 		padding: 13px 16px;
 		font-size: 12.5px;
 		color: var(--verde-100);
-	}
-	.hero-note b {
-		color: #fff;
 	}
 
 	/* ---------- SECTION shell ---------- */
