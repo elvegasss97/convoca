@@ -1314,7 +1314,7 @@
 	}
 	.ex-cta {
 		margin-top: 18px;
-		background: var(--verde-900);
+		background: var(--naranja-500);
 		color: #fff;
 		font-weight: 700;
 		font-size: 13.5px;
@@ -1326,7 +1326,7 @@
 		min-height: 44px;
 	}
 	.ex-cta:hover {
-		background: var(--verde-800);
+		background: var(--naranja-400);
 	}
 
 	/* ---------- PUENTE FINAL ---------- */
