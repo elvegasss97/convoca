@@ -222,22 +222,28 @@
 			</figure>
 		</div>
 
-		<!-- Escena 3 (3/9) — todavía sin versión panorámica propia, por eso
-		     conserva el tratamiento vertical (mismo patrón que la escena 2
-		     antes de recibir su versión desktop). -->
+		<!-- Escena 3 (3/9) — mismo patrón que la escena 2: <picture> sirve la
+		     versión horizontal propia desde `sm` (≥640px), con su encuadre
+		     completo (mismo ratio 1717/1145, sin recortes). -->
 		<div
-			class="mx-auto mt-10 max-w-xs px-4 pb-16 text-center sm:mt-14 sm:max-w-sm sm:px-6 sm:pb-20"
+			class="mx-auto mt-10 max-w-xs px-4 pb-16 text-center sm:mt-14 sm:max-w-4xl sm:translate-x-1 sm:px-6 sm:pb-20 lg:max-w-6xl lg:translate-x-2"
 		>
 			<figure>
-				<img
-					src="/vision/vision-sistema-nervioso-03-mobile.webp"
-					alt="Una persona consulta la aplicación de CONVOCA en su móvil sobre la ciudad: sus propuestas se priorizan junto a las de miles de ciudadanos y se convierten en planes de acción."
-					width="1024"
-					height="1536"
-					loading="lazy"
-					decoding="async"
-					class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
-				/>
+				<picture>
+					<source
+						srcset="/vision/vision-sistema-nervioso-03-desktop.webp"
+						media="(min-width: 640px)"
+					/>
+					<img
+						src="/vision/vision-sistema-nervioso-03-mobile.webp"
+						alt="Una persona consulta la aplicación de CONVOCA en su móvil sobre la ciudad: sus propuestas se priorizan junto a las de miles de ciudadanos y se convierten en planes de acción."
+						width="1024"
+						height="1536"
+						loading="lazy"
+						decoding="async"
+						class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[1717/1145]"
+					/>
+				</picture>
 				<figcaption class="mt-3">
 					<p class="text-xs font-medium text-ink-400">3 / 9</p>
 					<p class="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-ink-500">
