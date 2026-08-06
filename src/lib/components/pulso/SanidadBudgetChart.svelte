@@ -291,13 +291,14 @@
 			{/if}
 		</svg>
 
-		<!-- Zonas de hover/click por año, superpuestas al SVG. La superficie realmente accesible por teclado es el selector de años de abajo. -->
+		<!-- Zonas de hover/click por año, superpuestas al SVG. La superficie realmente accesible por teclado es el selector de años de abajo: se mantienen fuera del árbol de accesibilidad (aria-hidden, tabindex="-1") para no duplicar esa misma información dos veces, pero llevan aria-label igualmente por si algún lector no respeta aria-hidden en botones. -->
 		<div class="absolute inset-0 flex">
 			{#each SANIDAD_BUDGET_YEARS as y (y)}
 				<button
 					type="button"
 					tabindex="-1"
 					aria-hidden="true"
+					aria-label={yearPointLabel(y)}
 					class="h-full flex-1 cursor-pointer"
 					onmouseenter={() => (hoverYear = y)}
 					onmouseleave={() => (hoverYear = null)}
