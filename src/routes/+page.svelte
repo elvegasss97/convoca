@@ -195,7 +195,7 @@
 						height="1825"
 						loading="eager"
 						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						class="aspect-[862/1825] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
 					/>
 				</picture>
 				<figcaption class="mt-3">
@@ -224,7 +224,7 @@
 						height="1823"
 						loading="eager"
 						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						class="aspect-[863/1823] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
 					/>
 				</picture>
 				<figcaption class="mt-3">
@@ -282,7 +282,7 @@
 						height="1536"
 						loading="eager"
 						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						class="aspect-[1024/1536] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
 					/>
 				</picture>
 				<figcaption class="mt-3">
@@ -311,7 +311,7 @@
 						height="1536"
 						loading="eager"
 						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						class="aspect-[1024/1536] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
 					/>
 				</picture>
 				<figcaption class="mt-3">
@@ -341,7 +341,7 @@
 						height="1792"
 						loading="eager"
 						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						class="aspect-[878/1792] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
 					/>
 				</picture>
 				<figcaption class="mt-3">
@@ -370,7 +370,7 @@
 						height="1822"
 						loading="eager"
 						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						class="aspect-[863/1822] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
 					/>
 				</picture>
 				<figcaption class="mt-3">
@@ -399,7 +399,7 @@
 						height="1536"
 						loading="eager"
 						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						class="aspect-[1024/1536] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
 					/>
 				</picture>
 				<figcaption class="mt-3">
