@@ -3,7 +3,8 @@
 	import {
 		SANIDAD_M2_BACKLOG_TOTAL,
 		SANIDAD_M2_EXTRA,
-		SANIDAD_BUDGET_YEARS
+		SANIDAD_BUDGET_YEARS,
+		formatSanidadEur as eur
 	} from '$lib/data/sanidadBudgetData';
 
 	// Este bloque siempre usa el escenario Central, igual que en el artifact de
@@ -13,10 +14,6 @@
 	const backlogTotal = SANIDAD_M2_BACKLOG_TOTAL.Central;
 	const recurrente2032 = SANIDAD_M2_EXTRA.Central['2032'].recurrente;
 	const recurrentePct = Math.round((recurrente2032 / backlogTotal) * 100);
-
-	function eur(n: number): string {
-		return Math.round(n).toLocaleString('es-ES');
-	}
 
 	const maxYearTotal = Math.max(
 		...SANIDAD_BUDGET_YEARS.map((y) => {

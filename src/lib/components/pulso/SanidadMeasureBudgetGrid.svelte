@@ -6,6 +6,7 @@
 		SANIDAD_BUDGET_SERIE,
 		SANIDAD_BUDGET_YEARS,
 		SANIDAD_MEASURE_COLOR_TOKENS,
+		formatSanidadEur as eur,
 		type SanidadBudgetScenarioKey
 	} from '$lib/data/sanidadBudgetData';
 
@@ -17,10 +18,6 @@
 	let { scenario, year }: Props = $props();
 
 	let activeMeasureId = $state<string | null>(null);
-
-	function eur(n: number): string {
-		return Math.round(n).toLocaleString('es-ES');
-	}
 
 	const activeMeasure = $derived(
 		activeMeasureId ? SANIDAD_BUDGET_MEASURES.find((m) => m.id === activeMeasureId) : null

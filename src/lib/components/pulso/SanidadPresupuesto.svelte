@@ -1,10 +1,18 @@
 <script lang="ts">
-	import { ChevronDown, ChevronUp } from '@lucide/svelte';
+	import {
+		ChevronDown,
+		ChevronUp,
+		Download,
+		FileSpreadsheet,
+		FileText,
+		FileCode
+	} from '@lucide/svelte';
 	import { SvelteSet } from 'svelte/reactivity';
 	import {
 		SANIDAD_BUDGET_ACUMULADOS,
 		SANIDAD_BUDGET_SCENARIOS,
 		SANIDAD_BUDGET_TOTALES_2032,
+		formatSanidadEur as eur,
 		type SanidadBudgetScenarioKey
 	} from '$lib/data/sanidadBudgetData';
 	import SanidadBudgetChart from './SanidadBudgetChart.svelte';
@@ -14,9 +22,53 @@
 	let scenario = $state<SanidadBudgetScenarioKey>('Central');
 	let year = $state('2032');
 
-	function eur(n: number): string {
-		return Math.round(n).toLocaleString('es-ES');
+	const SCENARIO_KEYS: readonly string[] = SANIDAD_BUDGET_SCENARIOS.map((s) => s.key);
+	let scenarioButtonEls: (HTMLButtonElement | null)[] = $state([]);
+
+	/** Navegación con flechas/Inicio/Fin dentro de un grupo role="radiogroup", moviendo foco y selección juntos (patrón WAI-ARIA APG). */
+	function radiogroupKeydown(
+		e: KeyboardEvent,
+		index: number,
+		items: readonly string[],
+		els: (HTMLButtonElement | null)[],
+		select: (value: string) => void
+	) {
+		let next: number | null = null;
+		if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (index + 1) % items.length;
+		else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp')
+			next = (index - 1 + items.length) % items.length;
+		else if (e.key === 'Home') next = 0;
+		else if (e.key === 'End') next = items.length - 1;
+		if (next !== null) {
+			e.preventDefault();
+			select(items[next]);
+			els[next]?.focus();
+		}
 	}
+
+	const DOWNLOADS = [
+		{
+			href: '/descargas/sanidad/Presupuesto_CONVOCA_Sanidad_2036.xlsx',
+			label: 'Libro de cálculo completo',
+			filename: 'Presupuesto_CONVOCA_Sanidad_2036.xlsx',
+			type: 'Excel',
+			icon: FileSpreadsheet
+		},
+		{
+			href: '/descargas/sanidad/Memoria_Presupuesto_CONVOCA_Sanidad_2036.md',
+			label: 'Memoria metodológica',
+			filename: 'Memoria_Presupuesto_CONVOCA_Sanidad_2036.md',
+			type: 'Markdown',
+			icon: FileText
+		},
+		{
+			href: '/descargas/sanidad/modelo_presupuesto_convoca.py',
+			label: 'Modelo reproducible',
+			filename: 'modelo_presupuesto_convoca.py',
+			type: 'Python',
+			icon: FileCode
+		}
+	];
 
 	// El resumen de cabecera es fijo (escenario central + banda completa), igual
 	// que en el artifact de referencia: no cambia con el selector de escenario
@@ -108,13 +160,23 @@
 	role="radiogroup"
 	aria-label="Escenario"
 >
-	{#each SANIDAD_BUDGET_SCENARIOS as s (s.key)}
+	{#each SANIDAD_BUDGET_SCENARIOS as s, i (s.key)}
 		<button
+			bind:this={scenarioButtonEls[i]}
 			type="button"
 			role="radio"
 			aria-checked={s.key === scenario}
+			tabindex={s.key === scenario ? 0 : -1}
 			onclick={() => (scenario = s.key)}
-			class={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13.5px] font-semibold transition-colors ${
+			onkeydown={(e) =>
+				radiogroupKeydown(
+					e,
+					i,
+					SCENARIO_KEYS,
+					scenarioButtonEls,
+					(v) => (scenario = v as SanidadBudgetScenarioKey)
+				)}
+			class={`flex min-h-[40px] items-center gap-1.5 rounded-full px-3.5 py-2 text-[13.5px] font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 ${
 				s.key === scenario ? 'bg-brand-900 text-white' : 'text-ink-600 hover:bg-white'
 			}`}
 		>
@@ -215,4 +277,32 @@
 			y de validar mediante pilotos.
 		</p>
 	</div>
+</div>
+
+<div class="mt-5 border-t border-ink-100 pt-5">
+	<p class="text-xs font-semibold text-ink-700">Descarga las fuentes originales</p>
+	<div class="mt-2.5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+		{#each DOWNLOADS as d (d.href)}
+			<a
+				href={d.href}
+				download
+				class="group flex items-center gap-2.5 rounded-xl border border-ink-100 bg-white px-3.5 py-2.5 text-xs text-ink-700 transition-colors hover:border-brand-300 hover:bg-brand-50"
+			>
+				<d.icon class="size-4 shrink-0 text-brand-700" aria-hidden="true" />
+				<span class="flex flex-col">
+					<span class="font-semibold">{d.label}</span>
+					<span class="text-[11px] text-ink-500">{d.filename} · {d.type}</span>
+				</span>
+				<Download
+					class="ml-1 size-3.5 shrink-0 text-ink-400 group-hover:text-brand-700"
+					aria-hidden="true"
+				/>
+			</a>
+		{/each}
+	</div>
+	<p class="mt-2 text-[11px] text-ink-500">
+		El libro de cálculo y la memoria documentan cada cifra con su fuente oficial. El modelo en
+		Python es el mismo código reproducible con el que se han calculado todos los importes de esta
+		página.
+	</p>
 </div>

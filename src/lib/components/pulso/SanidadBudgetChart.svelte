@@ -5,6 +5,7 @@
 		SANIDAD_BUDGET_SERIE,
 		SANIDAD_BUDGET_YEARS,
 		SANIDAD_MEASURE_COLOR_TOKENS,
+		formatSanidadEur as eur,
 		type SanidadBudgetScenarioKey
 	} from '$lib/data/sanidadBudgetData';
 
@@ -33,9 +34,6 @@
 	}
 	function yFor(v: number, maxV: number): number {
 		return PAD_T + plotH - (plotH * v) / maxV;
-	}
-	function eur(n: number): string {
-		return Math.round(n).toLocaleString('es-ES');
 	}
 
 	const maxTotal = $derived.by(() => {
@@ -106,6 +104,41 @@
 	});
 
 	const YEARS: readonly string[] = SANIDAD_BUDGET_YEARS;
+	const MODES: readonly ['total', 'medidas'] = ['total', 'medidas'];
+
+	function scenarioLabelOf(key: SanidadBudgetScenarioKey): string {
+		return (SANIDAD_BUDGET_SCENARIOS.find((s) => s.key === key)?.label ?? key).toLowerCase();
+	}
+
+	/** Etiqueta accesible de cada punto del gráfico: se recalcula con el año, el escenario y el valor actuales. */
+	function yearPointLabel(y: string): string {
+		const total = SANIDAD_BUDGET_SERIE[scenario][y].TOTAL;
+		return `Año ${y}, escenario ${scenarioLabelOf(scenario)}, coste total ${eur(total)} millones de euros`;
+	}
+
+	let modeButtonEls: (HTMLButtonElement | null)[] = $state([]);
+	let yearButtonEls: (HTMLButtonElement | null)[] = $state([]);
+
+	/** Navegación con flechas/Inicio/Fin dentro de un grupo role="radiogroup", moviendo foco y selección juntos (patrón WAI-ARIA APG). */
+	function radiogroupKeydown(
+		e: KeyboardEvent,
+		index: number,
+		items: readonly string[],
+		els: (HTMLButtonElement | null)[],
+		select: (value: string) => void
+	) {
+		let next: number | null = null;
+		if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (index + 1) % items.length;
+		else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp')
+			next = (index - 1 + items.length) % items.length;
+		else if (e.key === 'Home') next = 0;
+		else if (e.key === 'End') next = items.length - 1;
+		if (next !== null) {
+			e.preventDefault();
+			select(items[next]);
+			els[next]?.focus();
+		}
+	}
 
 	// El tooltip y la línea vertical de referencia solo aparecen mientras se
 	// pasa el cursor por una zona del gráfico: en reposo (y en pantallas
@@ -131,13 +164,17 @@
 			role="radiogroup"
 			aria-label="Modo del gráfico"
 		>
-			{#each [['total', 'Coste total'], ['medidas', 'Por medidas (M1–M8)']] as [key, label] (key)}
+			{#each [['total', 'Coste total'], ['medidas', 'Por medidas (M1–M8)']] as [key, label], i (key)}
 				<button
+					bind:this={modeButtonEls[i]}
 					type="button"
 					role="radio"
 					aria-checked={mode === key}
+					tabindex={mode === key ? 0 : -1}
 					onclick={() => (mode = key as 'total' | 'medidas')}
-					class={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+					onkeydown={(e) =>
+						radiogroupKeydown(e, i, MODES, modeButtonEls, (v) => (mode = v as 'total' | 'medidas'))}
+					class={`min-h-[38px] rounded-full px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 ${
 						mode === key ? 'bg-white text-brand-800 shadow-sm' : 'text-ink-600 hover:bg-white/60'
 					}`}
 				>
@@ -293,15 +330,21 @@
 		role="radiogroup"
 		aria-label="Año"
 	>
-		{#each SANIDAD_BUDGET_YEARS as y (y)}
+		{#each SANIDAD_BUDGET_YEARS as y, i (y)}
 			<button
+				bind:this={yearButtonEls[i]}
 				type="button"
 				role="radio"
 				aria-checked={y === year}
+				aria-label={yearPointLabel(y)}
+				tabindex={y === year ? 0 : -1}
 				onclick={() => onYearChange(y)}
+				onkeydown={(e) => radiogroupKeydown(e, i, YEARS, yearButtonEls, onYearChange)}
 				onmouseenter={() => (hoverYear = y)}
 				onmouseleave={() => (hoverYear = null)}
-				class={`min-w-[42px] flex-1 rounded-lg px-1 py-2 font-mono text-xs font-medium transition-colors ${
+				onfocus={() => (hoverYear = y)}
+				onblur={() => (hoverYear = null)}
+				class={`min-h-[42px] min-w-[42px] flex-1 rounded-lg px-1 py-2 font-mono text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 ${
 					y === year ? 'bg-brand-900 font-semibold text-white' : 'text-ink-500 hover:bg-ink-50'
 				}`}
 			>
