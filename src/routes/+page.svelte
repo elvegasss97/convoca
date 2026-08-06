@@ -1,48 +1,8 @@
 <script lang="ts">
-	import {
-		ArrowRight,
-		Ear,
-		ListOrdered,
-		Hammer,
-		Megaphone,
-		ClipboardCheck,
-		Landmark,
-		Building2,
-		Users,
-		CheckCircle2,
-		Compass
-	} from '@lucide/svelte';
+	import { CheckCircle2, Compass } from '@lucide/svelte';
 	import Seo from '$lib/components/Seo.svelte';
 	import { reveal } from '$lib/actions/reveal';
 	import HomeIntro from '$lib/components/HomeIntro.svelte';
-
-	const journey = [
-		{
-			icon: Ear,
-			title: 'Escuchar',
-			text: 'Detectar qué preocupa realmente a la ciudadanía.'
-		},
-		{
-			icon: ListOrdered,
-			title: 'Priorizar',
-			text: 'Ordenar los problemas por impacto, urgencia y apoyo.'
-		},
-		{
-			icon: Hammer,
-			title: 'Construir',
-			text: 'Crear soluciones abiertas con medidas concretas.'
-		},
-		{
-			icon: Megaphone,
-			title: 'Actuar',
-			text: 'Facilitar la participación, la organización y la llegada a las instituciones.'
-		},
-		{
-			icon: ClipboardCheck,
-			title: 'Comprobar',
-			text: 'Publicar avances, resultados y corregir lo que no funcione.'
-		}
-	];
 
 	const timeline = [
 		{
@@ -75,24 +35,6 @@
 		'Datos públicos y comprensibles.',
 		'Corrección cuando una medida no funcione.',
 		'Independencia frente a intereses partidistas.'
-	];
-
-	const scales = [
-		{
-			icon: Landmark,
-			title: 'Nacional',
-			text: 'Grandes preocupaciones y planes públicos.'
-		},
-		{
-			icon: Building2,
-			title: 'Municipal',
-			text: 'Escucha local, propuestas y guías de actuación.'
-		},
-		{
-			icon: Users,
-			title: 'Comunidad',
-			text: 'Personas capaces de organizarse alrededor de objetivos concretos.'
-		}
 	];
 </script>
 
@@ -161,41 +103,6 @@
 		</div>
 	</section>
 
-	<!-- 4. EL CAMINO DE CONVOCA -->
-	<section use:reveal class="reveal-section border-t border-ink-100 bg-brand-50">
-		<div class="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
-			<h2 class="text-center font-display text-2xl font-semibold text-ink-900 sm:text-3xl">
-				El camino de Convoca
-			</h2>
-			<ol
-				class="mt-10 flex flex-col gap-0 sm:flex-row sm:items-stretch sm:justify-between sm:gap-2"
-			>
-				{#each journey as step, i (step.title)}
-					<li class="flex flex-1 flex-col items-center gap-2 px-2 py-2 text-center">
-						<span
-							class="flex size-12 items-center justify-center rounded-full bg-brand-700 text-white"
-						>
-							<step.icon class="size-5.5" strokeWidth={2.25} />
-						</span>
-						<p class="font-display text-sm font-semibold text-ink-900">{step.title}</p>
-						<p class="max-w-[16rem] text-xs leading-relaxed text-ink-600 sm:max-w-none">
-							{step.text}
-						</p>
-					</li>
-					{#if i < journey.length - 1}
-						<li
-							class="flex shrink-0 items-center justify-center py-1 text-brand-400 sm:rotate-0"
-							aria-hidden="true"
-						>
-							<ArrowRight class="hidden size-5 sm:block" />
-							<ArrowRight class="size-5 rotate-90 sm:hidden" />
-						</li>
-					{/if}
-				{/each}
-			</ol>
-		</div>
-	</section>
-
 	<!-- 5. PRINCIPIOS -->
 	<section use:reveal class="reveal-section bg-white">
 		<div class="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
@@ -219,35 +126,18 @@
 		</div>
 	</section>
 
-	<!-- 6. A QUÉ ASPIRA -->
+	<!-- 6. A QUÉ ASPIRA — contenedor aspiracional independiente.
+	     Deliberadamente breve: reservado para alojar más adelante otro
+	     artifact o una pieza visual horizontal sobre la aspiración final
+	     de Convoca. No añadir aquí explicaciones de funcionamiento. -->
 	<section use:reveal class="reveal-section border-t border-ink-100">
-		<div class="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
+		<div class="mx-auto max-w-2xl px-4 py-20 text-center sm:px-6 sm:py-28">
 			<h2 class="font-display text-2xl font-semibold text-ink-900 sm:text-3xl">
 				Una infraestructura democrática al alcance de cualquiera
 			</h2>
-			<p class="mt-4 text-base leading-relaxed text-ink-700 sm:text-lg">
-				Convoca aspira a que cualquier persona pueda abrir el mapa de su país o de su municipio,
-				comprender qué preocupa a su comunidad, participar en la construcción de soluciones y
-				conocer los pasos necesarios para llevarlas hasta las instituciones.
-			</p>
-
-			<div class="mt-9 grid grid-cols-1 gap-6 sm:grid-cols-3">
-				{#each scales as scale (scale.title)}
-					<div class="flex flex-col items-center gap-2 text-center">
-						<span
-							class="flex size-11 items-center justify-center rounded-full bg-accent-100 text-accent-700"
-						>
-							<scale.icon class="size-5" strokeWidth={2.25} />
-						</span>
-						<p class="font-display text-sm font-semibold text-ink-900">{scale.title}</p>
-						<p class="text-xs leading-relaxed text-ink-600">{scale.text}</p>
-					</div>
-				{/each}
-			</div>
-
-			<p class="mt-9 text-base leading-relaxed font-medium text-ink-800 sm:text-lg">
-				No queremos que participar signifique únicamente votar, firmar o protestar. Queremos que
-				también signifique comprender, proponer, colaborar y comprobar.
+			<p class="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ink-700 sm:text-lg">
+				Convoca aspira a que cualquier persona pueda abrir el mapa de su país o de su municipio y
+				comprender qué preocupa a su comunidad.
 			</p>
 		</div>
 	</section>
