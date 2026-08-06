@@ -292,24 +292,31 @@
 			</figure>
 		</div>
 
-		<!-- Escena 5 (5/9) — todavía sin versión panorámica propia, por eso
-		     conserva el tratamiento vertical. Ratio propio (887/1774), no
-		     el 2/3 genérico de las escenas 2-4: esta captura es más
-		     alargada (pantalla de móvil sobre fondo), así que forzar 2/3
-		     dejaría espacio en blanco dentro del figure. -->
+		<!-- Escena 5 (5/9) — <picture> sirve la versión horizontal propia
+		     desde `sm` (≥640px), con su encuadre completo (mismo ratio
+		     1717/1145 que las escenas 2-4). En móvil conserva su ratio
+		     propio (887/1774), distinto del 2/3 genérico de las escenas
+		     2-4: esta captura es más alargada (pantalla de móvil sobre
+		     fondo), así que forzar 2/3 dejaría espacio en blanco. -->
 		<div
-			class="mx-auto mt-10 max-w-xs px-4 pb-16 text-center sm:mt-14 sm:max-w-sm sm:px-6 sm:pb-20"
+			class="mx-auto mt-10 max-w-xs px-4 pb-16 text-center sm:mt-14 sm:max-w-4xl sm:translate-x-1 sm:px-6 sm:pb-20 lg:max-w-6xl lg:translate-x-2"
 		>
 			<figure>
-				<img
-					src="/vision/vision-sistema-nervioso-05-mobile.webp"
-					alt="La pantalla del móvil muestra el seguimiento del Plan de Vivienda 2036 en CONVOCA: mapa en tiempo real, progreso general, compromisos verificables y rendición de cuentas."
-					width="887"
-					height="1774"
-					loading="lazy"
-					decoding="async"
-					class="aspect-[887/1774] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
-				/>
+				<picture>
+					<source
+						srcset="/vision/vision-sistema-nervioso-05-desktop.webp"
+						media="(min-width: 640px)"
+					/>
+					<img
+						src="/vision/vision-sistema-nervioso-05-mobile.webp"
+						alt="La pantalla del móvil muestra el seguimiento del Plan de Vivienda 2036 en CONVOCA: mapa en tiempo real, progreso general, compromisos verificables y rendición de cuentas."
+						width="887"
+						height="1774"
+						loading="lazy"
+						decoding="async"
+						class="aspect-[887/1774] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[1717/1145]"
+					/>
+				</picture>
 				<figcaption class="mt-3">
 					<p class="text-xs font-medium text-ink-400">5 / 9</p>
 					<p class="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-ink-500">
