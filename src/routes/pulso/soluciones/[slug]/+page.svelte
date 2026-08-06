@@ -40,6 +40,7 @@
 	import PlanMap from '$lib/components/pulso/PlanMap.svelte';
 	import CosteEconomico from '$lib/components/pulso/CosteEconomico.svelte';
 	import SanidadPresupuesto from '$lib/components/pulso/SanidadPresupuesto.svelte';
+	import SanidadCalendario from '$lib/components/pulso/SanidadCalendario.svelte';
 	import CalendarioVisual from '$lib/components/pulso/CalendarioVisual.svelte';
 	import RiesgosComprobacion from '$lib/components/pulso/RiesgosComprobacion.svelte';
 	import { viviendaMapData, sanidadMapData } from '$lib/data/planMapData';
@@ -630,12 +631,16 @@
 		</h2>
 		<ContentTypeTag type="convoca" class="mt-2" />
 		<div class="mt-4">
-			<CalendarioVisual
-				measures={data.measures}
-				axes={data.axes}
-				phases={data.timelinePhases}
-				phaseStatuses={data.measurePhaseStatuses}
-			/>
+			{#if topic.slug === 'plan-sanidad-2036'}
+				<SanidadCalendario />
+			{:else}
+				<CalendarioVisual
+					measures={data.measures}
+					axes={data.axes}
+					phases={data.timelinePhases}
+					phaseStatuses={data.measurePhaseStatuses}
+				/>
+			{/if}
 		</div>
 	</section>
 
