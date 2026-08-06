@@ -87,7 +87,9 @@
 				aria-hidden="true"
 			></span>
 			<div class="font-mono text-[11px] font-semibold text-brand-700">{m.id}</div>
-			<div class="mt-1 mb-2.5 min-h-[34px] text-[13.5px] leading-tight font-semibold text-ink-900">
+			<div
+				class="mt-1 mb-2.5 min-h-[34px] text-[13.5px] leading-tight font-semibold break-words text-ink-900"
+			>
 				{m.nombre}
 			</div>
 			<div class="font-display text-xl font-bold text-brand-900">
@@ -111,7 +113,7 @@
 				<div class="font-mono text-[11px] tracking-wide text-brand-300 uppercase">
 					{activeMeasure.id} · Detalle de la medida
 				</div>
-				<h4 class="mt-1 max-w-lg font-display text-lg font-bold sm:text-xl">
+				<h4 class="mt-1 max-w-lg font-display text-lg font-bold break-words sm:text-xl">
 					{activeMeasure.nombre}
 				</h4>
 			</div>
