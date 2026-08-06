@@ -43,6 +43,7 @@
 	import SanidadCalendario from '$lib/components/pulso/SanidadCalendario.svelte';
 	import CalendarioVisual from '$lib/components/pulso/CalendarioVisual.svelte';
 	import RiesgosComprobacion from '$lib/components/pulso/RiesgosComprobacion.svelte';
+	import SanidadRiesgos from '$lib/components/pulso/SanidadRiesgos.svelte';
 	import { viviendaMapData, sanidadMapData } from '$lib/data/planMapData';
 	import { submitMeasureAlternative } from '$lib/services/topicsService';
 	import {
@@ -654,12 +655,16 @@
 		</h2>
 		<ContentTypeTag type="convoca" class="mt-2" />
 		<div class="mt-4">
-			<RiesgosComprobacion
-				{topic}
-				risks={data.risks}
-				evaluationMoments={data.evaluationMoments}
-				measureChangeConditions={data.measureChangeConditions}
-			/>
+			{#if topic.slug === 'plan-sanidad-2036'}
+				<SanidadRiesgos />
+			{:else}
+				<RiesgosComprobacion
+					{topic}
+					risks={data.risks}
+					evaluationMoments={data.evaluationMoments}
+					measureChangeConditions={data.measureChangeConditions}
+				/>
+			{/if}
 		</div>
 	</section>
 
