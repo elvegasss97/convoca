@@ -137,7 +137,7 @@
 			</div>
 			<div class="rounded-2xl border border-white/10 bg-white/5 p-3.5">
 				<div class="font-mono text-[10.5px] tracking-wide text-brand-300 uppercase">
-					2032 · Central
+					2032 · {scenario}
 				</div>
 				<div class="mt-1.5 font-display text-lg font-bold">
 					{eur(val2032)}<span class="ml-0.5 text-[.5em] font-medium text-brand-300">M€</span>
