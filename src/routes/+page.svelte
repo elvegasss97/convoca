@@ -261,7 +261,7 @@
 		     sirve la versión horizontal propia desde `sm` (≥640px), con su
 		     encuadre completo (mismo ratio 1717/1145, sin recortes). -->
 		<div
-			class="mx-auto mt-10 max-w-xs px-4 pb-16 text-center sm:mt-14 sm:max-w-4xl sm:translate-x-1 sm:px-6 sm:pb-20 lg:max-w-6xl lg:translate-x-2"
+			class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-4xl sm:translate-x-1 sm:px-6 lg:max-w-6xl lg:translate-x-2"
 		>
 			<figure>
 				<picture>
@@ -287,6 +287,37 @@
 					</p>
 					<p class="mt-3 text-[11px] text-ink-400 italic">
 						Cuarta escena de una secuencia en desarrollo.
+					</p>
+				</figcaption>
+			</figure>
+		</div>
+
+		<!-- Escena 5 (5/9) — todavía sin versión panorámica propia, por eso
+		     conserva el tratamiento vertical. Ratio propio (887/1774), no
+		     el 2/3 genérico de las escenas 2-4: esta captura es más
+		     alargada (pantalla de móvil sobre fondo), así que forzar 2/3
+		     dejaría espacio en blanco dentro del figure. -->
+		<div
+			class="mx-auto mt-10 max-w-xs px-4 pb-16 text-center sm:mt-14 sm:max-w-sm sm:px-6 sm:pb-20"
+		>
+			<figure>
+				<img
+					src="/vision/vision-sistema-nervioso-05-mobile.webp"
+					alt="La pantalla del móvil muestra el seguimiento del Plan de Vivienda 2036 en CONVOCA: mapa en tiempo real, progreso general, compromisos verificables y rendición de cuentas."
+					width="887"
+					height="1774"
+					loading="lazy"
+					decoding="async"
+					class="aspect-[887/1774] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+				/>
+				<figcaption class="mt-3">
+					<p class="text-xs font-medium text-ink-400">5 / 9</p>
+					<p class="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-ink-500">
+						Transparencia y trazabilidad en tiempo real: cada decisión es visible, cada paso es
+						medible y cada compromiso es verificable ante la comunidad ciudadana.
+					</p>
+					<p class="mt-3 text-[11px] text-ink-400 italic">
+						Quinta escena de una secuencia en desarrollo.
 					</p>
 				</figcaption>
 			</figure>
