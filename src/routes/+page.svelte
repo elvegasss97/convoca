@@ -153,7 +153,7 @@
 		     por debajo de eso el móvil sigue viendo exactamente la misma
 		     imagen vertical de antes. -->
 		<div
-			class="mx-auto mt-4 max-w-xs px-4 pb-16 text-center sm:mt-6 sm:max-w-4xl sm:translate-x-1 sm:px-6 sm:pb-20 lg:max-w-6xl lg:translate-x-2"
+			class="mx-auto mt-4 max-w-xs px-4 text-center sm:mt-6 sm:max-w-4xl sm:translate-x-1 sm:px-6 lg:max-w-6xl lg:translate-x-2"
 		>
 			<figure>
 				<picture>
@@ -179,6 +179,37 @@
 					</p>
 					<p class="mt-3 text-[11px] text-ink-400 italic">
 						Primera escena de una secuencia en desarrollo.
+					</p>
+				</figcaption>
+			</figure>
+		</div>
+
+		<!-- Escena 2 (2/9) — todavía sin versión panorámica propia, por eso
+		     conserva el tratamiento vertical original (mismo ancho, radio,
+		     sombra y comportamiento de carga que la escena 1 en móvil) en
+		     vez del contenedor ancho que usa la escena 1 en escritorio. -->
+		<div
+			class="mx-auto mt-10 max-w-xs px-4 pb-16 text-center sm:mt-14 sm:max-w-sm sm:px-6 sm:pb-20"
+		>
+			<figure>
+				<img
+					src="/vision/vision-sistema-nervioso-02-mobile.webp"
+					alt="Representación de un municipio conectado digitalmente donde las preocupaciones, propuestas y realidades locales alimentan el sistema ciudadano de CONVOCA."
+					width="1024"
+					height="1536"
+					loading="lazy"
+					decoding="async"
+					class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+				/>
+				<figcaption class="mt-3">
+					<p class="text-xs font-medium text-ink-400">2 / 9</p>
+					<p class="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-ink-500">
+						Cada municipio conserva su propio espacio de escucha, con preocupaciones que mantienen
+						su contexto territorial. La participación puede hacerse de forma digital, y esas voces
+						locales alimentan una red ciudadana más amplia.
+					</p>
+					<p class="mt-3 text-[11px] text-ink-400 italic">
+						Segunda escena de una secuencia en desarrollo.
 					</p>
 				</figcaption>
 			</figure>
