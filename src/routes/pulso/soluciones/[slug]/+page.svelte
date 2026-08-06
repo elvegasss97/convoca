@@ -39,6 +39,7 @@
 	import SimpleGeneralParticipationBlock from '$lib/components/pulso/SimpleGeneralParticipationBlock.svelte';
 	import PlanMap from '$lib/components/pulso/PlanMap.svelte';
 	import CosteEconomico from '$lib/components/pulso/CosteEconomico.svelte';
+	import SanidadPresupuesto from '$lib/components/pulso/SanidadPresupuesto.svelte';
 	import CalendarioVisual from '$lib/components/pulso/CalendarioVisual.svelte';
 	import RiesgosComprobacion from '$lib/components/pulso/RiesgosComprobacion.svelte';
 	import { viviendaMapData, sanidadMapData } from '$lib/data/planMapData';
@@ -603,14 +604,18 @@
 		</h2>
 		<ContentTypeTag type="convoca" class="mt-2" />
 		<div class="mt-3">
-			<CosteEconomico
-				{topic}
-				measures={data.measures}
-				axes={data.axes}
-				budgetLines={data.budgetLines}
-				budgetScenarios={data.budgetScenarios}
-				budgetTimeline={data.budgetTimeline}
-			/>
+			{#if topic.slug === 'plan-sanidad-2036'}
+				<SanidadPresupuesto />
+			{:else}
+				<CosteEconomico
+					{topic}
+					measures={data.measures}
+					axes={data.axes}
+					budgetLines={data.budgetLines}
+					budgetScenarios={data.budgetScenarios}
+					budgetTimeline={data.budgetTimeline}
+				/>
+			{/if}
 		</div>
 	</section>
 
