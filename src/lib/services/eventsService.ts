@@ -18,6 +18,7 @@ import { supabase } from '$lib/supabase/client';
 import type { Database, Json } from '$lib/supabase/database.types';
 import type { Event, EventFiltersState, GeoPoint, AttendanceCounts } from '$lib/types';
 import { filterEvents } from '$lib/utils/filterEvents';
+import { getEventTimeCategory } from '$lib/utils/eventTiming';
 
 type EventUpdatePayload = Database['public']['Tables']['events']['Update'];
 import { randomId } from '$lib/utils/id';
@@ -159,14 +160,28 @@ export async function listPendingModeration(): Promise<Event[]> {
 	return attachAttendance(data ?? []);
 }
 
-/** Devuelve estadísticas agregadas para la cabecera de Inicio. Nunca inventa cifras: es la suma real de `events`. */
+/**
+ * Devuelve estadísticas agregadas para la cabecera de Inicio/Descubrir.
+ * Nunca inventa cifras: es la suma real de `events`. `listPublicEvents()`
+ * ya excluye estados ocultos (draft, hidden, cancelled...), pero no la
+ * fecha — así que aquí se excluyen además las convocatorias cuya fecha ya
+ * pasó, con el mismo criterio (`getEventTimeCategory`, basado solo en
+ * `startAt`, nunca en `status`) que ya usa por defecto el listado/mapa de
+ * Descubrir. Sin este filtro, una convocatoria `completed` seguía sumando
+ * a "convocatorias activas" y "personas estimadas" aunque ya no apareciera
+ * en el listado visible, dando cifras inconsistentes entre la cabecera y
+ * la lista real.
+ */
 export async function getPublicStats(): Promise<{
 	eventCount: number;
 	estimatedAttendance: number;
 }> {
 	const publicEvents = await listPublicEvents();
-	const eventCount = publicEvents.length;
-	const estimatedAttendance = publicEvents.reduce(
+	const activeEvents = publicEvents.filter(
+		(e) => getEventTimeCategory(e.startAt).category !== 'past'
+	);
+	const eventCount = activeEvents.length;
+	const estimatedAttendance = activeEvents.reduce(
 		(sum, e) => sum + e.attendance.going + e.attendance.interested,
 		0
 	);
