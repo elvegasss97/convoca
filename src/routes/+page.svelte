@@ -144,187 +144,187 @@
 			</p>
 		</div>
 
-		<!-- Escena piloto (1/9) — prueba de integración de una única escena de
-		     la futura secuencia visual aspiracional. No generar el resto de
-		     escenas ni construir galería/carrusel hasta validar esta prueba.
-		     Contenedor propio (más ancho que el bloque de texto de arriba)
-		     para que la pieza horizontal tenga presencia real en escritorio.
-		     <picture> sirve la versión horizontal solo desde `sm` (≥640px);
-		     por debajo de eso el móvil sigue viendo exactamente la misma
-		     imagen vertical de antes. -->
-		<div
-			class="mx-auto mt-4 max-w-xs px-4 text-center sm:mt-6 sm:max-w-4xl sm:translate-x-1 sm:px-6 lg:max-w-6xl lg:translate-x-2"
-		>
+		<!-- Secuencia aspiracional (9 escenas) — nuevo diseño "El sistema
+		     nervioso ciudadano". Solo versión móvil por ahora; la versión
+		     desktop se añadirá en una segunda pasada con <picture> como en
+		     el diseño anterior. Cada escena conserva su propio ratio de
+		     imagen (object-contain) para no recortar contenido. -->
+		<div class="mx-auto mt-4 max-w-xs px-4 text-center sm:mt-6 sm:max-w-sm sm:px-6">
 			<figure>
-				<picture>
-					<source
-						srcset="/vision/vision-sistema-nervioso-01-desktop.webp"
-						media="(min-width: 640px)"
-					/>
-					<img
-						src="/vision/vision-sistema-nervioso-01-mobile.webp"
-						alt="Un grupo de personas observa desde una colina un mapa de España iluminado por una red de nodos conectados entre municipios: la visión de Convoca como un sistema nervioso ciudadano."
-						width="1024"
-						height="1536"
-						loading="lazy"
-						decoding="async"
-						class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[1717/916]"
-					/>
-				</picture>
+				<img
+					src="/vision/vision-sistema-nervioso-01-mobile.webp"
+					alt="Mapa iluminado con nodos de conversación conectando los municipios de un territorio, con la etiqueta 'Tu municipio' señalando un punto concreto."
+					width="864"
+					height="1821"
+					loading="lazy"
+					decoding="async"
+					class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+				/>
 				<figcaption class="mt-3">
-					<p class="text-xs font-medium text-ink-400">1 / 9</p>
-					<p class="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-ink-500">
-						Cada municipio escucha. Los patrones se conectan. La ciudadanía decide: la visión busca
-						convertir voces ciudadanas en planes públicos verificables.
-					</p>
-					<p class="mt-3 text-[11px] text-ink-400 italic">
-						Primera escena de una secuencia en desarrollo.
+					<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
+						Cada municipio tiene su propio espacio de escucha: la ciudadanía comparte lo que le
+						preocupa en su territorio, sin filtros ni etiquetas.
 					</p>
 				</figcaption>
 			</figure>
 		</div>
 
-		<!-- Escena 2 (2/9) — misma imagen que en la 01: <picture> sirve la
-		     versión horizontal propia desde `sm` (≥640px); por debajo el
-		     móvil ve la imagen vertical. La versión desktop conserva su
-		     encuadre completo (título y franja inferior íntegros), por eso
-		     usa su propio ratio (1717/1145) en vez del de la escena 1. -->
-		<div
-			class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-4xl sm:translate-x-1 sm:px-6 lg:max-w-6xl lg:translate-x-2"
-		>
+		<div class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
 			<figure>
-				<picture>
-					<source
-						srcset="/vision/vision-sistema-nervioso-02-desktop.webp"
-						media="(min-width: 640px)"
-					/>
-					<img
-						src="/vision/vision-sistema-nervioso-02-mobile.webp"
-						alt="Representación de un municipio conectado digitalmente donde las preocupaciones, propuestas y realidades locales alimentan el sistema ciudadano de CONVOCA."
-						width="1024"
-						height="1536"
-						loading="lazy"
-						decoding="async"
-						class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[1717/1145]"
-					/>
-				</picture>
+				<img
+					src="/vision/vision-sistema-nervioso-02-mobile.webp"
+					alt="Un medidor en forma de arco que va de 'Aún no suficiente' a 'Participación suficiente', mostrando cuándo se activa el agente municipal de CONVOCA."
+					width="862"
+					height="1825"
+					loading="lazy"
+					decoding="async"
+					class="aspect-[862/1825] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+				/>
 				<figcaption class="mt-3">
-					<p class="text-xs font-medium text-ink-400">2 / 9</p>
-					<p class="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-ink-500">
-						Cada municipio conserva su propio espacio de escucha, con preocupaciones que mantienen
-						su contexto territorial. La participación puede hacerse de forma digital, y esas voces
-						locales alimentan una red ciudadana más amplia.
-					</p>
-					<p class="mt-3 text-[11px] text-ink-400 italic">
-						Segunda escena de una secuencia en desarrollo.
+					<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
+						El sistema no se activa por ruido aislado, sino cuando una preocupación es compartida
+						por suficientes voces: cuantas más, más fuerza tiene la comunidad.
 					</p>
 				</figcaption>
 			</figure>
 		</div>
 
-		<!-- Escena 3 (3/9) — mismo patrón que la escena 2: <picture> sirve la
-		     versión horizontal propia desde `sm` (≥640px), con su encuadre
-		     completo (mismo ratio 1717/1145, sin recortes). -->
-		<div
-			class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-4xl sm:translate-x-1 sm:px-6 lg:max-w-6xl lg:translate-x-2"
-		>
+		<div class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
 			<figure>
-				<picture>
-					<source
-						srcset="/vision/vision-sistema-nervioso-03-desktop.webp"
-						media="(min-width: 640px)"
-					/>
-					<img
-						src="/vision/vision-sistema-nervioso-03-mobile.webp"
-						alt="Una persona consulta la aplicación de CONVOCA en su móvil sobre la ciudad: sus propuestas se priorizan junto a las de miles de ciudadanos y se convierten en planes de acción."
-						width="1024"
-						height="1536"
-						loading="lazy"
-						decoding="async"
-						class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[1717/1145]"
-					/>
-				</picture>
+				<img
+					src="/vision/vision-sistema-nervioso-03-mobile.webp"
+					alt="Un cerebro conectado a múltiples burbujas de conversación de colores que la IA agrupa y ordena en categorías: casos individuales, patrones, alertas y aportaciones."
+					width="863"
+					height="1823"
+					loading="lazy"
+					decoding="async"
+					class="aspect-[863/1823] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+				/>
 				<figcaption class="mt-3">
-					<p class="text-xs font-medium text-ink-400">3 / 9</p>
-					<p class="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-ink-500">
-						La participación ciudadana se organiza, se estructura y se transforma en propuestas
-						reales: de las preocupaciones a planes verificables que la comunidad puede impulsar.
-					</p>
-					<p class="mt-3 text-[11px] text-ink-400 italic">
-						Tercera escena de una secuencia en desarrollo.
+					<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
+						La IA agrupa, interpreta y organiza la escucha sin borrar matices: distingue casos
+						individuales de patrones colectivos y conserva el origen de cada aportación.
 					</p>
 				</figcaption>
 			</figure>
 		</div>
 
-		<!-- Escena 4 (4/9) — mismo patrón que las escenas 2 y 3: <picture>
-		     sirve la versión horizontal propia desde `sm` (≥640px), con su
-		     encuadre completo (mismo ratio 1717/1145, sin recortes). -->
-		<div
-			class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-4xl sm:translate-x-1 sm:px-6 lg:max-w-6xl lg:translate-x-2"
-		>
+		<div class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
 			<figure>
-				<picture>
-					<source
-						srcset="/vision/vision-sistema-nervioso-04-desktop.webp"
-						media="(min-width: 640px)"
-					/>
-					<img
-						src="/vision/vision-sistema-nervioso-04-mobile.webp"
-						alt="Una persona consulta en su móvil el plan de CONVOCA en construcción con la ciudadanía: prioridades, recursos, acciones y seguimiento del avance."
-						width="1024"
-						height="1536"
-						loading="lazy"
-						decoding="async"
-						class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[1717/1145]"
-					/>
-				</picture>
+				<img
+					src="/vision/vision-sistema-nervioso-04-mobile.webp"
+					alt="Un cerebro central conectado a varios grupos de personas repartidos por un mapa de municipios, representando patrones compartidos entre territorios."
+					width="864"
+					height="1821"
+					loading="lazy"
+					decoding="async"
+					class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+				/>
 				<figcaption class="mt-3">
-					<p class="text-xs font-medium text-ink-400">4 / 9</p>
-					<p class="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-ink-500">
-						Lo que importa se convierte en prioridades, recursos y acciones verificables: un plan
-						que nace de las personas y se revisa, mide y ajusta junto a la ciudadanía.
-					</p>
-					<p class="mt-3 text-[11px] text-ink-400 italic">
-						Cuarta escena de una secuencia en desarrollo.
+					<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
+						La IA detecta patrones compartidos entre municipios y conecta soluciones que ya han
+						funcionado en otros territorios, sin borrar lo local.
 					</p>
 				</figcaption>
 			</figure>
 		</div>
 
-		<!-- Escena 5 (5/9) — <picture> sirve la versión horizontal propia
-		     desde `sm` (≥640px), con su encuadre completo (mismo ratio
-		     1717/1145 que las escenas 2-4). En móvil conserva su ratio
-		     propio (887/1774), distinto del 2/3 genérico de las escenas
-		     2-4: esta captura es más alargada (pantalla de móvil sobre
-		     fondo), así que forzar 2/3 dejaría espacio en blanco. -->
-		<div
-			class="mx-auto mt-10 max-w-xs px-4 pb-16 text-center sm:mt-14 sm:max-w-4xl sm:translate-x-1 sm:px-6 sm:pb-20 lg:max-w-6xl lg:translate-x-2"
-		>
+		<div class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
 			<figure>
-				<picture>
-					<source
-						srcset="/vision/vision-sistema-nervioso-05-desktop.webp"
-						media="(min-width: 640px)"
-					/>
-					<img
-						src="/vision/vision-sistema-nervioso-05-mobile.webp"
-						alt="La pantalla del móvil muestra el seguimiento del Plan de Vivienda 2036 en CONVOCA: mapa en tiempo real, progreso general, compromisos verificables y rendición de cuentas."
-						width="887"
-						height="1774"
-						loading="lazy"
-						decoding="async"
-						class="aspect-[887/1774] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[1717/1145]"
-					/>
-				</picture>
+				<img
+					src="/vision/vision-sistema-nervioso-05-mobile.webp"
+					alt="Un diagrama que conecta problemas detectados en los municipios —vivienda, transporte, contaminación, salud mental, servicios sociales, cobertura digital— con el nivel institucional competente: ayuntamiento, diputación, comunidad autónoma o Estado."
+					width="1024"
+					height="1536"
+					loading="lazy"
+					decoding="async"
+					class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+				/>
 				<figcaption class="mt-3">
-					<p class="text-xs font-medium text-ink-400">5 / 9</p>
-					<p class="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-ink-500">
-						Transparencia y trazabilidad en tiempo real: cada decisión es visible, cada paso es
-						medible y cada compromiso es verificable ante la comunidad ciudadana.
+					<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
+						Cada propuesta toma la ruta correcta: el sistema dirige cada problema al nivel
+						institucional con la competencia y la capacidad real de actuar.
 					</p>
-					<p class="mt-3 text-[11px] text-ink-400 italic">
-						Quinta escena de una secuencia en desarrollo.
+				</figcaption>
+			</figure>
+		</div>
+
+		<div class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
+			<figure>
+				<img
+					src="/vision/vision-sistema-nervioso-06-mobile.webp"
+					alt="Un borrador de plan en el centro rodeado de seis agentes de IA especializados: económico, jurídico, de evidencia, de implementación, de riesgos y de participación ciudadana."
+					width="1024"
+					height="1536"
+					loading="lazy"
+					decoding="async"
+					class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+				/>
+				<figcaption class="mt-3">
+					<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
+						Un gabinete de agentes especializados —económico, jurídico, de riesgos, de
+						participación— contrasta cada propuesta desde todas las perspectivas antes de
+						convertirla en un plan sólido.
+					</p>
+				</figcaption>
+			</figure>
+		</div>
+
+		<div class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
+			<figure>
+				<img
+					src="/vision/vision-sistema-nervioso-07-mobile.webp"
+					alt="Un plan propuesto con medidas, coste, calendario y nivel de consenso, junto a tres opciones para la ciudadanía: aprobar, corregir o rechazar."
+					width="878"
+					height="1792"
+					loading="lazy"
+					decoding="async"
+					class="aspect-[878/1792] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+				/>
+				<figcaption class="mt-3">
+					<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
+						La IA propone, las personas deciden: el plan se revisa y se corrige hasta alcanzar un
+						consenso real. La decisión final siempre es humana.
+					</p>
+				</figcaption>
+			</figure>
+		</div>
+
+		<div class="mx-auto mt-10 max-w-xs px-4 text-center sm:mt-14 sm:max-w-sm sm:px-6">
+			<figure>
+				<img
+					src="/vision/vision-sistema-nervioso-08-mobile.webp"
+					alt="Un mapa de España con nodos iluminados mostrando el escalado territorial de una propuesta: de municipio a comarca, provincia, comunidad autónoma y Estado."
+					width="863"
+					height="1822"
+					loading="lazy"
+					decoding="async"
+					class="aspect-[863/1822] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+				/>
+				<figcaption class="mt-3">
+					<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
+						Cada propuesta empieza en un municipio y puede escalar de la comarca a la provincia, la
+						comunidad y el Estado: lo que funciona en un lugar inspira a otro.
+					</p>
+				</figcaption>
+			</figure>
+		</div>
+
+		<div class="mx-auto mt-10 max-w-xs px-4 pb-16 text-center sm:mt-14 sm:max-w-sm sm:px-6 sm:pb-20">
+			<figure>
+				<img
+					src="/vision/vision-sistema-nervioso-09-mobile.webp"
+					alt="Iconos de código abierto, datos abiertos, gobernanza ciudadana, financiación transparente y sostenibilidad, junto a las formas de participar en CONVOCA."
+					width="1024"
+					height="1536"
+					loading="lazy"
+					decoding="async"
+					class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+				/>
+				<figcaption class="mt-3">
+					<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
+						Un proyecto abierto, transparente y sostenible: código abierto, datos abiertos y
+						gobernanza ciudadana. Convoca es de la ciudadanía y para la ciudadanía.
 					</p>
 				</figcaption>
 			</figure>
