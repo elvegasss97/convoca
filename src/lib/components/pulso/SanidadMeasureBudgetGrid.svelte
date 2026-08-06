@@ -206,15 +206,13 @@
 							class="flex items-center justify-between gap-2.5 rounded-lg bg-white/5 px-3 py-2 text-[13px]"
 						>
 							<span class="flex min-w-0 items-center gap-2">
-								<span
-									class={`shrink-0 rounded-full px-1.5 py-0.5 font-mono text-[9.5px] tracking-wide uppercase ${
-										c.tipo === 'Recurrente'
-											? 'bg-brand-300/20 text-brand-300'
-											: 'bg-white/10 text-white/65'
-									}`}
-								>
-									{c.tipo === 'Recurrente' ? 'Recurrente' : 'Deducción'}
-								</span>
+								{#if c.tipo === 'Deducción'}
+									<span
+										class="shrink-0 rounded-full bg-white/10 px-1.5 py-0.5 font-mono text-[9.5px] tracking-wide text-white/65 uppercase"
+									>
+										Deducción
+									</span>
+								{/if}
 								<span class="truncate">{c.nombre}</span>
 							</span>
 							<span class="shrink-0 font-mono font-semibold whitespace-nowrap">
