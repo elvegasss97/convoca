@@ -131,7 +131,7 @@
 	     artifact o una pieza visual horizontal sobre la aspiración final
 	     de Convoca. No añadir aquí explicaciones de funcionamiento. -->
 	<section use:reveal class="reveal-section border-t border-ink-100">
-		<div class="mx-auto max-w-2xl px-4 py-20 text-center sm:px-6 sm:py-28">
+		<div class="mx-auto max-w-2xl px-4 pt-20 text-center sm:px-6 sm:pt-28">
 			<h2 class="font-display text-2xl font-semibold text-ink-900 sm:text-3xl">
 				Una infraestructura democrática al alcance de cualquiera
 			</h2>
@@ -142,23 +142,38 @@
 				Convoca aspira a que cualquier persona pueda abrir el mapa de su país o de su municipio y
 				comprender qué preocupa a su comunidad.
 			</p>
+		</div>
 
-			<!-- Escena piloto (1/9) — prueba de integración de una única escena de
-			     la futura secuencia visual aspiracional. No generar el resto de
-			     escenas ni construir galería/carrusel hasta validar esta prueba. -->
-			<figure class="mx-auto mt-10 max-w-xs sm:max-w-sm">
-				<img
-					src="/vision/vision-sistema-nervioso-01-mobile.webp"
-					alt="Un grupo de personas observa desde una colina un mapa de España iluminado por una red de nodos conectados entre municipios: la visión de Convoca como un sistema nervioso ciudadano."
-					width="1024"
-					height="1536"
-					loading="lazy"
-					decoding="async"
-					class="h-auto w-full rounded-2xl border border-ink-100 shadow-sm"
-				/>
+		<!-- Escena piloto (1/9) — prueba de integración de una única escena de
+		     la futura secuencia visual aspiracional. No generar el resto de
+		     escenas ni construir galería/carrusel hasta validar esta prueba.
+		     Contenedor propio (más ancho que el bloque de texto de arriba)
+		     para que la pieza horizontal tenga presencia real en escritorio.
+		     <picture> sirve la versión horizontal solo desde `sm` (≥640px);
+		     por debajo de eso el móvil sigue viendo exactamente la misma
+		     imagen vertical de antes. -->
+		<div
+			class="mx-auto mt-4 max-w-xs px-4 pb-16 text-center sm:mt-6 sm:max-w-4xl sm:px-6 sm:pb-20 lg:max-w-6xl"
+		>
+			<figure>
+				<picture>
+					<source
+						srcset="/vision/vision-sistema-nervioso-01-desktop.webp"
+						media="(min-width: 640px)"
+					/>
+					<img
+						src="/vision/vision-sistema-nervioso-01-mobile.webp"
+						alt="Un grupo de personas observa desde una colina un mapa de España iluminado por una red de nodos conectados entre municipios: la visión de Convoca como un sistema nervioso ciudadano."
+						width="1024"
+						height="1536"
+						loading="lazy"
+						decoding="async"
+						class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[1717/916]"
+					/>
+				</picture>
 				<figcaption class="mt-3">
 					<p class="text-xs font-medium text-ink-400">1 / 9</p>
-					<p class="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-ink-500">
+					<p class="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-ink-500">
 						Cada municipio escucha. Los patrones se conectan. La ciudadanía decide: la visión busca
 						convertir voces ciudadanas en planes públicos verificables.
 					</p>
