@@ -185,7 +185,7 @@
 						height="1825"
 						loading="lazy"
 						decoding="async"
-						class="aspect-[862/1825] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
@@ -205,7 +205,7 @@
 						height="1823"
 						loading="lazy"
 						decoding="async"
-						class="aspect-[863/1823] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
@@ -245,7 +245,7 @@
 						height="1536"
 						loading="lazy"
 						decoding="async"
-						class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
@@ -265,7 +265,7 @@
 						height="1536"
 						loading="lazy"
 						decoding="async"
-						class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
@@ -286,7 +286,7 @@
 						height="1792"
 						loading="lazy"
 						decoding="async"
-						class="aspect-[878/1792] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
@@ -306,7 +306,7 @@
 						height="1822"
 						loading="lazy"
 						decoding="async"
-						class="aspect-[863/1822] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
@@ -326,7 +326,7 @@
 						height="1536"
 						loading="lazy"
 						decoding="async"
-						class="aspect-[2/3] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
+						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
 					/>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
