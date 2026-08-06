@@ -158,15 +158,21 @@
 		>
 			<div use:reveal class="text-center">
 				<figure>
-					<img
-						src="/vision/vision-sistema-nervioso-01-mobile.webp"
-						alt="Mapa iluminado con nodos de conversación conectando los municipios de un territorio, con la etiqueta 'Tu municipio' señalando un punto concreto."
-						width="864"
-						height="1821"
-						loading="eager"
-						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
-					/>
+					<picture>
+						<source
+							srcset="/vision/vision-sistema-nervioso-01-desktop.webp"
+							media="(min-width: 640px)"
+						/>
+						<img
+							src="/vision/vision-sistema-nervioso-01-mobile.webp"
+							alt="Mapa iluminado con nodos de conversación conectando los municipios de un territorio, con la etiqueta 'Tu municipio' señalando un punto concreto."
+							width="864"
+							height="1821"
+							loading="eager"
+							decoding="async"
+							class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						/>
+					</picture>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
 							Cada municipio tiene su propio espacio de escucha: la ciudadanía comparte lo que le
@@ -178,15 +184,21 @@
 
 			<div use:reveal class="text-center">
 				<figure>
-					<img
-						src="/vision/vision-sistema-nervioso-02-mobile.webp"
-						alt="Un medidor en forma de arco que va de 'Aún no suficiente' a 'Participación suficiente', mostrando cuándo se activa el agente municipal de CONVOCA."
-						width="862"
-						height="1825"
-						loading="eager"
-						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
-					/>
+					<picture>
+						<source
+							srcset="/vision/vision-sistema-nervioso-02-desktop.webp"
+							media="(min-width: 640px)"
+						/>
+						<img
+							src="/vision/vision-sistema-nervioso-02-mobile.webp"
+							alt="Un medidor en forma de arco que va de 'Aún no suficiente' a 'Participación suficiente', mostrando cuándo se activa el agente municipal de CONVOCA."
+							width="862"
+							height="1825"
+							loading="eager"
+							decoding="async"
+							class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						/>
+					</picture>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
 							El sistema no se activa por ruido aislado, sino cuando una preocupación es compartida
@@ -198,15 +210,21 @@
 
 			<div use:reveal class="text-center">
 				<figure>
-					<img
-						src="/vision/vision-sistema-nervioso-03-mobile.webp"
-						alt="Un cerebro conectado a múltiples burbujas de conversación de colores que la IA agrupa y ordena en categorías: casos individuales, patrones, alertas y aportaciones."
-						width="863"
-						height="1823"
-						loading="eager"
-						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
-					/>
+					<picture>
+						<source
+							srcset="/vision/vision-sistema-nervioso-03-desktop.webp"
+							media="(min-width: 640px)"
+						/>
+						<img
+							src="/vision/vision-sistema-nervioso-03-mobile.webp"
+							alt="Un cerebro conectado a múltiples burbujas de conversación de colores que la IA agrupa y ordena en categorías: casos individuales, patrones, alertas y aportaciones."
+							width="863"
+							height="1823"
+							loading="eager"
+							decoding="async"
+							class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						/>
+					</picture>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
 							La IA agrupa, interpreta y organiza la escucha sin borrar matices: distingue casos
@@ -218,15 +236,21 @@
 
 			<div use:reveal class="text-center">
 				<figure>
-					<img
-						src="/vision/vision-sistema-nervioso-04-mobile.webp"
-						alt="Un cerebro central conectado a varios grupos de personas repartidos por un mapa de municipios, representando patrones compartidos entre territorios."
-						width="864"
-						height="1821"
-						loading="eager"
-						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
-					/>
+					<picture>
+						<source
+							srcset="/vision/vision-sistema-nervioso-04-desktop.webp"
+							media="(min-width: 640px)"
+						/>
+						<img
+							src="/vision/vision-sistema-nervioso-04-mobile.webp"
+							alt="Un cerebro central conectado a varios grupos de personas repartidos por un mapa de municipios, representando patrones compartidos entre territorios."
+							width="864"
+							height="1821"
+							loading="eager"
+							decoding="async"
+							class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						/>
+					</picture>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
 							La IA detecta patrones compartidos entre municipios y conecta soluciones que ya han
@@ -238,15 +262,21 @@
 
 			<div use:reveal class="text-center">
 				<figure>
-					<img
-						src="/vision/vision-sistema-nervioso-05-mobile.webp"
-						alt="Un diagrama que conecta problemas detectados en los municipios —vivienda, transporte, contaminación, salud mental, servicios sociales, cobertura digital— con el nivel institucional competente: ayuntamiento, diputación, comunidad autónoma o Estado."
-						width="1024"
-						height="1536"
-						loading="eager"
-						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
-					/>
+					<picture>
+						<source
+							srcset="/vision/vision-sistema-nervioso-05-desktop.webp"
+							media="(min-width: 640px)"
+						/>
+						<img
+							src="/vision/vision-sistema-nervioso-05-mobile.webp"
+							alt="Un diagrama que conecta problemas detectados en los municipios —vivienda, transporte, contaminación, salud mental, servicios sociales, cobertura digital— con el nivel institucional competente: ayuntamiento, diputación, comunidad autónoma o Estado."
+							width="1024"
+							height="1536"
+							loading="eager"
+							decoding="async"
+							class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						/>
+					</picture>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
 							Cada propuesta toma la ruta correcta: el sistema dirige cada problema al nivel
@@ -258,15 +288,21 @@
 
 			<div use:reveal class="text-center">
 				<figure>
-					<img
-						src="/vision/vision-sistema-nervioso-06-mobile.webp"
-						alt="Un borrador de plan en el centro rodeado de seis agentes de IA especializados: económico, jurídico, de evidencia, de implementación, de riesgos y de participación ciudadana."
-						width="1024"
-						height="1536"
-						loading="eager"
-						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
-					/>
+					<picture>
+						<source
+							srcset="/vision/vision-sistema-nervioso-06-desktop.webp"
+							media="(min-width: 640px)"
+						/>
+						<img
+							src="/vision/vision-sistema-nervioso-06-mobile.webp"
+							alt="Un borrador de plan en el centro rodeado de seis agentes de IA especializados: económico, jurídico, de evidencia, de implementación, de riesgos y de participación ciudadana."
+							width="1024"
+							height="1536"
+							loading="eager"
+							decoding="async"
+							class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						/>
+					</picture>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
 							Un gabinete de agentes especializados —económico, jurídico, de riesgos, de
@@ -279,15 +315,21 @@
 
 			<div use:reveal class="text-center">
 				<figure>
-					<img
-						src="/vision/vision-sistema-nervioso-07-mobile.webp"
-						alt="Un plan propuesto con medidas, coste, calendario y nivel de consenso, junto a tres opciones para la ciudadanía: aprobar, corregir o rechazar."
-						width="878"
-						height="1792"
-						loading="eager"
-						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
-					/>
+					<picture>
+						<source
+							srcset="/vision/vision-sistema-nervioso-07-desktop.webp"
+							media="(min-width: 640px)"
+						/>
+						<img
+							src="/vision/vision-sistema-nervioso-07-mobile.webp"
+							alt="Un plan propuesto con medidas, coste, calendario y nivel de consenso, junto a tres opciones para la ciudadanía: aprobar, corregir o rechazar."
+							width="878"
+							height="1792"
+							loading="eager"
+							decoding="async"
+							class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						/>
+					</picture>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
 							La IA propone, las personas deciden: el plan se revisa y se corrige hasta alcanzar un
@@ -299,15 +341,21 @@
 
 			<div use:reveal class="text-center">
 				<figure>
-					<img
-						src="/vision/vision-sistema-nervioso-08-mobile.webp"
-						alt="Un mapa de España con nodos iluminados mostrando el escalado territorial de una propuesta: de municipio a comarca, provincia, comunidad autónoma y Estado."
-						width="863"
-						height="1822"
-						loading="eager"
-						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
-					/>
+					<picture>
+						<source
+							srcset="/vision/vision-sistema-nervioso-08-desktop.webp"
+							media="(min-width: 640px)"
+						/>
+						<img
+							src="/vision/vision-sistema-nervioso-08-mobile.webp"
+							alt="Un mapa de España con nodos iluminados mostrando el escalado territorial de una propuesta: de municipio a comarca, provincia, comunidad autónoma y Estado."
+							width="863"
+							height="1822"
+							loading="eager"
+							decoding="async"
+							class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						/>
+					</picture>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
 							Cada propuesta empieza en un municipio y puede escalar de la comarca a la provincia,
@@ -319,15 +367,21 @@
 
 			<div use:reveal class="text-center">
 				<figure>
-					<img
-						src="/vision/vision-sistema-nervioso-09-mobile.webp"
-						alt="Iconos de código abierto, datos abiertos, gobernanza ciudadana, financiación transparente y sostenibilidad, junto a las formas de participar en CONVOCA."
-						width="1024"
-						height="1536"
-						loading="eager"
-						decoding="async"
-						class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm"
-					/>
+					<picture>
+						<source
+							srcset="/vision/vision-sistema-nervioso-09-desktop.webp"
+							media="(min-width: 640px)"
+						/>
+						<img
+							src="/vision/vision-sistema-nervioso-09-mobile.webp"
+							alt="Iconos de código abierto, datos abiertos, gobernanza ciudadana, financiación transparente y sostenibilidad, junto a las formas de participar en CONVOCA."
+							width="1024"
+							height="1536"
+							loading="eager"
+							decoding="async"
+							class="aspect-[864/1821] w-full rounded-2xl border border-ink-100 object-contain shadow-sm sm:aspect-[3/2]"
+						/>
+					</picture>
 					<figcaption class="mt-3">
 						<p class="mx-auto max-w-sm text-xs leading-relaxed text-ink-500">
 							Un proyecto abierto, transparente y sostenible: código abierto, datos abiertos y
