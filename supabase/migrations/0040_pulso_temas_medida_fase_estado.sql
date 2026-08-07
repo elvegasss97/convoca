@@ -65,7 +65,51 @@ create policy "topic_measure_phase_status_write_staff"
 
 -- ---------------------------------------------------------------------------
 -- Datos: Vivienda 2036 — 8 medidas × 5 fases (32 filas)
+--
+-- Guarda de reproducibilidad clean-room (seguridad/27, seguridad/28): el
+-- tema "Vivienda" y sus medidas/fases se crean vía aplicación, no por
+-- migración (ver seguridad/27 §1) — en una instancia sin ese contenido
+-- (fork nuevo, shadow DB de `supabase db diff`) este INSERT fallaría por FK.
+-- La condición exige el topic Y las 8 medidas Y las 5 fases exactas que
+-- usan las 32 filas de abajo; si falta cualquiera, se omite el INSERT
+-- completo (no se inserta parcialmente ni se crean filas padre). Si todo
+-- existe, el INSERT es exactamente el mismo que ya corrió en
+-- staging/producción, sin cambios de efecto.
 -- ---------------------------------------------------------------------------
+
+do $$
+begin
+	if exists (
+		select 1 from public.topics where id = '22578e3c-91a2-4b30-ab1b-9aae2f510f0e'::uuid
+	)
+	and not exists (
+		select 1 from unnest(array[
+			'f8aae7fb-b10e-4bc3-aa0f-392f40a2909f',
+			'75d63251-606a-4183-b15f-bd20483e7a7e',
+			'1dc4e177-62b2-4dce-bcdd-ed6e6326e45e',
+			'83961c13-3549-4721-a621-a9fd6484c160',
+			'69407eba-ce7a-485d-bdcb-f878cb287c99',
+			'c9a35a5e-5219-41e8-afb2-f007dd84984a',
+			'c7b13817-5499-49ef-9c2b-22cb5a975a8b',
+			'd152d8e4-efda-41a7-8ae3-bbffb74cff2e'
+		]::uuid[]) as required_measure_id
+		where not exists (
+			select 1 from public.topic_measures m where m.id = required_measure_id
+		)
+	)
+	and not exists (
+		select 1 from unnest(array[
+			'26c3164c-ec2b-46f8-91c5-ce2e3634ce0c',
+			'4ef0d125-56dc-461d-8619-87c703e3ef81',
+			'5b252ef8-c0bd-404e-9858-684e7951461d',
+			'bd172f2b-4f2e-46c9-9128-1e52498ef2a4',
+			'fbd4a0ce-cead-4bc3-b52f-2d4288c33919'
+		]::uuid[]) as required_phase_id
+		where not exists (
+			select 1 from public.topic_timeline_phases p where p.id = required_phase_id
+		)
+	)
+	then
 
 insert into public.topic_measure_phase_status (topic_id, measure_id, phase_id, status)
 select
@@ -115,4 +159,7 @@ from (
 		('d152d8e4-efda-41a7-8ae3-bbffb74cff2e', '5b252ef8-c0bd-404e-9858-684e7951461d', 'despliegue'),
 		('d152d8e4-efda-41a7-8ae3-bbffb74cff2e', 'bd172f2b-4f2e-46c9-9128-1e52498ef2a4', 'consolidacion'),
 		('d152d8e4-efda-41a7-8ae3-bbffb74cff2e', 'fbd4a0ce-cead-4bc3-b52f-2d4288c33919', 'evaluacion')
-) as v (measure_id, phase_id, status);
+	) as v (measure_id, phase_id, status);
+
+	end if;
+end $$;
