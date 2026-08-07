@@ -112,6 +112,19 @@ create policy "topic_evaluation_moments_write_staff"
 	using (public.is_moderator_or_admin())
 	with check (public.is_moderator_or_admin());
 
+-- Guarda de reproducibilidad clean-room (seguridad/27, seguridad/28): única
+-- FK de contenido de este INSERT es topic_id (confirmado en seguridad/28
+-- §2 — key/title/frequency_label/description/sort_order no referencian
+-- ninguna otra fila). Si el topic no existe (fork nuevo, shadow DB), se
+-- omite el INSERT completo. Si existe, es exactamente el mismo INSERT que
+-- ya corrió en staging/producción, sin cambios de efecto.
+do $$
+begin
+	if exists (
+		select 1 from public.topics where id = '22578e3c-91a2-4b30-ab1b-9aae2f510f0e'::uuid
+	)
+	then
+
 insert into public.topic_evaluation_moments (topic_id, key, title, frequency_label, description, sort_order)
 values
 	(
@@ -146,6 +159,9 @@ values
 		'En 2036 se compararán los resultados con la línea de base de 2026. La evaluación deberá incluir también: objetivos incumplidos, costes superiores a lo previsto, efectos no deseados, diferencias entre territorios, y aprendizajes para el siguiente periodo.',
 		3
 	);
+
+	end if;
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- 3. topic_measure_change_conditions — ampliar / modificar / suspender
@@ -189,6 +205,19 @@ create policy "topic_measure_change_conditions_write_staff"
 	using (public.is_moderator_or_admin())
 	with check (public.is_moderator_or_admin());
 
+-- Guarda de reproducibilidad clean-room (seguridad/27, seguridad/28): única
+-- FK de contenido de este INSERT es topic_id (confirmado en seguridad/28
+-- §2 — key/title/items/sort_order no referencian ninguna otra fila). Si el
+-- topic no existe (fork nuevo, shadow DB), se omite el INSERT completo. Si
+-- existe, es exactamente el mismo INSERT que ya corrió en
+-- staging/producción, sin cambios de efecto.
+do $$
+begin
+	if exists (
+		select 1 from public.topics where id = '22578e3c-91a2-4b30-ab1b-9aae2f510f0e'::uuid
+	)
+	then
+
 insert into public.topic_measure_change_conditions (topic_id, key, title, items, sort_order)
 values
 	(
@@ -231,3 +260,6 @@ values
 		],
 		2
 	);
+
+	end if;
+end $$;
