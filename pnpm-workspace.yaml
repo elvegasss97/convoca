@@ -2,3 +2,12 @@ allowBuilds:
   '@tailwindcss/oxide': true
   esbuild: true
   sharp: true
+
+overrides:
+  # CVE-2026-33327/33328/35590/35591 (libvips) en sharp@0.34.5, arrastrada
+  # como transitiva de @vercel/og@0.11.1 (que declara "sharp": "^0.34.5" —
+  # el rango caret excluye 0.35.x, así que hace falta forzarla por encima
+  # de ese rango). Versión fijada exacta, ya validada con un smoke test
+  # aislado (generación de imagen OG real) antes de aplicarse aquí — ver
+  # /seguridad/13_resultados_pruebas_pendientes_staging.md.
+  sharp: 0.35.3
