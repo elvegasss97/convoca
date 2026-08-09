@@ -1,0 +1,14 @@
+{
+	"$comment": "Inventario de buckets de Storage ya auditados, definidos vía migración versionada (seguridad/19_security_baseline_v1_diseno.md, control G-STORAGE). Un bucket nuevo, o un cambio de público/privado/límites en uno existente, falla el check y exige revisión explícita. LIMITACIÓN P0 declarada: este check solo lee lo que hay versionado en supabase/migrations/ — no se conecta a producción/staging para confirmar que el estado real coincide (eso es P-D5, periódico, fuera de alcance de P0).",
+	"buckets": [
+		{
+			"bucket": "verification-documents",
+			"public": false,
+			"fileSizeLimit": 10485760,
+			"allowedMimeTypes": ["application/pdf", "image/jpeg", "image/png", "image/webp"],
+			"definedIn": "supabase/migrations/0006_verification_documents_and_storage.sql",
+			"pathConvention": "prefijo por auth.uid() vía storage.foldername(name)[1]",
+			"why": "Único bucket existente. Documentos de verificación de organizador: privado, con límite de tamaño y tipos MIME explícitos, políticas RLS sobre storage.objects con ruta por usuario."
+		}
+	]
+}

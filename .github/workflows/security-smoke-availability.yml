@@ -1,0 +1,64 @@
+name: Security Smoke — Disponibilidad pública
+
+# B11 (seguridad/19_..._diseno.md §4) — DISPONIBILIDAD, no autorización.
+# Comprueba únicamente que rutas públicas conocidas responden 200. No
+# inicia sesión, no vota, no crea contenido, no lee datos ciudadanos. No
+# debe confundirse con una prueba de seguridad de autorización (esa vive
+# en la matriz de identidades de seguridad/19 §7, todavía no
+# implementada — ver seguridad/30_..._implementacion.md).
+#
+# Corre después de cada push a main (ya desplegado) y también se puede
+# lanzar a mano. No corre en cada PR: un Pull Request no tiene, hoy, un
+# Preview Deployment fiable (sin integración Git↔Vercel activa, ver
+# seguridad/19 §8) — decisión abierta documentada, no resuelta aquí.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '43 6 * * *' # diario, cadencia razonable para disponibilidad
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-availability:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Rutas públicas responden 200
+        run: |
+          set -euo pipefail
+          BASE_URL="https://convoca.cloud"
+          ROUTES=(
+            "/"
+            "/pulso/soluciones/vivienda-plan-vivienda-2036"
+            "/pulso/proximo-bloque"
+          )
+          FAILED=0
+          for route in "${ROUTES[@]}"; do
+            code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 "${BASE_URL}${route}" || echo "000")
+            if [ "$code" = "200" ]; then
+              echo "ok    $route -> $code"
+            else
+              # Distinguir un fallo de red puntual de GitHub de una
+              # regresión real: un solo reintento tras una breve espera,
+              # nunca se trata "000"/timeout como conclusión de seguridad
+              # sin al menos confirmar que persiste.
+              sleep 5
+              retry=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 "${BASE_URL}${route}" || echo "000")
+              if [ "$retry" = "200" ]; then
+                echo "ok    $route -> $code luego $retry (probable fallo de red puntual, no regresión)"
+              else
+                echo "FAIL  $route -> $code, reintento -> $retry"
+                FAILED=1
+              fi
+            fi
+          done
+          if [ "$FAILED" -ne 0 ]; then
+            echo ""
+            echo "security-smoke-availability — FAIL"
+            exit 1
+          fi
+          echo ""
+          echo "security-smoke-availability — PASS"
