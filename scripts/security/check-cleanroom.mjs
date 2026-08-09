@@ -25,7 +25,7 @@ const expectedFiles = readdirSync('supabase/migrations')
 
 console.log(`check-cleanroom: aplicando ${expectedFiles.length} migraciones con supabase@${CLI_VERSION} (db diff --db-url <destino inalcanzable>, --schema public)`);
 
-const result = spawnSync('npx', [`supabase@${CLI_VERSION}`, 'db', 'diff', '--db-url', DUMMY_TARGET, '--schema', 'public'], {
+const result = spawnSync('npx', [`supabase@${CLI_VERSION}`, 'db', 'diff', '--db-url', DUMMY_TARGET, '--schema', 'public', '--output-format', 'json'], {
 	encoding: 'utf8',
 	timeout: 10 * 60 * 1000
 });

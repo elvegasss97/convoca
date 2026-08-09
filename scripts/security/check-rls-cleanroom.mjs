@@ -62,10 +62,15 @@ if (!ready) {
 }
 
 console.log(`check-rls-cleanroom: supabase@${CLI_VERSION} db diff --from <réplica vacía> --to migrations --schema public`);
-const result = spawnSync('npx', [`supabase@${CLI_VERSION}`, 'db', 'diff', '--from', `postgresql://postgres:test@127.0.0.1:${PORT}/postgres`, '--to', 'migrations', '--schema', 'public'], {
-	encoding: 'utf8',
-	timeout: 10 * 60 * 1000
-});
+// --output-format json explícito: el formato por defecto ("text") varía
+// según el entorno (confirmado: JSON en local, texto plano en GitHub
+// Actions con la misma versión de CLI) — sin fijarlo, este parseo deja
+// de ser fiable de forma no determinista entre entornos.
+const result = spawnSync(
+	'npx',
+	[`supabase@${CLI_VERSION}`, 'db', 'diff', '--from', `postgresql://postgres:test@127.0.0.1:${PORT}/postgres`, '--to', 'migrations', '--schema', 'public', '--output-format', 'json'],
+	{ encoding: 'utf8', timeout: 10 * 60 * 1000 }
+);
 
 const output = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
 
@@ -76,15 +81,25 @@ if (result.status !== 0) {
 	process.exit(1);
 }
 
-const jsonLine = output.split('\n').find((l) => l.startsWith('{"diff"'));
-if (!jsonLine) {
+// Búsqueda robusta del bloque JSON: por posición de '{"diff"' en todo el
+// output (no solo como inicio de línea), ya que --output-format json no
+// garantiza por sí solo que no haya texto adicional de npx/logging antes.
+const jsonStart = output.indexOf('{"diff"');
+let parsed = null;
+if (jsonStart !== -1) {
+	try {
+		parsed = JSON.parse(output.slice(jsonStart).trim());
+	} catch {
+		parsed = null;
+	}
+}
+if (!parsed) {
 	console.log(output);
-	console.log('FAIL: no se encontró el bloque JSON de diff en la salida del CLI');
+	console.log('FAIL: no se pudo encontrar/parsear el bloque JSON de diff en la salida del CLI');
 	console.log('\ncheck-rls-cleanroom — FAIL');
 	process.exit(1);
 }
-
-const { diff } = JSON.parse(jsonLine);
+const { diff } = parsed;
 
 const createdTables = new Set([...diff.matchAll(/CREATE TABLE public\.(\w+)\s*\(/g)].map((m) => m[1]));
 const rlsEnabledTables = new Set([...diff.matchAll(/ALTER TABLE public\.(\w+)\s*\n\s*ENABLE ROW LEVEL SECURITY;/g)].map((m) => m[1]));
