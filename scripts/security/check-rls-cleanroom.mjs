@@ -23,7 +23,15 @@
 import { spawnSync, execSync } from 'node:child_process';
 
 const CLI_VERSION = '2.113.0';
-const IMAGE = 'public.ecr.aws/supabase/postgres:17.6.1.155';
+// Imagen ligera (no la de Supabase) para el destino vacío: el propio CLI
+// levanta ADEMÁS su shadow completo (postgres+storage-api+gotrue+realtime)
+// para aplicar las migraciones — con las dos réplicas de Supabase-postgres
+// vivas a la vez, este check moría en silencio (sin mensaje de error, a
+// mitad del diff) en el runner estándar de GitHub Actions, confirmado
+// ejecutándolo de verdad sobre un PR real antes de fusionarlo. postgres
+// vacío no necesita ninguna extensión de Supabase — solo sirve de
+// destino "vacío" contra el que medir el diff.
+const IMAGE = 'postgres:17-alpine';
 const CONTAINER = `security_baseline_rls_${process.pid}`;
 const PORT = 55000 + (process.pid % 1000);
 
@@ -43,7 +51,14 @@ process.on('SIGINT', () => process.exit(1));
 process.on('SIGTERM', () => process.exit(1));
 
 console.log('check-rls-cleanroom: levantando réplica vacía desechable...');
-sh(`docker run --rm -d --name ${CONTAINER} -e POSTGRES_PASSWORD=test -p ${PORT}:5432 ${IMAGE}`, { stdio: 'ignore' });
+// shared_buffers/max_connections bajos deliberadamente: este Postgres
+// nunca recibe carga real, solo sirve de destino vacío para el diff —
+// minimizar su huella de memoria deja más margen al shadow completo que
+// levanta el propio CLI en paralelo (ver comentario de IMAGE arriba).
+sh(
+	`docker run --rm -d --name ${CONTAINER} -e POSTGRES_PASSWORD=test -p ${PORT}:5432 ${IMAGE} -c shared_buffers=16MB -c max_connections=20`,
+	{ stdio: 'ignore' }
+);
 
 let ready = false;
 for (let i = 0; i < 30; i++) {
