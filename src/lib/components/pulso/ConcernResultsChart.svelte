@@ -25,7 +25,7 @@
 	}
 
 	const averageLabel = $derived.by(() => {
-		if (results.averageLevel === undefined) return 'Sin respuestas todavía';
+		if (results.averageLevel === undefined) return 'Aún no hay datos suficientes';
 		const rounded = Math.round(results.averageLevel) as ConcernLevel;
 		return `${results.averageLevel.toFixed(1)} / 5 · ${concernLevelLabels[rounded]}`;
 	});
@@ -34,7 +34,7 @@
 {#if compact}
 	<div>
 		{#if results.totalResponses === 0}
-			<p class="text-xs text-ink-400">Todavía sin respuestas</p>
+			<p class="text-xs text-ink-400">Aún no hay datos suficientes</p>
 		{:else}
 			<div
 				class="flex h-2 w-full overflow-hidden rounded-full bg-ink-100"
@@ -54,14 +54,22 @@
 {:else}
 	<div>
 		<p class="font-display text-sm font-semibold text-ink-900">{averageLabel}</p>
-		<p class="mt-0.5 text-xs text-ink-500">
-			{results.totalResponses}
-			{results.totalResponses === 1 ? 'persona ha respondido' : 'personas han respondido'}
-		</p>
+		{#if results.totalResponses > 0}
+			<p class="mt-0.5 text-xs text-ink-500">
+				{results.totalResponses}
+				{results.totalResponses === 1 ? 'persona ha respondido' : 'personas han respondido'}
+			</p>
+		{/if}
 
 		{#if results.totalResponses === 0}
+			<!--
+				results.totalResponses === 0 aquí puede significar "sin respuestas" o "entre 1 y 4
+				respuestas suprimidas por privacidad" (0043, get_concern_results) — no hay forma de
+				distinguirlas desde el cliente, ni la hay: es la garantía de indistinguibilidad del
+				diseño. No afirmar "sé la primera persona en participar", puede ser falso.
+			-->
 			<p class="mt-3 rounded-xl border border-dashed border-ink-200 p-3 text-sm text-ink-500">
-				Todavía no hay respuestas. Sé la primera persona en participar.
+				Aún no hay datos suficientes para mostrar este desglose.
 			</p>
 		{:else}
 			<ul class="mt-3 flex flex-col gap-2">

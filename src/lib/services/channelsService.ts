@@ -123,29 +123,40 @@ export async function deleteChannel(channelId: string): Promise<void> {
 // Reportes y moderación de canales
 // ---------------------------------------------------------------------------
 
+/**
+ * `channel_reports_moderation` (vista) tipa todas sus columnas como
+ * `| null` — limitación conocida del generador de tipos de Supabase para
+ * vistas, no un reflejo real: ver la misma nota en moderationService.ts.
+ */
 interface ChannelReportRow {
-	id: string;
-	channel_id: string;
-	reason: string;
+	id: string | null;
+	channel_id: string | null;
+	reason: string | null;
 	details: string | null;
-	status: string;
-	created_at: string;
+	status: string | null;
+	created_at: string | null;
 	resolved_at: string | null;
 }
 
 function rowToChannelReport(row: ChannelReportRow): ChannelReport {
 	return {
-		id: row.id,
-		channelId: row.channel_id,
-		reason: row.reason as ChannelReportReason,
+		id: row.id ?? '',
+		channelId: row.channel_id ?? '',
+		reason: (row.reason ?? '') as ChannelReportReason,
 		details: row.details ?? undefined,
-		status: row.status as ChannelReport['status'],
-		createdAt: row.created_at,
+		status: (row.status ?? 'open') as ChannelReport['status'],
+		createdAt: row.created_at ?? new Date().toISOString(),
 		resolvedAt: row.resolved_at ?? undefined
 	};
 }
 
-/** Requiere sesión (política `channel_reports_insert_authenticated`: `anon` no puede reportar). */
+/**
+ * Requiere sesión (política `channel_reports_insert_authenticated`: `anon`
+ * no puede reportar). El insert va contra la tabla base; `.select()` pide
+ * explícitamente las columnas seguras porque, desde 0043, `authenticated`
+ * solo tiene GRANT de columna sobre esas 7 (sin `reported_by_user_id`) —
+ * un `select('*')` fallaría con "permission denied".
+ */
 export async function reportChannel(
 	channelId: string,
 	reason: ChannelReportReason,
@@ -163,17 +174,22 @@ export async function reportChannel(
 			reason,
 			details: details ?? null
 		})
-		.select('*')
+		.select('id, channel_id, reason, details, status, created_at, resolved_at')
 		.single();
 	if (error) throw error;
 	return rowToChannelReport(data);
 }
 
+/**
+ * Solo moderación/administración (RLS: `channel_reports_select_staff`). Se
+ * lee `channel_reports_moderation`, no `channel_reports`: la vista no
+ * expone `reported_by_user_id` (seguridad/32 §E, mismo patrón que reports).
+ */
 export async function listReportedChannels(): Promise<
 	{ channel: CommunicationChannel; reports: ChannelReport[] }[]
 > {
 	const { data, error } = await supabase
-		.from('channel_reports')
+		.from('channel_reports_moderation')
 		.select('*')
 		.in('status', ['open', 'in_review']);
 	if (error) throw error;

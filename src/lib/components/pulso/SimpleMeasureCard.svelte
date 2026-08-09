@@ -358,7 +358,12 @@
 								placeholder="Opcional…"
 								class="mt-1 w-full rounded-xl border-ink-200 text-sm focus:border-brand-500 focus:ring-brand-500"
 							></textarea>
-							<p class="mt-1 text-right text-xs text-ink-400">{formComment.length}/500</p>
+							<div class="mt-1 flex items-start justify-between gap-2">
+								<p class="text-xs text-ink-400">
+									No incluyas datos personales tuyos o de terceros que no sean necesarios.
+								</p>
+								<p class="shrink-0 text-xs text-ink-400">{formComment.length}/500</p>
+							</div>
 						</div>
 					{/if}
 
@@ -400,7 +405,7 @@
 					<div class="mt-3">
 						<ContentTypeTag type="pulso" class="mb-2" />
 						{#if results.totalResponses === 0}
-							<p class="text-xs text-ink-400">Todavía sin respuestas.</p>
+							<p class="text-xs text-ink-400">Aún no hay datos suficientes.</p>
 						{:else}
 							<ul class="flex flex-col gap-1.5">
 								{#each POSITIONS as pos (pos)}

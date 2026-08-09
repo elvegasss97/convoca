@@ -618,6 +618,9 @@
 					placeholder="Opcional"
 					class="mt-1 w-full rounded-xl border-ink-200 text-sm focus:border-brand-500 focus:ring-brand-500"
 				/>
+				<p class="mt-1 text-xs text-ink-400">
+					No incluyas datos personales tuyos o de terceros que no sean necesarios.
+				</p>
 
 				<p class="mt-3 text-xs font-semibold text-ink-700">Tipo de entorno</p>
 				<div class="mt-1.5 grid grid-cols-2 gap-2 sm:grid-cols-4">

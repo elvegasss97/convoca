@@ -2190,7 +2190,66 @@ export type Database = {
 			};
 		};
 		Views: {
-			[_ in never]: never;
+			reports_moderation: {
+				Row: {
+					created_at: string | null;
+					details: string | null;
+					event_id: string | null;
+					id: string | null;
+					reason: string | null;
+					resolved_at: string | null;
+					status: string | null;
+				};
+				Insert: {
+					created_at?: string | null;
+					details?: string | null;
+					event_id?: string | null;
+					id?: string | null;
+					reason?: string | null;
+					resolved_at?: string | null;
+					status?: string | null;
+				};
+				Update: {
+					created_at?: string | null;
+					details?: string | null;
+					event_id?: string | null;
+					id?: string | null;
+					reason?: string | null;
+					resolved_at?: string | null;
+					status?: string | null;
+				};
+				Relationships: [];
+			};
+			channel_reports_moderation: {
+				Row: {
+					channel_id: string | null;
+					created_at: string | null;
+					details: string | null;
+					id: string | null;
+					reason: string | null;
+					resolved_at: string | null;
+					status: string | null;
+				};
+				Insert: {
+					channel_id?: string | null;
+					created_at?: string | null;
+					details?: string | null;
+					id?: string | null;
+					reason?: string | null;
+					resolved_at?: string | null;
+					status?: string | null;
+				};
+				Update: {
+					channel_id?: string | null;
+					created_at?: string | null;
+					details?: string | null;
+					id?: string | null;
+					reason?: string | null;
+					resolved_at?: string | null;
+					status?: string | null;
+				};
+				Relationships: [];
+			};
 		};
 		Functions: {
 			get_attendance_counts: {
