@@ -1,0 +1,202 @@
+name: Security Baseline P0
+
+# Ver seguridad/19_security_baseline_v1_diseno.md (diseño) y
+# seguridad/30_security_baseline_p0_implementacion.md (implementación).
+#
+# No hace ningún deploy. No usa credenciales de producción ni staging.
+# Todos los checks contra base de datos usan una réplica desechable local
+# (Docker), nunca un proyecto Supabase real.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    # Escaneo semanal del historial completo de git (gitleaks) — no es
+    # gate por-PR, es el control PERIODIC de seguridad/19 §14.
+    - cron: '17 4 * * 1'
+
+permissions:
+  contents: read
+
+env:
+  SECURITY_BASELINE_CLI_VERSION: '2.113.0'
+
+jobs:
+  resolve-base-ref:
+    runs-on: ubuntu-latest
+    outputs:
+      base_ref: ${{ steps.resolve.outputs.base_ref }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - id: resolve
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}" --quiet
+            echo "base_ref=origin/${{ github.base_ref }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "push" ] && [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            echo "base_ref=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "base_ref=" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-reproducible:
+    needs: resolve-base-ref
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: pnpm
+      - name: engines.node presente y con el valor esperado (B8, TRIPWIRE)
+        run: |
+          expected=$(node -p "require('./package.json').engines && require('./package.json').engines.node")
+          if [ -z "$expected" ] || [ "$expected" = "undefined" ]; then
+            echo "FAIL: package.json no declara engines.node"
+            exit 1
+          fi
+          echo "ok: engines.node=$expected"
+      - name: pnpm install --frozen-lockfile (B4/B5, GARANTÍA VERIFICADA)
+        run: pnpm install --frozen-lockfile
+      - name: pnpm build
+        # Credenciales deliberadamente ficticias (.env.example) — el build
+        # nunca debe necesitar un proyecto Supabase real (prerender=false
+        # en la raíz de rutas, verificado en seguridad/30_...md).
+        env:
+          PUBLIC_SUPABASE_URL: https://tu-proyecto-ficticio.supabase.co
+          PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_valor_ficticio_de_ejemplo
+          PUBLIC_APP_ENV: test
+          PUBLIC_AUTH_GOOGLE_ENABLED: 'false'
+          PUBLIC_AUTH_PASSWORD_ENABLED: 'true'
+          PUBLIC_ENABLE_DEMO_DATA: 'false'
+          PUBLIC_ENABLE_DEV_TOOLS: 'false'
+        run: pnpm build
+
+  migrations-structure:
+    needs: resolve-base-ref
+    runs-on: ubuntu-latest
+    env:
+      BASE_REF: ${{ needs.resolve-base-ref.outputs.base_ref }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+      - name: B1/B2/B3 + gate de migraciones históricas (0001-0042)
+        run: node scripts/security/check-migrations-structure.mjs
+
+  migrations-cleanroom:
+    needs: resolve-base-ref
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+      - name: Migraciones clean-room (GARANTÍA VERIFICADA, Supabase CLI ${{ env.SECURITY_BASELINE_CLI_VERSION }})
+        run: node scripts/security/check-cleanroom.mjs
+
+  migrations-rls:
+    # En job separado de migrations-cleanroom deliberadamente: ambos
+    # levantan su propio shadow completo (Postgres+storage-api+gotrue vía
+    # Docker) para aplicar las 42 migraciones. Ejecutarlos uno detrás de
+    # otro en el mismo runner agotó recursos del runner (el proceso del
+    # segundo terminaba sin error explícito, a mitad de generar el diff)
+    # — confirmado al ejecutar este workflow de verdad sobre este PR
+    # antes de fusionarlo. Runners separados = recursos frescos para cada
+    # shadow, a costa de aplicar las migraciones dos veces en total (ver
+    # limitación ya declarada en seguridad/30_..._implementacion.md §5).
+    needs: resolve-base-ref
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+      - name: RLS sobre la DB clean-room (GATE)
+        run: node scripts/security/check-rls-cleanroom.mjs
+
+  code-static-checks:
+    needs: resolve-base-ref
+    runs-on: ubuntu-latest
+    env:
+      BASE_REF: ${{ needs.resolve-base-ref.outputs.base_ref }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+      - name: SECURITY DEFINER + triggers críticos (B9/B9b)
+        run: node scripts/security/check-security-definer.mjs
+      - name: Policies USING(true) (B10)
+        run: node scripts/security/check-using-true.mjs
+      - name: Arquitectura de sesión (G-SSR)
+        run: node scripts/security/check-session-architecture.mjs
+      - name: Edge Functions con service_role (G-SR)
+        run: node scripts/security/check-edge-functions.mjs
+      - name: Storage (G-STORAGE)
+        run: node scripts/security/check-storage.mjs
+
+  dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Doble auditoría de dependencias (B6/W1)
+        run: node scripts/security/check-dependencies.mjs
+
+  secrets-diff:
+    if: github.event_name != 'schedule'
+    needs: resolve-base-ref
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: gitleaks sobre los commits nuevos de este PR/push (B7, GATE)
+        env:
+          BASE_REF: ${{ needs.resolve-base-ref.outputs.base_ref }}
+        run: |
+          if [ -z "$BASE_REF" ]; then
+            RANGE=""
+          else
+            RANGE="--log-opts=${BASE_REF}..HEAD"
+          fi
+          docker run --rm -v "$PWD":/repo -w /repo zricethezav/gitleaks:latest \
+            detect --source . --config .gitleaks.toml --redact --no-banner $RANGE
+
+  secrets-full-history:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: gitleaks sobre el historial completo (PERIODIC, no bloquea PRs)
+        run: |
+          docker run --rm -v "$PWD":/repo -w /repo zricethezav/gitleaks:latest \
+            detect --source . --config .gitleaks.toml --redact --no-banner --exit-code 0 \
+            --report-format json --report-path gitleaks-full-history-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-full-history-report
+          path: gitleaks-full-history-report.json
+          retention-days: 90

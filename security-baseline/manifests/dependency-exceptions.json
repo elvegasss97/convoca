@@ -1,0 +1,47 @@
+{
+	"$comment": "Excepciones puntuales a la doble auditoría de dependencias (seguridad/19_security_baseline_v1_diseno.md §10). Cada entrada es paquete + advisory + alcance + fecha de revisión obligatoria — nunca 'indefinido'. Una excepción que supera su reviewBy sin resolverse escala automáticamente a GATE tipo BLOCK en el siguiente PR que la toque (check-dependencies.mjs lo aplica). Ninguna entrada de aquí cubre pnpm audit --prod: ese comando no debe tener NUNCA una excepción activa sin que sea, por definición, un hallazgo crítico.",
+	"createdAt": "2026-08-09",
+	"exceptions": [
+		{
+			"package": "cookie",
+			"vulnerableRange": "<0.7.0",
+			"severity": "low",
+			"advisoryTitle": "cookie accepts cookie name, path, and domain with out of bounds characters",
+			"scope": "full-only",
+			"classification": "reachability-not-confirmed",
+			"reachability": "Vía @sveltejs/kit (devDependency, pero cookie@0.6.0 llega al bundle SSR). La función vulnerable es serialize()/cookie.set(); CONVOCA no llama a cookies.set() en ningún punto (sin @supabase/ssr, sin hooks.server.ts) — confirmado en seguridad/15_analisis_alcanzabilidad_cookie.md.",
+			"reviewBy": "2026-11-09",
+			"escalatesIfChanged": "Cualquier PR que introduzca @supabase/ssr, hooks.server.ts, o una llamada a cookies.set()/serialize() reactiva esta excepción como GATE — cubierto además por G-SSR (check-session-architecture.mjs)."
+		},
+		{
+			"package": "fast-uri",
+			"vulnerableRange": ">=3.0.0 <3.1.5",
+			"severity": "high",
+			"advisoryTitle": "fast-uri vulnerable to host confusion via backslash authority introducer",
+			"scope": "full-only",
+			"classification": "build-tooling-no-path-to-bundle",
+			"reachability": "Vía eslint (lint-time). No forma parte del bundle desplegado.",
+			"reviewBy": "2026-11-09"
+		},
+		{
+			"package": "brace-expansion",
+			"vulnerableRange": ">=2.0.0 <2.1.4 || >=4.0.0 <5.0.9",
+			"severity": "high",
+			"advisoryTitle": "brace-expansion: DoS via unbounded intermediate arrays, bypassing the CVE-2026-14257 mitigation",
+			"scope": "full-only",
+			"classification": "build-tooling-no-path-to-bundle",
+			"reachability": "Vía eslint/workbox-build (build-time). No forma parte del bundle desplegado.",
+			"reviewBy": "2026-11-09"
+		},
+		{
+			"package": "nanoid",
+			"vulnerableRange": "<3.3.17",
+			"severity": "high",
+			"advisoryTitle": "nanoid: custom generators can loop indefinitely when size is zero",
+			"scope": "full-only",
+			"classification": "build-tooling-no-path-to-bundle",
+			"reachability": "Vía postcss, cadena completa de devDependencies (eslint-plugin-svelte, vite y su ecosistema — verificado con `pnpm why nanoid`). El patrón vulnerable requiere invocar customAlphabet()/customRandom() con size=0 desde código de aplicación; ningún código de CONVOCA importa ni invoca nanoid directamente.",
+			"reviewBy": "2026-11-09"
+		}
+	]
+}

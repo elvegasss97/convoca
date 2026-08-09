@@ -1,0 +1,64 @@
+# Security Baseline P0 — secret scanning (B7, seguridad/19_..._diseno.md §4/§11).
+#
+# Extiende el ruleset por defecto de gitleaks (que ya cubre JWT genéricos,
+# claves privadas, AWS, etc.) con reglas específicas de este proyecto:
+# tokens de acceso personal de Supabase, tokens de Vercel, y connection
+# strings de Postgres con credenciales embebidas.
+#
+# Principio (decisión del propietario, ver seguridad/19 §4 B7): nunca se
+# allowlistea un archivo completo por ruta, ni siquiera los ".example"/
+# ".test" permitidos por .gitignore — un secreto real pegado dentro de un
+# archivo "permitido" pasaría inadvertido si allowlisteáramos la ruta
+# entera. Las excepciones son por huella (fingerprint) de gitleaks sobre
+# un valor exacto ya revisado, nunca por directorio/archivo/extensión.
+
+title = "convoca gitleaks config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "supabase-access-token"
+description = "Supabase personal access token (sbp_...)"
+regex = '''sbp_[a-f0-9]{40}'''
+tags = ["secret", "supabase"]
+
+[[rules]]
+id = "supabase-service-role-key-assignment"
+description = "Asignación de SUPABASE_SERVICE_ROLE_KEY a un JWT real (no vacío/placeholder)"
+regex = '''SUPABASE_SERVICE_ROLE_KEY\s*=\s*['"]?eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'''
+tags = ["secret", "supabase"]
+
+[[rules]]
+id = "vercel-token"
+description = "Vercel API/OIDC token"
+regex = '''\bvercel_[A-Za-z0-9]{24,}\b'''
+tags = ["secret", "vercel"]
+
+[[rules]]
+id = "postgres-url-with-credentials"
+description = "postgres:// o postgresql:// con usuario:contraseña embebidos"
+regex = '''postgres(?:ql)?://[^\s'":/]+:[^\s'":/@]+@[^\s'"/]+'''
+tags = ["secret", "database"]
+
+# --- Excepciones puntuales, por valor exacto (nunca por archivo/ruta) ---
+#
+# Las dos entradas de abajo son las únicas excepciones activas hoy.
+# Encontradas al escanear el propio diff de implementación de esta
+# baseline (scripts/security/check-cleanroom.mjs y
+# scripts/security/check-rls-cleanroom.mjs): ambas son connection strings
+# de un Postgres desechable en 127.0.0.1 (loopback), creado y destruido
+# por el propio script en el mismo proceso, nunca un host real — el
+# patrón "usuario:contraseña@127.0.0.1" es precisamente lo que hace que
+# la regla los detecte, y precisamente lo que demuestra que no son reales
+# (una credencial real jamás apuntaría a loopback en código versionado).
+# Acotadas a ese host exacto, no a los archivos completos.
+[[allowlists]]
+description = "postgresql://postgres:postgres@127.0.0.1:1 — destino deliberadamente inalcanzable en check-cleanroom.mjs, nunca una credencial real"
+regexTarget = "match"
+regexes = ['''postgres(?:ql)?://postgres:postgres@127\.0\.0\.1''']
+
+[[allowlists]]
+description = "postgresql://postgres:test@127.0.0.1:<puerto> — réplica Postgres desechable creada por check-rls-cleanroom.mjs en el mismo proceso, nunca una credencial real"
+regexTarget = "match"
+regexes = ['''postgres(?:ql)?://postgres:test@127\.0\.0\.1''']

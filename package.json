@@ -3,6 +3,7 @@
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
+	"packageManager": "pnpm@11.9.0",
 	"engines": {
 		"node": "22.x"
 	},
@@ -15,7 +16,8 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest run",
 		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"security:baseline": "node scripts/security/run-all.mjs"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

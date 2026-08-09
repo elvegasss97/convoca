@@ -1,0 +1,19 @@
+{
+	"$comment": "Inventario exacto de policies con USING(true)/WITH CHECK(true) ya existentes y consideradas legítimas (seguridad/19_security_baseline_v1_diseno.md, control B10). Una aparición NUEVA no listada aquí falla el check y exige revisión explícita — nunca se allowlistea un archivo completo, solo la policy concreta por nombre+tabla.",
+	"policies": [
+		{
+			"policy": "organizers_select_public",
+			"table": "public.organizers",
+			"operation": "select",
+			"definedIn": "supabase/migrations/0002_organizers.sql",
+			"why": "Perfil público de organizador por diseño — igual para anon que para authenticated."
+		},
+		{
+			"policy": "next_block_vote_rounds_select_public",
+			"table": "public.next_block_vote_rounds",
+			"operation": "select",
+			"definedIn": "supabase/migrations/0038_proximo_bloque.sql",
+			"why": "A diferencia de concern_listening_rounds/participation_rounds, no existe estado 'draft' que ocultar: cualquiera puede ver que la votación existe y en qué estado está."
+		}
+	]
+}
