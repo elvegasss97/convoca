@@ -89,9 +89,21 @@ const result = spawnSync(
 
 const output = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
 
+// Nunca console.log() del blob completo: un solo write() de decenas de KB
+// mató el proceso en silencio (exit 1, sin mensaje) en GitHub Actions,
+// confirmado ejecutándolo de verdad sobre un PR real. Se trocea en líneas
+// cortas y, si hace falta, se recorta — preferible perder detalle de log
+// a perder el mensaje de error por completo.
+function safePrint(text, maxChars = 4000) {
+	const clipped = text.length > maxChars ? `${text.slice(0, maxChars)}\n... [recortado, ${text.length} caracteres totales] ...` : text;
+	for (const line of clipped.split('\n')) {
+		console.log(line);
+	}
+}
+
 if (result.status !== 0) {
-	console.log(output);
-	console.log('FAIL: el comando de comparación falló (revisar si es un error de aplicación de migración o de conexión)');
+	safePrint(output);
+	console.log(`FAIL: el comando de comparación falló (status=${result.status}, signal=${result.signal ?? 'ninguna'}) — revisar si es un error de aplicación de migración o de conexión`);
 	console.log('\ncheck-rls-cleanroom — FAIL');
 	process.exit(1);
 }
@@ -109,7 +121,7 @@ if (jsonStart !== -1) {
 	}
 }
 if (!parsed) {
-	console.log(output);
+	safePrint(output);
 	console.log('FAIL: no se pudo encontrar/parsear el bloque JSON de diff en la salida del CLI');
 	console.log('\ncheck-rls-cleanroom — FAIL');
 	process.exit(1);

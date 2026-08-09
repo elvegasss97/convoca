@@ -31,7 +31,12 @@ const result = spawnSync('npx', [`supabase@${CLI_VERSION}`, 'db', 'diff', '--db-
 });
 
 const output = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
-console.log(output);
+// Imprimir en líneas cortas, nunca como un solo write() de todo el
+// bloque: un output grande matando el proceso en silencio en GitHub
+// Actions ya se confirmó una vez en check-rls-cleanroom.mjs — mismo
+// cuidado aquí aunque este output normalmente sea pequeño (el destino
+// dummy hace fallar la comparación antes de generar un diff grande).
+for (const line of output.split('\n')) console.log(line);
 
 const appliedLines = [...output.matchAll(/Applying migration ([\w.-]+)\.\.\./g)].map((m) => m[1]);
 const appliedSet = new Set(appliedLines);
