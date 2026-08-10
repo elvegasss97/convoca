@@ -236,6 +236,10 @@
 						{/if}
 					</div>
 
+					<p class="text-xs text-ink-400">
+						No incluyas datos personales tuyos o de terceros que no sean necesarios.
+					</p>
+
 					<label
 						class="flex items-start gap-2.5 rounded-2xl border p-3.5 text-sm font-medium text-brand-900 {showErrors &&
 						!respectfulConfirmed

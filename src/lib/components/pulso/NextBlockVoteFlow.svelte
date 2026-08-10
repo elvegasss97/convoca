@@ -292,11 +292,24 @@
 					>
 				</p>
 			{/if}
-			{#if resultsTotal === 0}
+			{#if resultsTotal === 0 && total === 0}
 				<p
 					class="mt-3 rounded-xl border border-dashed border-ink-200 bg-ink-50 p-3 text-sm text-ink-500"
 				>
 					Todavía no se ha registrado ningún voto en esta votación.
+				</p>
+			{:else if resultsTotal === 0}
+				<!--
+					total > 0 pero results vacío: hay votos reales (0043, get_next_block_vote_results),
+					pero el desglose por opción está suprimido porque alguna opción tiene entre 1 y 4
+					votos — no es "sin votos", es "sin datos suficientes para desglosar sin riesgo de
+					reconstrucción por resta". No usar el mensaje de "ningún voto registrado" aquí:
+					sería falso.
+				-->
+				<p
+					class="mt-3 rounded-xl border border-dashed border-ink-200 bg-ink-50 p-3 text-sm text-ink-500"
+				>
+					Aún no hay datos suficientes para mostrar el desglose por opción.
 				</p>
 			{:else}
 				{#if isTie}

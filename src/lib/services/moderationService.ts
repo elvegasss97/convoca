@@ -2,24 +2,33 @@ import type { AuditLog, Event, ModerationAction, Report, ReportReason } from '$l
 import { supabase } from '$lib/supabase/client';
 import { listPendingModeration, setEventStatus, getEvent } from './eventsService';
 
+/**
+ * `reports_moderation` (vista) tipa todas sus columnas como `| null` — es
+ * una limitación conocida del generador de tipos de Supabase para vistas,
+ * no un reflejo real: las columnas subyacentes de `reports` son NOT NULL
+ * salvo `details`/`resolved_at` (ver 0005_reports_and_audit_logs.sql).
+ * `id`/`event_id`/`reason`/`status`/`created_at` nunca son null en la
+ * práctica; `?? ''`/`?? row.created_at` aquí es solo para satisfacer el
+ * tipo generado, no lógica de negocio real.
+ */
 interface ReportRow {
-	id: string;
-	event_id: string;
-	reason: string;
+	id: string | null;
+	event_id: string | null;
+	reason: string | null;
 	details: string | null;
-	status: string;
-	created_at: string;
+	status: string | null;
+	created_at: string | null;
 	resolved_at: string | null;
 }
 
 function rowToReport(row: ReportRow): Report {
 	return {
-		id: row.id,
-		eventId: row.event_id,
-		reason: row.reason as ReportReason,
+		id: row.id ?? '',
+		eventId: row.event_id ?? '',
+		reason: (row.reason ?? '') as ReportReason,
 		details: row.details ?? undefined,
-		status: row.status as Report['status'],
-		createdAt: row.created_at,
+		status: (row.status ?? 'open') as Report['status'],
+		createdAt: row.created_at ?? new Date().toISOString(),
 		resolvedAt: row.resolved_at ?? undefined
 	};
 }
@@ -53,10 +62,14 @@ export interface ReportedEventGroup {
 	reports: Report[];
 }
 
-/** Solo moderación/administración ven reportes (RLS): `reports_select_staff`. */
+/**
+ * Solo moderación/administración ven reportes (RLS: `reports_select_own_or_staff`).
+ * Se lee `reports_moderation`, no `reports`: la vista no expone
+ * `reported_by_user_id` (seguridad/32 §E, seguridad/33_rollback_0043.sql).
+ */
 export async function listReportedEvents(): Promise<ReportedEventGroup[]> {
 	const { data, error } = await supabase
-		.from('reports')
+		.from('reports_moderation')
 		.select('*')
 		.in('status', ['open', 'in_review']);
 	if (error) throw error;
@@ -129,7 +142,10 @@ export async function applyModerationAction(
 }
 
 export async function listReportsForEvent(eventId: string): Promise<Report[]> {
-	const { data, error } = await supabase.from('reports').select('*').eq('event_id', eventId);
+	const { data, error } = await supabase
+		.from('reports_moderation')
+		.select('*')
+		.eq('event_id', eventId);
 	if (error) throw error;
 	return (data ?? []).map(rowToReport);
 }
@@ -138,7 +154,14 @@ export async function listReportsForEvent(eventId: string): Promise<Report[]> {
  * Reportar requiere estar autenticado (política `reports_insert_authenticated`
  * en `supabase/migrations/0005_reports_and_audit_logs.sql`: `anon` no tiene
  * política de INSERT). Quién reportó no se expone en ninguna vista pública
- * ni siquiera a moderación desde la interfaz actual.
+ * ni siquiera a moderación desde la interfaz actual — y, desde 0043, tampoco
+ * es estructuralmente legible vía la API para nadie salvo `service_role`.
+ *
+ * El insert va contra la tabla base (no la vista, que es de solo lectura).
+ * `.select()` pide explícitamente las columnas seguras: desde 0043,
+ * `authenticated` solo tiene GRANT de columna sobre esas 7, así que un
+ * `select('*')` aquí fallaría con "permission denied" incluso para el
+ * propio autor del reporte.
  */
 export async function createReport(
 	eventId: string,
@@ -158,7 +181,7 @@ export async function createReport(
 			reason,
 			details: details ?? null
 		})
-		.select('*')
+		.select('id, event_id, reason, details, status, created_at, resolved_at')
 		.single();
 	if (error) throw error;
 	return rowToReport(data);

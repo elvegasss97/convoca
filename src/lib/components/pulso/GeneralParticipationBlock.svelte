@@ -327,6 +327,9 @@
 				placeholder="Máximo 600 caracteres…"
 				class="mt-1 w-full rounded-xl border-ink-200 text-sm focus:border-brand-500 focus:ring-brand-500"
 			></textarea>
+			<p class="mt-1 text-xs text-ink-400">
+				No incluyas datos personales tuyos o de terceros que no sean necesarios.
+			</p>
 
 			<button
 				type="button"
@@ -390,7 +393,7 @@
 								: 'personas han valorado'} el conjunto del plan
 						</p>
 					{:else}
-						<p class="text-xs text-ink-400">Todavía sin respuestas.</p>
+						<p class="text-xs text-ink-400">Aún no hay datos suficientes.</p>
 					{/if}
 				</div>
 			{/if}
@@ -411,6 +414,9 @@
 				placeholder="Comunidad o ciudad autónoma (opcional)"
 				class="mt-2 w-full rounded-xl border-ink-200 text-sm focus:border-brand-500 focus:ring-brand-500"
 			/>
+			<p class="mt-1 text-xs text-ink-400">
+				No incluyas datos personales tuyos o de terceros que no sean necesarios.
+			</p>
 			<select
 				bind:value={housingSituation}
 				class="mt-2 w-full rounded-xl border-ink-200 text-sm focus:border-brand-500 focus:ring-brand-500"

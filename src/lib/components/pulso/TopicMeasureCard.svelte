@@ -462,6 +462,9 @@
 								placeholder="Describe brevemente el motivo…"
 								class="mt-1.5 w-full rounded-xl border-ink-200 text-sm focus:border-brand-500 focus:ring-brand-500"
 							/>
+							<p class="mt-1 text-xs text-ink-400">
+								No incluyas datos personales tuyos o de terceros que no sean necesarios.
+							</p>
 						{/if}
 					{/if}
 
@@ -488,6 +491,9 @@
 									placeholder="Opcional, máximo 400 caracteres…"
 									class="mt-1 w-full rounded-xl border-ink-200 text-sm focus:border-brand-500 focus:ring-brand-500"
 								></textarea>
+								<p class="mt-1 text-xs text-ink-400">
+									No incluyas datos personales tuyos o de terceros que no sean necesarios.
+								</p>
 							</div>
 						{/if}
 					{/if}
@@ -522,6 +528,9 @@
 								placeholder="Opcional, máximo 400 caracteres…"
 								class="mt-1 w-full rounded-xl border-ink-200 text-sm focus:border-brand-500 focus:ring-brand-500"
 							></textarea>
+							<p class="mt-1 text-xs text-ink-400">
+								No incluyas datos personales tuyos o de terceros que no sean necesarios.
+							</p>
 						</div>
 					{/if}
 
@@ -563,7 +572,7 @@
 					<div class="mt-3">
 						<ContentTypeTag type="pulso" class="mb-2" />
 						{#if results.totalResponses === 0}
-							<p class="text-xs text-ink-400">Todavía sin respuestas.</p>
+							<p class="text-xs text-ink-400">Aún no hay datos suficientes.</p>
 						{:else}
 							<ul class="flex flex-col gap-1.5">
 								{#each POSITIONS as pos (pos)}

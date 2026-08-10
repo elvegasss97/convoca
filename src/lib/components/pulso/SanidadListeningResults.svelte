@@ -148,9 +148,17 @@
 					{/each}
 				</ul>
 			{:else}
+				<!--
+					0043: el desglose es todo-o-nada por ronda, no por comunidad — si cualquier
+					comunidad con respuestas está por debajo de TERRITORY_THRESHOLD, no se muestra
+					ninguna (protección frente a reconstrucción por resta sobre un catálogo cerrado
+					de comunidades). No afirmar que "ninguna" tiene base suficiente: puede que la
+					mayoría sí la tenga y una sola esté bloqueando el desglose completo.
+				-->
 				<p class="mt-1.5 text-xs text-ink-400">
-					Por privacidad, un territorio solo se muestra al alcanzar {TERRITORY_THRESHOLD} respuestas.
-					Todavía no hay ninguno con base suficiente.
+					Por privacidad, el desglose por comunidad autónoma solo se muestra cuando todas las
+					comunidades con respuestas superan las {TERRITORY_THRESHOLD}. Aún no hay datos suficientes
+					para mostrarlo.
 				</p>
 			{/if}
 		</div>

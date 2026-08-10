@@ -149,7 +149,7 @@
 						{/if}
 					</p>
 				{:else}
-					<p class="text-xs text-ink-400">Todavía sin respuestas.</p>
+					<p class="text-xs text-ink-400">Aún no hay datos suficientes.</p>
 				{/if}
 				<p class="mt-2 text-xs text-ink-400">
 					Estos resultados reflejan a las personas que han participado en Convoca. No constituyen
