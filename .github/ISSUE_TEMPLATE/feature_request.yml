@@ -1,0 +1,33 @@
+name: Propuesta de funcionalidad
+description: Sugiere una idea o mejora para CONVOCA
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **¿Es una vulnerabilidad de seguridad?** No la reportes aquí — lee [SECURITY.md](../../SECURITY.md).
+  - type: textarea
+    id: problem
+    attributes:
+      label: Qué problema resuelve
+      description: ¿Qué situación real te lleva a proponer esto?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Qué propones
+      description: Descripción de la solución que tienes en mente.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas consideradas
+      description: Opcional — otras formas de resolver lo mismo que hayas pensado.
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        Para cambios significativos, es mejor discutir el enfoque aquí antes de invertir tiempo en una implementación completa — ver [CONTRIBUTING.md](../../CONTRIBUTING.md).

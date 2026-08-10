@@ -1,0 +1,46 @@
+name: Reporte de error
+description: Reporta un fallo que no sea una vulnerabilidad de seguridad
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **¿Es una vulnerabilidad de seguridad?** No la reportes aquí — lee [SECURITY.md](../../SECURITY.md) y usa el canal privado indicado ahí (GitHub Private Vulnerability Reporting). Un Issue público expone el problema antes de que exista corrección.
+  - type: textarea
+    id: description
+    attributes:
+      label: Qué ha pasado
+      description: Descripción clara y concisa del problema.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Cómo reproducirlo
+      description: Pasos concretos, en orden.
+      placeholder: |
+        1. Ir a '...'
+        2. Hacer clic en '...'
+        3. Ver el error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Qué esperabas que pasara
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: Commit o versión afectada
+      placeholder: hash de commit, o "última versión de main"
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto adicional
+      description: Navegador, sistema operativo, capturas de pantalla — lo que sea relevante.
+    validations:
+      required: false

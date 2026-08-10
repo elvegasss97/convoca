@@ -15,7 +15,7 @@ de datos ficticios en el árbol de código que se ejecuta.
 
 Sigue **sin estar listo para lanzamiento público**: falta desplegar y
 probar en staging (Fase 5 en adelante, ver más abajo), pasar una auditoría
-de seguridad externa (Strix) y corregir cualquier hallazgo crítico/alto
+externa de seguridad y corregir cualquier hallazgo crítico/alto
 antes de plantear un lanzamiento real. Este documento se sigue actualizando
 según ese principio: solo se declara hecho lo que de verdad se comprobó en
 vivo.
@@ -26,7 +26,7 @@ vivo.
 
 ### 1. Estado de Git
 
-Al empezar esta fase, `/home/elias/Escritorio/convoca` **no era un
+Al empezar esta fase, el directorio de trabajo local **no era un
 repositorio Git** (no había `.git`, ni commits, ni remoto). No existía
 por tanto ningún riesgo de secretos filtrados en historial de commits,
 pero tampoco había forma de volver a un estado anterior si algo se rompía
@@ -80,12 +80,18 @@ Supabase Storage, nunca datos de cliente.
 
 #### Cuentas de demostración
 
-Definidas en `src/lib/auth/authService.ts` (`DEMO_ACCOUNTS`, `DEMO_PASSWORD`):
+**Nota de vigencia:** esta sección describe el sistema mock de la Fase 1,
+que la Fase 4 (más abajo) elimina por completo del árbol de código — no
+existe hoy ningún `DEMO_ACCOUNTS`/`DEMO_PASSWORD` en `authService.ts`. Se
+conserva aquí como registro histórico de la migración, con el valor de la
+contraseña de ejemplo sustituido por un placeholder, sin valor real.
+
+Definidas en su momento en `src/lib/auth/authService.ts` (`DEMO_ACCOUNTS`, `DEMO_PASSWORD`):
 
 - `organizador@convoca.demo` (rol organizer, vinculada a `org-1`)
 - `organizador2@convoca.demo` (rol organizer, vinculada a `org-2`)
 - `moderador@convoca.demo` (rol moderator)
-- Contraseña compartida: `Convoca123!` (constante `DEMO_PASSWORD`, en claro en el código fuente)
+- Contraseña compartida: `<contraseña de ejemplo>` (constante `DEMO_PASSWORD`, en claro en el código fuente de aquella fase)
 
 Se muestran en la pantalla `/login` **solo si `import.meta.env.DEV` es
 `true`** (botones "Usar" + contraseña visible). `import.meta.env.DEV` es una
@@ -137,7 +143,7 @@ exclusión estaba listo, pero no había nada que excluir todavía.
 
 #### Secretos potencialmente expuestos
 
-- `DEMO_PASSWORD = 'Convoca123!'` en texto plano en `authService.ts`. No es
+- `DEMO_PASSWORD = '<contraseña de ejemplo>'` en texto plano en `authService.ts`. No es
   un secreto real (es una contraseña de demostración conocida y compartida
   a propósito), pero debe dejar de poder cargarse en un build de
   producción — la Fase 2 lo ata a `PUBLIC_ENABLE_DEV_TOOLS`.
@@ -207,7 +213,7 @@ verificado más abajo).
 
 Las cuentas de demostración (`organizador@convoca.demo`,
 `organizador2@convoca.demo`, `moderador@convoca.demo`, contraseña
-`Convoca123!`) se aislaron en `src/lib/auth/demoAccounts.ts`, consumido
+`<contraseña de ejemplo>`) se aislaron en `src/lib/auth/demoAccounts.ts`, consumido
 por `authService.ts` (siembra de cuentas) y `login/+page.svelte` (caja de
 "cuentas de demostración" + autorrelleno), ambos gated por
 `ENABLE_DEMO_DATA`/`ENABLE_DEV_TOOLS`.
@@ -224,7 +230,7 @@ funcionar":
 
 1. Se generó un build con `PUBLIC_APP_ENV=production`,
    `PUBLIC_ENABLE_DEMO_DATA=false`.
-2. `grep -r "Convoca123" .svelte-kit/output` **encontró la contraseña de
+2. `grep -r "<contraseña de ejemplo>" .svelte-kit/output` **encontró la contraseña de
    demostración en texto plano** en un chunk público del cliente
    (`_app/immutable/chunks/CbhJvH212.js`) y en el bundle de servidor.
 
@@ -259,7 +265,7 @@ ningún solapamiento (`convoca:demo-accounts`) elimina el problema de raíz.
 
 Comprobado con builds reales, no solo con lectura de código:
 
-| Build                                                        | `grep` de `Convoca123!` / correos `*@convoca.demo` en `.svelte-kit/output` |
+| Build                                                        | `grep` de `<contraseña de ejemplo>` / correos `*@convoca.demo` en `.svelte-kit/output` |
 | ------------------------------------------------------------ | -------------------------------------------------------------------------- |
 | `PUBLIC_APP_ENV=development`, `PUBLIC_ENABLE_DEMO_DATA=true` | **Presente** (esperado: es un build de desarrollo)                         |
 | `PUBLIC_APP_ENV=production`, `PUBLIC_ENABLE_DEMO_DATA=false` | **Ausente** (confirmado tras la corrección del punto 3)                    |
@@ -303,8 +309,8 @@ comportamiento a reproducir con políticas RLS reales en la Fase 4:
 ## FASE 3 (parcial) — Cliente Supabase y esquema de base de datos
 
 Decisión del usuario: proyecto de Supabase Cloud ya creado por él mismo.
-Coloca `PUBLIC_SUPABASE_URL` y `PUBLIC_SUPABASE_PUBLISHABLE_KEY` en
-`/home/elias/Escritorio/convoca/.env` (ya tiene las claves correctas
+Coloca `PUBLIC_SUPABASE_URL` y `PUBLIC_SUPABASE_PUBLISHABLE_KEY` en el
+`.env` local del proyecto (ya tiene las claves correctas
 esperando su valor; `.env.example` actualizado con nombres y valores
 ficticios). La `secret key`/`service_role key` **nunca** debe ir en ese
 archivo ni en ninguna variable `PUBLIC_*`.
@@ -408,7 +414,7 @@ ejemplo se han borrado del árbol de código.
 
 ### 2. Las 17 migraciones están aplicadas contra el proyecto real
 
-`ihwzbdaeggvkzwevozra`, confirmado con `list_migrations` (no son solo
+Confirmado con `list_migrations` (no son solo
 archivos locales pendientes de pegar en el SQL Editor, como decía la Fase
 3 parcial). Incluyen RLS en `events`, `organizers`,
 `organizer_private_profiles`, `reports`, `audit_logs`,
@@ -418,7 +424,7 @@ archivos locales pendientes de pegar en el SQL Editor, como decía la Fase
 ### 3. Google OAuth activado y verificado end-to-end
 
 - `external_google_enabled=true` en el proyecto real (Management API), con
-  callback `https://ihwzbdaeggvkzwevozra.supabase.co/auth/v1/callback`.
+  el callback OAuth de ese proyecto configurado correctamente en Google Cloud Console.
 - Probado en vivo: clic real en "Continuar con Google" desde
   `localhost:5173/login` redirige a `accounts.google.com` con el
   `client_id` y `redirect_uri` correctos.
@@ -487,7 +493,7 @@ resuelto.
 ### 5. Limpieza de mock verificada con build real, no asumida
 
 Se encontró (con el mismo método de "build + grep" que ya usó la Fase 2
-para el hallazgo del `Convoca123!`) que el botón "Reset local (dev)"
+para el hallazgo de la contraseña de ejemplo expuesta) que el botón "Reset local (dev)"
 seguía compilándose dentro del bundle principal del layout raíz incluso
 con `PUBLIC_ENABLE_DEV_TOOLS=false` — un `{#if}` sobre un import estático
 es una rama en tiempo de ejecución, Svelte no elimina el componente del
@@ -518,5 +524,5 @@ lo mismo de siempre: qué se verificó en vivo y qué no.
 
 **No se declara Convoca lista para lanzamiento público en ningún punto de
 este proceso.** El objetivo de esta ronda es una URL de staging para
-probar Google OAuth desde el móvil, y pasar una auditoría de seguridad
-(Strix) antes de plantear un lanzamiento real.
+probar Google OAuth desde el móvil, y pasar una auditoría externa de
+seguridad antes de plantear un lanzamiento real.
