@@ -1,7 +1,7 @@
 # Smoke test HTTP real de la ruta OG — Preview `security/sharp-node22-preview`
 
 **Fecha:** 2026-08-07
-**Deployment probado:** `https://convoca-6jd95sp9j-vegas13.vercel.app` (Preview, `target: null`, commit `407a6fe`/`7adad8f`, entorno Supabase = `convoca-staging`, confirmado por el usuario en la tarea anterior).
+**Deployment probado:** `<url-deployment>.vercel.app` (Preview, `target: null`, commit `407a6fe`/`7adad8f`, entorno Supabase = `convoca-staging`, confirmado por el usuario en la tarea anterior).
 **Objetivo:** validar en runtime real (no build local) el endpoint `/og/convocatorias/[slug]`, que es el que ejercita `sharp@0.35.3` vía `@vercel/og` en producción/preview. No se ha tocado `sharp` ni `cookie` en esta tarea.
 
 ---

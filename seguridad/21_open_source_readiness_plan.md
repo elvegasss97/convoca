@@ -123,7 +123,7 @@ Evaluado documento por documento. Ninguno se mueve, sanitiza ni elimina en esta 
 | `20_analisis_informe_kimi.md` | **A — íntegro** | Ejemplo real de auto-corrección ante una revisión adversarial. |
 | `21_open_source_readiness_plan.md` (este documento) | **A — íntegro, una vez ejecutado** | Documentar el propio proceso de apertura es coherente con el principio de §23. |
 | `22_analisis_kimi_open_source.md` | **A — íntegro** | Segundo ejemplo de auto-corrección — refuerza, no debilita, la credibilidad. |
-| `MIGRACION-PRODUCCION.md` (raíz, no en `/seguridad` pero mismo tratamiento) | **B — sanitizar, hallazgos concretos ya identificados** | Verificado por lectura directa del archivo (no por descripción genérica): contiene una sección de "Cuentas de demostración" con una **contraseña compartida documentada en texto plano** (constante de un sistema mock de una fase muy anterior del proyecto). El propio documento demuestra, con evidencia de build real, que esa contraseña **queda excluida del bundle de producción** (`grep` sobre el build compilado con `PUBLIC_ENABLE_DEMO_DATA=false`: ausente) — no es una credencial viva ni alcanzable hoy. Aun así, debe eliminarse o generalizarse esa sección antes de publicar, para no exponerla fuera de su contexto de mitigación. Además menciona por nombre a un auditor de seguridad externo contratado ("Strix") — decidir si se mantiene la mención o se generaliza a "una auditoría de seguridad externa" (ver §21). |
+| `MIGRACION-PRODUCCION.md` (raíz, no en `/seguridad` pero mismo tratamiento) | **B — sanitizar, hallazgos concretos ya identificados** | Verificado por lectura directa del archivo (no por descripción genérica): contiene una sección de "Cuentas de demostración" con una **contraseña compartida documentada en texto plano** (constante de un sistema mock de una fase muy anterior del proyecto). El propio documento demuestra, con evidencia de build real, que esa contraseña **queda excluida del bundle de producción** (`grep` sobre el build compilado con `PUBLIC_ENABLE_DEMO_DATA=false`: ausente) — no es una credencial viva ni alcanzable hoy. Aun así, debe eliminarse o generalizarse esa sección antes de publicar, para no exponerla fuera de su contexto de mitigación. Además menciona por nombre a un auditor de seguridad externo contratado — decidir si se mantiene la mención o se generaliza a "una auditoría de seguridad externa". |
 
 **Ninguno se clasifica como D ("no debe publicarse")** — no existe en `/seguridad` ningún documento que deba ocultarse por completo. Lo que existe son documentos que citan identificadores operacionales concretos de forma repetida y sin necesidad (categoría B), uno sin valor duradero pero tampoco sensible (categoría C), y un documento fuera de `/seguridad` con dos hallazgos concretos y acotados (categoría B). La disciplina de no pegar secretos en `/seguridad` se mantuvo real a lo largo de 22 documentos — verificado, no solo declarado.
 
@@ -405,7 +405,7 @@ Los otros 3 grupos (build reproducible, doble auditoría de dependencias, smoke 
 - [ ] 10 grupos P0 de la Security Baseline implementados (no solo diseñados).
 - [ ] Auditoría formal de historial de git ejecutada (los cinco frentes de §5); rotación/limpieza aplicada si hizo falta.
 - [ ] Decisión tomada sobre el email personal en el historial de commits (§21).
-- [ ] Documentos de categoría B de `/seguridad` y `MIGRACION-PRODUCCION.md` sanitizados (incluida la contraseña de demo y la mención a "Strix").
+- [ ] Documentos de categoría B de `/seguridad` y `MIGRACION-PRODUCCION.md` sanitizados (incluida la contraseña de demo y la mención al auditor externo).
 - [ ] Licencias/atribuciones de terceros verificadas, incluido el aviso de MapLibre GL JS en `static/vendor/`.
 - [ ] README reescrito por completo (no es el scaffold de `sv`).
 - [ ] LICENSE elegida y añadida.
@@ -428,7 +428,7 @@ Los otros 3 grupos (build reproducible, doble auditoría de dependencias, smoke 
 7. Formalización futura de marca/trademark real (más allá de la política de uso informal de §11).
 8. Si `docs/security/` debe existir como carpeta separada o basta con un enlace directo a `/seguridad` desde el README.
 9. **(Nueva)** Email personal en el historial de commits: mantener los 98 commits tal cual (aceptando la exposición del email personal, si es una elección consciente del autor) o reescribir el historial completo para usar la dirección `noreply` de GitHub en todos los commits — **solo ejecutar la reescritura una vez confirmado que es segura hacerla** (coordinada con GATE 3, force-push a todas las ramas remotas, y aviso a cualquier colaborador con clon local que tendría que volver a clonar). No se ejecuta ahora.
-10. **(Nueva)** Mantener o generalizar la mención nominal al auditor externo ("Strix") en `MIGRACION-PRODUCCION.md`.
+10. **(Nueva)** Mantener o generalizar la mención nominal al auditor externo (generalizado a "auditoría externa de seguridad") en `MIGRACION-PRODUCCION.md`.
 11. **(Nueva)** Si el contenido no-código (documentos de producto como el presupuesto de Sanidad) debería llevar una licencia distinta a la del código (p. ej. Creative Commons), o la misma licencia general del repositorio.
 12. **(Nueva)** Resolución de *provenance* commit↔deployment (§22): ¿reconectar la integración Git↔Vercel, adoptar otro mecanismo equivalente, o aceptar y comunicar la limitación actual explícitamente?
 
@@ -481,7 +481,7 @@ Máximo 12 grupos, agrupados deliberadamente para que sean implementables de ver
 4. **Metadatos/email histórico — decisión tomada** (§21.9): mantener o reescribir el historial para eliminar el email personal, ejecutado solo si se confirma seguro hacerlo.
 5. **Credenciales antiguas rotadas, si el punto 3 encontrara alguna** — rotación siempre antes que cualquier limpieza de historial.
 6. **Licencias y atribuciones de terceros verificadas** — dependencias, `static/vendor/` (MapLibre GL JS, BSD-3-Clause, aviso pendiente), iconos, imágenes, fuentes, documentos/assets.
-7. **Documentación sensible clasificada y sanitizada** — `/seguridad` categoría B y `MIGRACION-PRODUCCION.md` (contraseña de demo y mención a "Strix" resueltas).
+7. **Documentación sensible clasificada y sanitizada** — `/seguridad` categoría B y `MIGRACION-PRODUCCION.md` (contraseña de demo y mención al auditor externo resueltas).
 8. **README + LICENSE (licencia elegida) + SECURITY.md + CONTRIBUTING.md publicados** (este último con higiene de Issues incluida).
 9. **Clean-room reproducibility test ejecutado con éxito** — `clone → variables propias → Supabase propio → migraciones → install → build/run`, sin ningún secreto de la instancia oficial. P0, no P1.
 10. **GitHub Security lista el día de apertura** — Secret Scanning confirmado (automático), Push Protection de repositorio activada manualmente, branch protection mínima, Dependabot.
@@ -500,7 +500,7 @@ Máximo 12 grupos, agrupados deliberadamente para que sean implementables de ver
 | Metadatos/email histórico decidido | Decisión documentada (§21.9); si se reescribe, confirmación de que todas las ramas remotas se actualizaron y los colaboradores fueron avisados | **Sí, como decisión — no exige necesariamente reescribir, sí exige decidir** |
 | Credenciales rotadas, si aparecieran | Confirmación de rotación en el proveedor correspondiente, previa a cualquier limpieza de historial | **Condicional** — solo si el gate anterior encuentra algo |
 | Licencias/atribuciones de terceros comprobadas | Inventario de licencias de dependencias sin incompatibilidades; aviso de copyright de MapLibre GL JS añadido junto a `static/vendor/` | **Sí** |
-| Documentación sensible sanitizada | `/seguridad` categoría B redactada; `MIGRACION-PRODUCCION.md` sin la contraseña de demo en claro y con la mención a "Strix" resuelta según §21.10 | **Sí** |
+| Documentación sensible sanitizada | `/seguridad` categoría B redactada; `MIGRACION-PRODUCCION.md` sin la contraseña de demo en claro y con la mención al auditor externo resuelta según §21.10 | **Sí** |
 | README + LICENSE + SECURITY + CONTRIBUTING listos | Los 4 archivos publicados en la raíz, con contenido real (no scaffold, no placeholder) | **Sí** |
 | Clean-room reproducibility test | Registro de una ejecución real (o simulación con el mismo rigor) de `clone → configurar → migrar → ejecutar` contra infraestructura propia del probador, sin secretos oficiales | **Sí** |
 | GitHub Security lista | Capturas o confirmación de Secret Scanning activo, Push Protection de repositorio activada, branch protection mínima y Dependabot, todo visible en Settings el día de apertura | **Sí** |

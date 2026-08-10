@@ -22,7 +22,7 @@ Ninguno de los dos bloques depende del otro para funcionar. Se promueven, se ver
   - `b18fa86` — `pnpm-workspace.yaml` (`overrides: sharp: 0.35.3`) + `pnpm-lock.yaml` regenerado.
   - `739c3a2` — `package.json` (`engines.node: "22.x"`).
 - Los 3 commits de documentación (`407a6fe`, `7adad8f`, `251388d`, todos bajo `seguridad/`) **no contienen ningún cambio de código, configuración ni dependencia** — se confirma con `git show --stat <hash>` antes de promover: cada uno debe tocar únicamente un archivo `.md` dentro de `seguridad/`. Esto es lo que garantiza que la documentación no es necesaria para el funcionamiento: si se decidiera promover solo `b18fa86`+`739c3a2` (por ejemplo, vía cherry-pick a otra rama), el software funcionaría idénticamente sin los 3 commits de documentación.
-- El deployment Preview `dpl_BMf4ThywdWSW9nT4hhKP8Y7U6G5D` sigue en `READY` y accesible.
+- El deployment Preview `<deployment-id>` sigue en `READY` y accesible.
 - Resultados ya confirmados y vigentes: `pnpm build` PASS, `pnpm audit --prod` limpio, build log del Preview confirma Node `22.x` y `sharp@0.35.3`, smoke test HTTP del endpoint OG PASS (200/PNG válido + 404 en slug inexistente).
 - `git status` en la rama `security/sharp-node22-preview` sin cambios sin commitear en `package.json`, `pnpm-lock.yaml` o `pnpm-workspace.yaml`.
 - `origin/main` no tiene commits nuevos desde que se creó la rama que no se hayan revisado (`git fetch origin && git log origin/main -1`).
@@ -60,7 +60,7 @@ debe mostrar únicamente esos 3 archivos (ya verificado en la tarea de push del 
 
 - `pnpm install && pnpm build && pnpm audit --prod && node --version` en un checkout limpio de la rama, repetidos una vez más justo antes de fusionar (no reutilizar resultados de hace días).
 - `git log origin/main..security/sharp-node22-preview --oneline` → debe mostrar exactamente los 5 commits ya conocidos, ninguno más.
-- Confirmar que el Preview (`dpl_BMf4ThywdWSW9nT4hhKP8Y7U6G5D`) sigue accesible y en `READY` (no expiró ni se borró).
+- Confirmar que el Preview (`<deployment-id>`) sigue accesible y en `READY` (no expiró ni se borró).
 
 ### A.5 Criterio GO / NO-GO
 
@@ -125,7 +125,7 @@ Esto satisface la condición de "sin placeholders": el rollback de B.9 es SQL co
 - `seguridad/08_migracion_candidata_0042.sql` (514 líneas) sin cambios desde su última revisión registrada en `06_revision_critica.md`.
 - **El rollback SQL completo de B.9 existe y ha sido revisado — precondición bloqueante, no opcional.**
 - Todas las pruebas de staging ya PASS y documentadas: preflight (`11_resultados_preflight_staging.md`), sesiones reales 17/17 (`12_resultados_pruebas_sesion_real_staging.md`), páginas públicas SSR sin sesión, `delete-account` 6/6, sanidad 5/5, concurrencia RT-009 (estado final 3 prioridades, no 6).
-- Acceso confirmado a producción (`ihwzbdaeggvkzwevozra`) con permisos suficientes para aplicar migraciones vía Supabase CLI y para solicitar/verificar un backup.
+- Acceso confirmado a producción (`<ref-proyecto-producción>`) con permisos suficientes para aplicar migraciones vía Supabase CLI y para solicitar/verificar un backup.
 - La migración **no existe todavía** en `supabase/migrations/` (confirmado: no hay ningún `0042_*.sql` en el repo real) — sigue siendo un archivo candidato en `/seguridad`.
 - Supabase CLI instalado, autenticado, y enlazado (`supabase link`) contra el proyecto correcto — verificado, no asumido (ver B.3.3).
 
@@ -143,7 +143,7 @@ Contenido: bloque `§DIAGNÓSTICO` (solo lectura), `§A` (10 funciones de escrit
    ```sql
    select current_database(), current_setting('cluster_name', true);
    ```
-   y, por separado, `supabase projects list` / `supabase link --project-ref <ref>` mostrando explícitamente el `project-ref` activo. Comparar carácter a carácter contra `ihwzbdaeggvkzwevozra` (producción) — **nunca de memoria, nunca asumido**. Confirmar explícitamente que **no** es `hapxitzmmifuddvbfphc` (staging).
+   y, por separado, `supabase projects list` / `supabase link --project-ref <ref>` mostrando explícitamente el `project-ref` activo. Comparar carácter a carácter contra `<ref-proyecto-producción>` (producción) — **nunca de memoria, nunca asumido**. Confirmar explícitamente que **no** es `<ref-proyecto-staging>` (staging).
 2. Ejecutar de nuevo, **contra producción, ahora mismo** (no reutilizar resultados de staging), el preflight completo de solo lectura: `07_preflight_produccion.sql`, secciones 1 a 9.
 3. **Backup/snapshot recuperable** — ver B.3-BACKUP más abajo — completado y verificado antes de continuar.
 4. Copiar el archivo, **sin modificar su contenido**, a `supabase/migrations/0042_security_hardening_review3.sql`, en una rama propia (p. ej. `db/0042-security-hardening`, **nunca** en `security/sharp-node22-preview` ni mezclado con el Bloque A). Commitear ese único archivo en esa rama.
@@ -182,7 +182,7 @@ Contenido: bloque `§DIAGNÓSTICO` (solo lectura), `§A` (10 funciones de escrit
 **GO** solo si **todas** las comprobaciones de B.4 son exactamente las esperadas, sin excepciones ni "está casi bien", **y** existe aprobación humana explícita (B.3.7).
 
 **NO-GO inmediato, sin aplicar 0042**, si cualquiera de estas condiciones ocurre:
-- El project-ref no coincide exactamente con `ihwzbdaeggvkzwevozra`.
+- El project-ref no coincide exactamente con `<ref-proyecto-producción>`.
 - El backup/PITR no está verificado según B.3-BACKUP.
 - §8 devuelve alguna fila — **ver procedimiento dedicado B.5-LEGACY, no limpiar producción automáticamente.**
 - §4 devuelve `true` en `anon_can_create` o `authenticated_can_create`.
@@ -537,7 +537,7 @@ o promover explícitamente el deployment de producción anterior conocido desde 
 ```sql
 select current_database(), current_setting('cluster_name', true);
 ```
-y `supabase link`/`supabase projects list` mostrando el `project-ref` activo. Confirmar `ihwzbdaeggvkzwevozra` (producción) vs `hapxitzmmifuddvbfphc` (staging) carácter a carácter antes de cualquier otro paso del runbook de B.
+y `supabase link`/`supabase projects list` mostrando el `project-ref` activo. Confirmar `<ref-proyecto-producción>` (producción) vs `<ref-proyecto-staging>` (staging) carácter a carácter antes de cualquier otro paso del runbook de B.
 
 **C. Ejecución del preflight (Bloque B):**
 ```

@@ -1,6 +1,6 @@
 # 34 — Resultados de implementación y validación de 0043 (local + staging: completo)
 
-**Estado: implementación local completa, tracking de staging reconciliado, `0043` aplicada realmente a `convoca-staging` y validada con sesiones JWT reales.** No se ha tocado producción. No se ha modificado `0042` (solo se reconcilió su registro de tracking, sin re-ejecutar su SQL). Commit/push/PR: ver §13.
+**Estado: implementación local completa, tracking de staging reconciliado, `0043` aplicada realmente a `<proyecto-staging>` y validada con sesiones JWT reales.** No se ha tocado producción. No se ha modificado `0042` (solo se reconcilió su registro de tracking, sin re-ejecutar su SQL). Commit/push/PR: ver §13.
 
 ---
 
@@ -92,7 +92,7 @@ Contenedor `postgres:17-alpine` con roles reales (`citizen_a`, `citizen_b`, `mod
 
 ## 7. Reconciliación de tracking de `0042` en staging (previa, ya resuelta)
 
-Antes de aplicar 0043 se detectó que `convoca-staging` no tenía `0042` registrada en `schema_migrations`, aunque su contenido ya estaba materialmente aplicado (mismo patrón que producción, documentado en `25_pre_b_produccion_resultados.md`/`28_plan_saneamiento_0040_0041.md`). Verificado con 4 señales independientes de solo lectura antes de actuar: conteo de `schema_migrations` (41 filas, máx. `0041`), ACL de 4 funciones representativas (`public` revocado, `anon`/`authenticated` concedidos — patrón H-02 de 0042), `search_path` pineado en las 2 funciones que 0042 reemplaza, y el cuerpo completo de `set_concern_listening_detail` con la validación H-02 literal.
+Antes de aplicar 0043 se detectó que `<proyecto-staging>` no tenía `0042` registrada en `schema_migrations`, aunque su contenido ya estaba materialmente aplicado (mismo patrón que producción, documentado en `25_pre_b_produccion_resultados.md`/`28_plan_saneamiento_0040_0041.md`). Verificado con 4 señales independientes de solo lectura antes de actuar: conteo de `schema_migrations` (41 filas, máx. `0041`), ACL de 4 funciones representativas (`public` revocado, `anon`/`authenticated` concedidos — patrón H-02 de 0042), `search_path` pineado en las 2 funciones que 0042 reemplaza, y el cuerpo completo de `set_concern_listening_detail` con la validación H-02 literal.
 
 Reconciliado con una única versión explícita, nunca `repairAll`:
 ```
@@ -128,7 +128,7 @@ supabase db push --db-url <staging>   (sin --dry-run, una sola migración pendie
 
 ## 10. Pruebas con sesiones JWT reales contra staging (24 pruebas, no simuladas con postgres)
 
-Script Node.js con `@supabase/supabase-js` real, contra la URL/anon key/service_role key reales de `convoca-staging` (`.env.staging.secrets`). Fixtures propios creados vía `service_role` (18 usuarios de identidad/pool + 44 usuarios adicionales para umbrales de `next_block_votes`/`territory_breakdown` = 151 usuarios reales de `auth.users`, todos con email bajo un dominio de prueba etiquetado con timestamp) y **sesiones reales obtenidas con `signInWithPassword`** para `citizen_a`, `citizen_b` y un `moderator` (rol asignado en `profiles.role` vía `service_role`). Todas las consultas de prueba se hicieron vía el cliente `supabase-js` (autenticado o `anon`), es decir, a través de la API PostgREST real, no por impersonación de rol en `psql`.
+Script Node.js con `@supabase/supabase-js` real, contra la URL/anon key/service_role key reales de `<proyecto-staging>` (`.env.staging.secrets`). Fixtures propios creados vía `service_role` (18 usuarios de identidad/pool + 44 usuarios adicionales para umbrales de `next_block_votes`/`territory_breakdown` = 151 usuarios reales de `auth.users`, todos con email bajo un dominio de prueba etiquetado con timestamp) y **sesiones reales obtenidas con `signInWithPassword`** para `citizen_a`, `citizen_b` y un `moderator` (rol asignado en `profiles.role` vía `service_role`). Todas las consultas de prueba se hicieron vía el cliente `supabase-js` (autenticado o `anon`), es decir, a través de la API PostgREST real, no por impersonación de rol en `psql`.
 
 | # | Prueba | Resultado |
 |---|---|---|
@@ -162,7 +162,7 @@ Script Node.js con `@supabase/supabase-js` real, contra la URL/anon key/service_
 
 ## 11. UI y smoke tests públicos (contra el backend de staging real)
 
-Servidor `vite dev` local arrancado con las credenciales reales de `convoca-staging` (`PUBLIC_SUPABASE_URL`/`PUBLIC_SUPABASE_PUBLISHABLE_KEY` de `.env.staging.secrets`, pasadas por variable de entorno de proceso, nunca escritas a `.env`), sin fixtures de prueba activos (ya limpiados — ver §12), lo que ejercita exactamente el camino de "distribución suprimida/sin datos" en las páginas reales:
+Servidor `vite dev` local arrancado con las credenciales reales de `<proyecto-staging>` (`PUBLIC_SUPABASE_URL`/`PUBLIC_SUPABASE_PUBLISHABLE_KEY` de `.env.staging.secrets`, pasadas por variable de entorno de proceso, nunca escritas a `.env`), sin fixtures de prueba activos (ya limpiados — ver §12), lo que ejercita exactamente el camino de "distribución suprimida/sin datos" en las páginas reales:
 
 | Ruta | HTTP |
 |---|---|
