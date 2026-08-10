@@ -9,7 +9,7 @@ verdad — esto es una guía de orientación, no una especificación exhaustiva.
 navegador
   │
   ▼
-SvelteKit (sin sesión de servidor — ssr = false en las rutas relevantes)
+SvelteKit (SSR activo, sin estado de sesión de servidor)
   │
   ▼
 Supabase
@@ -33,9 +33,12 @@ la invoca)
 
 ## Cliente
 
-- SvelteKit, sin `hooks.server.ts` ni sesión de servidor — deliberado, no
-  un descuido: simplifica el modelo de amenazas porque no hay estado de
-  sesión que proteger en el servidor.
+- SvelteKit con SSR activo (necesario para SEO y previsualizaciones
+  sociales), pero sin `hooks.server.ts` ni sesión de servidor — el
+  servidor solo lee datos públicos con la misma `publishable key` que el
+  navegador, nunca guarda ni valida tokens de sesión. El código que toca
+  APIs de navegador (`localStorage`, `window`, geolocalización) está
+  guardado tras `browser` de `$app/environment`.
 - Un único cliente de Supabase (`src/lib/supabase/client.ts`),
   instanciado solo con la clave pública (`publishable key`/`anon key`).
 - Los guards de ruta por rol (`/organizador`, `/moderacion`, `/cuenta`)

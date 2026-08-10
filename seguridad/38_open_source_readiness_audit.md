@@ -100,13 +100,13 @@ Los documentos `00`-`22` mantienen exactamente la clasificación de `21` (no rep
 | `30_security_baseline_p0_implementacion.md` | **A — íntegro** | Documenta la propia implementación real de la Security Baseline, incluidas las 11/11 pruebas negativas — máxima transparencia posible |
 | `31_privacidad_participacion_plan_final.md`, `32_plan_implementacion_privacidad_prelaunch.md` | **A — íntegro** | Diseño de `0043`, sin secretos |
 | `33_rollback_0043.sql` | **A — íntegro** | SQL de rollback, sin datos ni secretos |
-| `34_resultados_privacidad_0043_staging.md` | **B — sanitizar** | Cita `hapxitzmmifuddvbfphc` (project-ref de staging) y patrones de email de prueba (`test0043_*@example.com`, ya sintéticos, sin riesgo real, pero mejor generalizar) |
+| `34_resultados_privacidad_0043_staging.md` | **B — sanitizar** | Cita `<ref-proyecto-staging>` (project-ref de staging) y patrones de email de prueba (`test0043_*@example.com`, ya sintéticos, sin riesgo real, pero mejor generalizar) |
 | `35_bugfix_override_pr_head.md` | **A — íntegro** | Documenta un bug real del propio CI y su fix — ejemplo de auto-corrección, mismo principio que `20`/`22` |
-| `36_plan_promocion_privacidad_0043.md` | **B — sanitizar** | Cita ambos project-refs, IDs de deployment de Vercel (`dpl_...`), org `vegas13`, hash SHA-256 de backups (el hash en sí es inocuo, pero redactar los identificadores de infraestructura) |
+| `36_plan_promocion_privacidad_0043.md` | **B — sanitizar** | Cita ambos project-refs, IDs de deployment de Vercel (`dpl_...`), org `<org-vercel>`, hash SHA-256 de backups (el hash en sí es inocuo, pero redactar los identificadores de infraestructura) |
 | `37_resultados_promocion_privacidad_0043.md` | **B — sanitizar** | Mismo motivo que `36` — IDs de deployment concretos, project-refs, horas exactas de una promoción real a producción |
 | `38_open_source_readiness_audit.md` (este) | **A — íntegro, una vez ejecutado el saneamiento que describe** | Documentar el propio proceso de auditoría, coherente con `21` §23 |
 
-**`MIGRACION-PRODUCCION.md` (raíz) — hallazgo actualizado respecto a `21`:** la sección de "Cuentas de demostración" que `21` marcó como categoría B (contraseña `Convoca123!` en claro) **describe un sistema de mock (`DEMO_ACCOUNTS`/`DEMO_PASSWORD` en `authService.ts`) que ya no existe en el código actual** — verificado, `grep` sin resultados. El documento sigue citando `ihwzbdaeggvkzwevozra` (project-ref de producción) y "Strix" (nombre del auditor externo), igual que antes. **Recomendación actualizada:** no es solo "sanitizar", el documento necesita una revisión de vigencia completa — partes describen un estado del proyecto que ya no es el actual (mock de auth eliminado), y publicarlo tal cual sin esa aclaración sería confuso para un lector externo, más que un riesgo de seguridad puro.
+**`MIGRACION-PRODUCCION.md` (raíz) — hallazgo actualizado respecto a `21`:** la sección de "Cuentas de demostración" que `21` marcó como categoría B (contraseña de demostración en claro) **describe un sistema de mock (`DEMO_ACCOUNTS`/`DEMO_PASSWORD` en `authService.ts`) que ya no existe en el código actual** — verificado, `grep` sin resultados. El documento sigue citando el project-ref de producción y al auditor externo por nombre, igual que antes. **Recomendación actualizada:** no es solo "sanitizar", el documento necesita una revisión de vigencia completa — partes describen un estado del proyecto que ya no es el actual (mock de auth eliminado), y publicarlo tal cual sin esa aclaración sería confuso para un lector externo, más que un riesgo de seguridad puro.
 
 ---
 
@@ -215,10 +215,10 @@ Sin cambios respecto a `21`: no existe `LICENSE`, campo `license` ausente en `pa
 | Patrón | Dónde aparece | Clasificación |
 |---|---|---|
 | `convoca.cloud` | README propuesto, documentación, ya público | **PÚBLICO INOCUO** |
-| `ihwzbdaeggvkzwevozra` (project-ref producción) | `MIGRACION-PRODUCCION.md`, varios `/seguridad` (`07`, `11`-`13`, `17`, `34`, `36`, `37`) | **SENSIBLE** — no es secreto por sí solo, pero facilita reconocimiento/targeting; redactar (mismo criterio que `21` ya aplicaba) |
-| `hapxitzmmifuddvbfphc` (project-ref staging) | Mismos documentos, más `34`/`36`/`37` | **SENSIBLE**, mismo tratamiento |
+| `<ref-proyecto-producción>` (project-ref producción) | `MIGRACION-PRODUCCION.md`, varios `/seguridad` (`07`, `11`-`13`, `17`, `34`, `36`, `37`) | **SENSIBLE** — no es secreto por sí solo, pero facilita reconocimiento/targeting; redactar (mismo criterio que `21` ya aplicaba) |
+| `<ref-proyecto-staging>` (project-ref staging) | Mismos documentos, más `34`/`36`/`37` | **SENSIBLE**, mismo tratamiento |
 | IDs de deployment de Vercel (`dpl_...`) | `36`, `37` | **SENSIBLE** — identifican deployments concretos, redactar |
-| `vegas13` (org de Vercel) | `36`, `37` | **DOCUMENTACIÓN INTERNA INNECESARIA** — sin riesgo real pero sin valor para un lector externo |
+| `<org-vercel>` (org de Vercel) | `36`, `37` | **DOCUMENTACIÓN INTERNA INNECESARIA** — sin riesgo real pero sin valor para un lector externo |
 | Rutas locales `/home/elias/...` | Ninguna encontrada en los documentos nuevos (verificado, §16 del barrido) | — |
 | Emails | Ninguno en documentos; el email personal del autor solo en metadatos de commit (§3) | **SENSIBLE** (metadatos, no contenido) |
 | UUIDs de rondas/eventos/concerns citados en pruebas | `34`, `37` | **PÚBLICO INOCUO** — son identificadores de contenido público o de fixtures ya eliminados, no permiten ninguna acción |
@@ -267,7 +267,7 @@ No hay ningún hallazgo que empuje hacia B (repo público limpio nuevo) — el h
 | Prueba clean-room real ejecutada | **FIX** — nunca ejecutada |
 | GitHub Security activada (Push Protection, branch protection, Dependabot) | **FIX** — pendiente, activación manual el día de apertura |
 | Decisión sobre email personal en historial | **DECISIÓN** (propietario) |
-| Decisión sobre mención a "Strix" | **DECISIÓN** (propietario) |
+| Decisión sobre mención al auditor externo | **DECISIÓN** (propietario) |
 | Decisión sobre *provenance* commit↔deployment | **DECISIÓN** (propietario, no bloqueante) |
 
 ---
@@ -281,7 +281,7 @@ No hay ningún hallazgo que empuje hacia B (repo público limpio nuevo) — el h
 | Datos ciudadanos en el repo | PASS | — | Ninguna |
 | Objetos git inalcanzables | PASS (informativo) | INFO | Ninguna — contenido benigno, se autolimpiará |
 | Email personal en metadatos de commit | DECISIÓN | MEDIA | Decidir: mantener o reescribir historial |
-| `MIGRACION-PRODUCCION.md` — project-ref + "Strix" + sección de mock obsoleta | FIX | ALTA | Sanitizar y actualizar vigencia antes de publicar |
+| `MIGRACION-PRODUCCION.md` — project-ref + mención al auditor externo + sección de mock obsoleta | FIX | ALTA | Sanitizar y actualizar vigencia antes de publicar |
 | `seguridad/34`, `36`, `37` — project-refs/deployment IDs | FIX | MEDIA | Redactar identificadores de infraestructura |
 | `seguridad/08` — sigue etiquetada "candidata" | FIX | BAJA | Actualizar cabecera, ya está aplicada |
 | `static/vendor/` MapLibre sin aviso de licencia | FIX | MEDIA | Añadir aviso BSD-3-Clause |
@@ -325,7 +325,7 @@ Ninguno de estos 6 puntos requiere reescribir historia ni rotar credenciales —
 1. Licencia definitiva del código (MIT / Apache-2.0 / GPLv3 / AGPLv3) — recomendación en `21` §10: AGPLv3 si prioriza que las mejoras vuelvan a la comunidad, MIT si prioriza adopción rápida.
 2. Email personal en metadatos de 98+ commits — mantener o reescribir historial (solo tras confirmar que es seguro hacerlo, coordinado con force-push a todas las ramas remotas).
 3. Canal definitivo de reporte de `SECURITY.md` y expectativas de tiempo de respuesta realistas para un único mantenedor.
-4. Mención nominal al auditor externo "Strix" en `MIGRACION-PRODUCCION.md` — mantener o generalizar.
+4. Mención nominal al auditor externo en `MIGRACION-PRODUCCION.md` — mantener o generalizar.
 5. Licencia del contenido no-código (documentos de producto) — misma licencia del repo o una específica tipo Creative Commons.
 6. *Provenance* commit↔deployment — reconectar integración Git↔Vercel, publicar SHA desplegado en un endpoint, o aceptar y comunicar la limitación explícitamente.
 7. Parametrización del nombre "Convoca" en la UI para forks (P2, no bloqueante).

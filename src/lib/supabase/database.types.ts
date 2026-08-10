@@ -1,7 +1,6 @@
 /**
- * Tipos generados automáticamente a partir del esquema remoto real
- * (proyecto ihwzbdaeggvkzwevozra) con
- * `supabase gen types typescript --project-id ihwzbdaeggvkzwevozra`.
+ * Tipos generados automáticamente a partir del esquema remoto real con
+ * `supabase gen types typescript --project-id <tu-project-ref>`.
  * No editar a mano: si el esquema cambia, añade una migración nueva y
  * vuelve a generar este archivo.
  */

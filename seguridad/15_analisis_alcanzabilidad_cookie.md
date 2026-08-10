@@ -1,7 +1,7 @@
 # Análisis de alcanzabilidad real: advisory `cookie` (low) — CONVOCA
 
 **Fecha:** 2026-08-07
-**Alcance:** determinar presencia + alcanzabilidad real del hallazgo `cookie` de `pnpm audit` en el runtime SSR desplegado (Preview `security/sharp-node22-preview`, deployment `dpl_BMf4ThywdWSW9nT4hhKP8Y7U6G5D`). Ninguna dependencia se ha modificado en esta sesión — este documento es puramente de investigación, tal como se pidió ("no arreglar el audit por reflejo").
+**Alcance:** determinar presencia + alcanzabilidad real del hallazgo `cookie` de `pnpm audit` en el runtime SSR desplegado (Preview `security/sharp-node22-preview`, deployment `<deployment-id>`). Ninguna dependencia se ha modificado en esta sesión — este documento es puramente de investigación, tal como se pidió ("no arreglar el audit por reflejo").
 
 ---
 
