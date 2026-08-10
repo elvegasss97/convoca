@@ -82,6 +82,13 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BASE_REF: ${{ needs.resolve-base-ref.outputs.base_ref }}
+      # Ver scripts/security/lib/override.mjs: en pull_request, actions/checkout
+      # resuelve por defecto el commit de merge sintético de GitHub, no la punta
+      # real del PR — su mensaje nunca contiene los trailers
+      # Security-Baseline-Override escritos por quien abre el PR. Se fija aquí
+      # el SHA real para que el mecanismo de override lea SU mensaje, no el del
+      # merge sintético. Vacío en push/schedule a propósito (no aplica).
+      SECURITY_BASELINE_OVERRIDE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || '' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -131,6 +138,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BASE_REF: ${{ needs.resolve-base-ref.outputs.base_ref }}
+      # Ver scripts/security/lib/override.mjs: mismo motivo que en
+      # migrations-structure — SHA real del PR para leer los trailers
+      # Security-Baseline-Override del commit correcto, no del merge sintético.
+      SECURITY_BASELINE_OVERRIDE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || '' }}
     steps:
       - uses: actions/checkout@v5
         with:
