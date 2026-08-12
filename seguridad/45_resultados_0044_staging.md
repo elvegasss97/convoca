@@ -158,6 +158,10 @@ Detalle relevante de `security:baseline`:
 
 **Ninguna excepción nueva creada para hacer pasar esta implementación.**
 
+### 8.1. Incidente real de CI (PR #16) y corrección
+
+El primer push a GitHub Actions falló en `code-static-checks` (`check-security-definer.mjs`, 8 `GATE FAIL`): el mecanismo de override (`scripts/security/lib/override.mjs`) solo lee el mensaje del commit que queda como **HEAD del PR**, no el de todos los commits. Los 8 trailers `Security-Baseline-Override` se habían escrito en el primer commit (`ff84833`, la implementación), pero un segundo commit posterior (`1a7587f`, este mismo informe) pasó a ser el HEAD sin repetirlos — exactamente el mismo tipo de fallo estructural que ya corrigió `seguridad/35_bugfix_override_pr_head.md` para el caso `pull_request` vs. commit real, documentado en el propio código de `override.mjs`. Corregido con un tercer commit (`c11b6d9`, vacío de código, solo repite los 8 trailers ya justificados) — tras el cual los 9 jobs reales de CI quedaron en `pass` (1 `skipping`, esperado). No se modificó ningún código para lograr esto, solo se repitió la autorización ya dada.
+
 ---
 
 ## 9. Alcance de lo modificado en esta fase
