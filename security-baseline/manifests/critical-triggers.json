@@ -8,6 +8,27 @@
 			"definedIn": "supabase/migrations/0001_extensions_and_helpers.sql",
 			"laterModifiedIn": ["supabase/migrations/0008_security_hardening.sql", "supabase/migrations/0012_fix_admin_role_promotion.sql", "supabase/migrations/0015_fix_organizer_takeover_no_session.sql"],
 			"why": "Único trigger que impide que una cuenta sin privilegios de staff se autoasigne un rol de moderador/admin. Ver seguridad/19 §2 (Roles) para el matiz conocido: no bloquea escalación lateral moderator→admin — decisión de producto abierta, no resuelta por esta baseline."
+		},
+		{
+			"trigger": "enforce_reports_rate_limit",
+			"function": "enforce_write_rate_limit",
+			"table": "public.reports",
+			"definedIn": "supabase/migrations/0044_post_review_abuse_and_visibility_hardening.sql",
+			"why": "Único mecanismo que impide que una cuenta autenticada sature la cola de moderación con reportes. Serializado por (auth.uid(), action) con un advisory lock transaccional — ver seguridad/44_revision_0044_r2.md §1 para la carrera de concurrencia real que corrige y §10 para el tripwire estructural asociado en check-migrations-structure.mjs."
+		},
+		{
+			"trigger": "enforce_channel_reports_rate_limit",
+			"function": "enforce_write_rate_limit",
+			"table": "public.channel_reports",
+			"definedIn": "supabase/migrations/0044_post_review_abuse_and_visibility_hardening.sql",
+			"why": "Mismo mecanismo que enforce_reports_rate_limit (misma función enforce_write_rate_limit), para reportes de canal de comunicación."
+		},
+		{
+			"trigger": "enforce_concern_proposals_rate_limit",
+			"function": "enforce_write_rate_limit",
+			"table": "public.concern_proposals",
+			"definedIn": "supabase/migrations/0044_post_review_abuse_and_visibility_hardening.sql",
+			"why": "Mismo mecanismo, límite más estricto (1/min, 5/día) para propuestas ciudadanas — proponer es una acción deliberada y poco frecuente incluso para un usuario muy comprometido."
 		}
 	]
 }

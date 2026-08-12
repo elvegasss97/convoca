@@ -125,6 +125,58 @@ if (base === null) {
 		}
 		if (!anyDisableRls) ok('B2: sin "disable row level security" en migraciones nuevas');
 	}
+
+	// --- Tripwires de seguridad/44_revision_0044_r2.md -------------------
+	// 4 regresiones concretas ya encontradas y corregidas una vez en la
+	// revisión 0044-R2: si una migración futura vuelve a redefinir alguna
+	// de estas funciones/tabla, debe seguir conteniendo el patrón que la
+	// protege. No fallan al crear el objeto (todas son sintácticamente
+	// válidas sin la protección) — solo cambian el comportamiento en
+	// tiempo de ejecución, así que ni el cleanroom ni el chequeo de tipos
+	// las detectarían por sí solos.
+	for (const path of newMigrationFiles) {
+		const content = getFileNow(path) ?? readFileSync(path, 'utf8');
+
+		if (/create\s+table\s+public\.write_rate_limits/i.test(content)) {
+			if (!/revoke\s+all\s+on\s+public\.write_rate_limits\s+from\s+public\s*,\s*anon\s*,\s*authenticated/i.test(content)) {
+				fail(
+					`0044-tripwire: "${path}" crea public.write_rate_limits sin el REVOKE ALL explícito para PUBLIC/anon/authenticated (regresión de seguridad/44_revision_0044_r2.md §2 — antes solo dependía de RLS-sin-políticas).`
+				);
+			} else {
+				ok('0044-tripwire: write_rate_limits mantiene el REVOKE ALL explícito para PUBLIC/anon/authenticated');
+			}
+		}
+
+		if (/create\s+(?:or\s+replace\s+)?function\s+public\.enforce_write_rate_limit/i.test(content)) {
+			if (!/pg_advisory_xact_lock/i.test(content)) {
+				fail(
+					`0044-tripwire: "${path}" redefine enforce_write_rate_limit() sin pg_advisory_xact_lock — reintroduce la carrera de concurrencia confirmada empíricamente en seguridad/44_revision_0044_r2.md §1 (10 inserts concurrentes bypasseaban el límite por completo).`
+				);
+			} else {
+				ok('0044-tripwire: enforce_write_rate_limit mantiene el advisory lock transaccional');
+			}
+		}
+
+		if (/create\s+(?:or\s+replace\s+)?function\s+public\.set_concern_listening_survey_response/i.test(content)) {
+			if (!/p_community\s+not\s+in\s*\(/i.test(content)) {
+				fail(
+					`0044-tripwire: "${path}" redefine set_concern_listening_survey_response() sin el catálogo cerrado de p_community — reintroduce el hallazgo de seguridad/44_revision_0044_r2.md §3 (categorías inventadas suprimen el desglose territorial público).`
+				);
+			} else {
+				ok('0044-tripwire: set_concern_listening_survey_response mantiene el catálogo cerrado de p_community');
+			}
+		}
+
+		if (/create\s+(?:or\s+replace\s+)?function\s+public\.get_attendance_counts/i.test(content)) {
+			if (!/status\s+not\s+in\s*\(\s*'draft'/i.test(content)) {
+				fail(
+					`0044-tripwire: "${path}" redefine get_attendance_counts() sin el filtro de estado no público — reintroduce el hallazgo de seguridad/44_revision_0044_r2.md §5 (enumeración de eventos draft/pending_review/hidden/rejected).`
+				);
+			} else {
+				ok('0044-tripwire: get_attendance_counts mantiene el filtro de estado no público');
+			}
+		}
+	}
 }
 
 console.log(findings.join('\n'));
