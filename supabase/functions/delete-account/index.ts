@@ -12,11 +12,14 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 //
 // `auth.admin.deleteUser` borra la fila de auth.users, lo que dispara en
 // cascada el borrado de profiles/organizers/organizer_private_profiles
-// (FKs `on delete cascade`). Las convocatorias (`events.created_by_user_id`)
-// usan `on delete restrict` a propósito: si la cuenta tiene alguna
-// convocatoria creada (borrador o publicada), el borrado falla con una
-// violación de clave foránea y devolvemos un mensaje claro en vez de dejar
-// contenido público huérfano o borrarlo silenciosamente.
+// (FKs `on delete cascade`). Hay 3 FK `on delete restrict` reales que
+// pueden bloquear el borrado a propósito, en vez de dejar contenido
+// público huérfano o borrarlo silenciosamente: `events.created_by_user_id`
+// (convocatorias creadas), `audit_logs.moderator_id` (acciones de
+// moderación registradas) y `verification_documents.uploaded_by_user_id`
+// (documentos de verificación subidos). GoTrue no reenvía cuál de las 3
+// fue — se detectan todas con el mismo regex genérico y se devuelve un
+// mensaje que las cubre a las tres, no solo a la primera.
 
 Deno.serve(async (req: Request) => {
 	if (req.method !== 'POST') {
@@ -62,7 +65,7 @@ Deno.serve(async (req: Request) => {
 		return new Response(
 			JSON.stringify({
 				error: isForeignKeyViolation
-					? 'No puedes eliminar tu cuenta porque tiene convocatorias creadas. Cancélalas o contacta con moderación.'
+					? 'No puedes eliminar tu cuenta todavía: tiene contenido asociado que debe resolverse antes (convocatorias creadas, acciones de moderación registradas o documentos de verificación subidos). Contacta con moderación si necesitas ayuda.'
 					: 'No se ha podido eliminar la cuenta.'
 			}),
 			{ status: 409, headers: { 'Content-Type': 'application/json' } }
