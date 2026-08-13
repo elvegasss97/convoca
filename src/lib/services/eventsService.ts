@@ -171,12 +171,19 @@ export async function listPendingModeration(): Promise<Event[]> {
  * a "convocatorias activas" y "personas estimadas" aunque ya no apareciera
  * en el listado visible, dando cifras inconsistentes entre la cabecera y
  * la lista real.
+ *
+ * Acepta opcionalmente los eventos ya obtenidos por un `listPublicEvents()`
+ * previo en la misma request (p. ej. desde `/descubrir`, que ya los pide en
+ * el mismo `Promise.all`) para no repetir el `SELECT` + RPC de asistencia:
+ * `events` aquí es siempre un resultado real de `listPublicEvents()`, nunca
+ * datos inventados ni una aproximación. Sin argumento, mantiene el
+ * comportamiento público original (los pide ella misma).
  */
-export async function getPublicStats(): Promise<{
+export async function getPublicStats(events?: Event[]): Promise<{
 	eventCount: number;
 	estimatedAttendance: number;
 }> {
-	const publicEvents = await listPublicEvents();
+	const publicEvents = events ?? (await listPublicEvents());
 	const activeEvents = publicEvents.filter(
 		(e) => getEventTimeCategory(e.startAt).category !== 'past'
 	);
