@@ -9,7 +9,7 @@
 
 <Seo
 	title="Tú eliges el próximo bloque"
-	description="La ciudadanía decide qué problema debe abordar Convoca después de vivienda y sanidad. La opción más apoyada abrirá primero una escucha ciudadana, no un plan cerrado."
+	description="La ciudadanía decide qué problema debe abordar Convoca después de vivienda, sanidad y Ceuta. La opción más apoyada abrirá primero una escucha ciudadana, no un plan cerrado."
 />
 
 <div class="mx-auto max-w-3xl px-4 pt-4 pb-16 sm:px-6">
@@ -21,7 +21,7 @@
 			</h1>
 		</div>
 		<p class="mt-2 max-w-2xl text-sm text-ink-700 sm:text-base">
-			Convoca ya ha empezado a trabajar sobre vivienda y sanidad. Ahora queremos que la ciudadanía
+			Convoca ya ha empezado a trabajar sobre vivienda, sanidad y Ceuta. Ahora queremos que la ciudadanía
 			decida qué problema debemos abordar después.
 		</p>
 		<p class="mt-2 max-w-2xl text-sm text-ink-600">
