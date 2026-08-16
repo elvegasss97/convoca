@@ -2,13 +2,16 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 // Autoeliminación de cuenta: la ÚNICA operación de este proyecto que
-// necesita la service_role key (para poder llamar a auth.admin.deleteUser).
-// Esa clave vive exclusivamente en las variables de entorno del runtime de
-// esta función (inyectadas automáticamente por Supabase) y nunca llega al
-// navegador. `verify_jwt: true` (fijado al desplegar) hace que la propia
-// plataforma rechace la petición si no trae un JWT válido antes de que este
-// código se ejecute; además comprobamos el usuario nosotros mismos como
-// defensa en profundidad.
+// necesita una clave con privilegio elevado (para poder llamar a
+// auth.admin.deleteUser). Usa la Secret API Key nombrada "delete_account"
+// del sistema nuevo de Supabase (Publishable + Secret Keys), leída de
+// SUPABASE_SECRET_KEYS (JSON inyectado por el runtime, `{ "<nombre>":
+// "<clave>", ... }` por cada Secret Key configurada en el proyecto) — ya
+// NO se usa SUPABASE_SERVICE_ROLE_KEY (retirado tras el incidente de
+// exposición de la service_role legacy, ver seguridad/). El valor nunca
+// se loguea ni llega al navegador; si el nombre no existe en
+// SUPABASE_SECRET_KEYS se falla cerrado con un 500 genérico, sin
+// exponer nada sobre el motivo exacto.
 //
 // `auth.admin.deleteUser` borra la fila de auth.users, lo que dispara en
 // cascada el borrado de profiles/organizers/organizer_private_profiles
@@ -20,6 +23,26 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 // (documentos de verificación subidos). GoTrue no reenvía cuál de las 3
 // fue — se detectan todas con el mismo regex genérico y se devuelve un
 // mensaje que las cubre a las tres, no solo a la primera.
+
+const DELETE_ACCOUNT_SECRET_KEY_NAME = 'delete_account';
+
+/**
+ * Extrae la Secret API Key nombrada "delete_account" de SUPABASE_SECRET_KEYS
+ * sin loguear en ningún caso el JSON crudo, la clave concreta ni el motivo
+ * exacto de fallo (evita filtrar forma/tamaño del valor en logs de error).
+ */
+function resolveDeleteAccountSecretKey(): string | undefined {
+	const raw = Deno.env.get('SUPABASE_SECRET_KEYS');
+	if (!raw) return undefined;
+	try {
+		const parsed = JSON.parse(raw) as unknown;
+		if (!parsed || typeof parsed !== 'object') return undefined;
+		const value = (parsed as Record<string, unknown>)[DELETE_ACCOUNT_SECRET_KEY_NAME];
+		return typeof value === 'string' && value.length > 0 ? value : undefined;
+	} catch {
+		return undefined;
+	}
+}
 
 Deno.serve(async (req: Request) => {
 	if (req.method !== 'POST') {
@@ -39,7 +62,6 @@ Deno.serve(async (req: Request) => {
 
 	const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 	const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-	const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 	const callerClient = createClient(supabaseUrl, anonKey, {
 		global: { headers: { Authorization: authHeader } }
@@ -52,7 +74,19 @@ Deno.serve(async (req: Request) => {
 		});
 	}
 
-	const adminClient = createClient(supabaseUrl, serviceRoleKey);
+	// Resuelto justo antes de usarse, tras confirmar que hay una persona
+	// autenticada real: si falta la Secret Key configurada, es un error de
+	// configuración del servidor, no del usuario que llama — 500 genérico,
+	// nunca se detalla el motivo exacto.
+	const secretKey = resolveDeleteAccountSecretKey();
+	if (!secretKey) {
+		return new Response(JSON.stringify({ error: 'No se ha podido procesar la solicitud.' }), {
+			status: 500,
+			headers: { 'Content-Type': 'application/json' }
+		});
+	}
+
+	const adminClient = createClient(supabaseUrl, secretKey);
 	const { error: deleteError } = await adminClient.auth.admin.deleteUser(userData.user.id);
 
 	if (deleteError) {
