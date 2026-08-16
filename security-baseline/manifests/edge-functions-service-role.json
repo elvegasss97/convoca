@@ -1,11 +1,4 @@
 {
-	"$comment": "Inventario de Edge Functions que usan SUPABASE_SERVICE_ROLE_KEY, ya auditadas (seguridad/19_security_baseline_v1_diseno.md, control G-SR). Una función nueva con service_role, o una existente que empiece a usarlo, falla el check y exige el checklist de 8 puntos de G-SR antes de mergear.",
-	"functions": [
-		{
-			"function": "delete-account",
-			"path": "supabase/functions/delete-account/index.ts",
-			"why": "Único caso legítimo hoy: borra la cuenta completa del usuario autenticado. Identidad derivada de callerClient.auth.getUser() contra el JWT real del llamante, nunca del body. Auditado en seguridad/13_resultados_pruebas_pendientes_staging.md §2.",
-			"auditedIn": "seguridad/13_resultados_pruebas_pendientes_staging.md"
-		}
-	]
+	"$comment": "Inventario de Edge Functions que usan SUPABASE_SERVICE_ROLE_KEY, ya auditadas (seguridad/19_security_baseline_v1_diseno.md, control G-SR). Una función nueva con service_role, o una existente que empiece a usarlo, falla el check y exige el checklist de 8 puntos de G-SR antes de mergear. delete-account fue el único caso y dejó de usar SUPABASE_SERVICE_ROLE_KEY tras el incidente de exposición de la service_role legacy de producción (2026-08-16): ahora usa la Secret API Key nombrada \"delete_account\" del sistema Publishable + Secret Keys, ya no aplica el control G-SR.",
+	"functions": []
 }
