@@ -4,14 +4,14 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 // Autoeliminación de cuenta: la ÚNICA operación de este proyecto que
 // necesita una clave con privilegio elevado (para poder llamar a
 // auth.admin.deleteUser). Usa la Secret API Key nombrada "delete_account"
-// del sistema nuevo de Supabase (Publishable + Secret Keys), leída de
+// del sistema Publishable + Secret Keys de Supabase, leída de
 // SUPABASE_SECRET_KEYS (JSON inyectado por el runtime, `{ "<nombre>":
 // "<clave>", ... }` por cada Secret Key configurada en el proyecto) — ya
-// NO se usa SUPABASE_SERVICE_ROLE_KEY (retirado tras el incidente de
-// exposición de la service_role legacy, ver seguridad/). El valor nunca
-// se loguea ni llega al navegador; si el nombre no existe en
-// SUPABASE_SECRET_KEYS se falla cerrado con un 500 genérico, sin
-// exponer nada sobre el motivo exacto.
+// no depende de la clave legacy de rol elevado retirada tras un
+// incidente de exposición (ver seguridad/). El valor nunca se loguea ni
+// llega al navegador; si el nombre no existe en SUPABASE_SECRET_KEYS se
+// falla cerrado con un 500 genérico, sin exponer nada sobre el motivo
+// exacto.
 //
 // `auth.admin.deleteUser` borra la fila de auth.users, lo que dispara en
 // cascada el borrado de profiles/organizers/organizer_private_profiles
