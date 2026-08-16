@@ -44,6 +44,8 @@
 	import CalendarioVisual from '$lib/components/pulso/CalendarioVisual.svelte';
 	import RiesgosComprobacion from '$lib/components/pulso/RiesgosComprobacion.svelte';
 	import SanidadRiesgos from '$lib/components/pulso/SanidadRiesgos.svelte';
+	import CeutaPresupuesto from '$lib/components/pulso/CeutaPresupuesto.svelte';
+	import CeutaCircuito72h from '$lib/components/pulso/CeutaCircuito72h.svelte';
 	import { viviendaMapData, sanidadMapData } from '$lib/data/planMapData';
 	import { submitMeasureAlternative } from '$lib/services/topicsService';
 	import {
@@ -64,10 +66,12 @@
 	// preocupaciones, vacía y sin ese recorrido todavía.
 	const hasOpenListening = $derived(topic.category === 'vivienda' || topic.category === 'sanidad');
 	// Vivienda usa el cuestionario rico (motivo estructurado, urgencia,
-	// inversión, ritmo, prioridades, contexto). Otros temas, como Sanidad,
-	// usan un modelo de participación más simple: posición + comentario
+	// inversión, ritmo, prioridades, contexto). Otros temas, como Sanidad y
+	// Ceuta, usan un modelo de participación más simple: posición + comentario
 	// opcional. Cambiar esta rama no toca el camino de Vivienda.
-	const usesSimpleParticipation = $derived(topic.category === 'sanidad');
+	const usesSimpleParticipation = $derived(
+		topic.category === 'sanidad' || topic.slug === 'plan-ceuta-2026'
+	);
 	const categoryLabel = $derived(
 		topic.category ? concernCategoryLabels[topic.category] : TOPIC_CATEGORY_PENDING_LABEL
 	);
@@ -124,6 +128,7 @@
 	const NAV_SECTIONS = $derived([
 		{ id: 'resumen', label: 'Resumen' },
 		...(data.commitments.length > 0 ? [{ id: 'compromisos', label: 'Compromisos' }] : []),
+		...(topic.slug === 'plan-ceuta-2026' ? [{ id: 'circuito-72h', label: '0-72h' }] : []),
 		{ id: 'medidas', label: 'Medidas' },
 		{ id: 'participar', label: 'Participar' },
 		{ id: 'coste', label: 'Coste' },
@@ -504,6 +509,30 @@
 		</section>
 	{/if}
 
+	<!-- Circuito operativo 0-72h: exclusivo de Plan Ceuta, sin equivalente en
+	     Vivienda/Sanidad. No toca la navegación ni el contenido de ningún
+	     otro tema. -->
+	{#if topic.slug === 'plan-ceuta-2026'}
+		<section
+			id="circuito-72h"
+			class="mt-8 scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-5"
+		>
+			<h2 class="flex items-center gap-1.5 font-display text-base font-semibold text-ink-900">
+				<History class="size-4 text-brand-700" /> De 0 a 72 horas: el reloj que nadie puede parar
+			</h2>
+			<ContentTypeTag type="convoca" class="mt-2" />
+			<p class="mt-2 text-sm leading-relaxed text-ink-700">
+				Las 72 horas no son una promesa de expulsión automática. Son el límite legal que obliga a
+				que cada expediente llegue a una salida: devolución ejecutada, salida voluntaria informada,
+				asilo activado, protección de menores, petición judicial de internamiento o libertad.
+				Explora cada tramo.
+			</p>
+			<div class="mt-4">
+				<CeutaCircuito72h />
+			</div>
+		</section>
+	{/if}
+
 	<!-- 3 + 4. Organización de medidas y tarjetas -->
 	<section id="medidas" class="mt-8 scroll-mt-20">
 		<h2 class="flex items-center gap-1.5 font-display text-base font-semibold text-ink-900">
@@ -576,6 +605,15 @@
 
 	<!-- Participar (cierre de participación general) -->
 	<section id="participar" class="mt-8 scroll-mt-20">
+		{#if topic.slug === 'plan-ceuta-2026'}
+			<div
+				class="mb-4 flex items-start gap-2 rounded-xl bg-warning-50 p-3 text-xs leading-relaxed text-warning-700"
+			>
+				<AlertTriangle class="mt-0.5 size-3.5 shrink-0" />
+				Esta participación queda registrada en CONVOCA, pero no constituye una firma oficial, una firma
+				válida para una ILP ni una adhesión presentada ante una Administración.
+			</div>
+		{/if}
 		{#if usesSimpleParticipation}
 			<SimpleGeneralParticipationBlock
 				{round}
@@ -610,6 +648,8 @@
 		<div class="mt-3">
 			{#if topic.slug === 'plan-sanidad-2036'}
 				<SanidadPresupuesto />
+			{:else if topic.slug === 'plan-ceuta-2026'}
+				<CeutaPresupuesto />
 			{:else}
 				<CosteEconomico
 					{topic}
