@@ -137,7 +137,7 @@
 				>
 				<span
 					>Ya puedes explorar convocatorias, participar en propuestas y consultar los planes de
-					Vivienda y Sanidad.</span
+					Vivienda, Sanidad y Ceuta.</span
 				>
 			</div>
 		</div>

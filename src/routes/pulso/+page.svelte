@@ -71,7 +71,7 @@
 				Elige el próximo bloque
 			</h2>
 			<p class="mt-1 text-sm leading-relaxed text-ink-600">
-				Decide qué problema debe empezar a trabajar Convoca después de vivienda y sanidad.
+				Decide qué problema debe empezar a trabajar Convoca después de vivienda, sanidad y Ceuta.
 			</p>
 		</div>
 		<p

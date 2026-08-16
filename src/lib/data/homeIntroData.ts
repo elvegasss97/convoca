@@ -59,10 +59,10 @@ export const STAGES: HomeStage[] = [
 		icono: '✎',
 		resumen:
 			'Los problemas priorizados se transforman en planes concretos: diagnóstico, medidas, coste, calendario, riesgos, salvaguardas, fuentes, comprobación, participación y vía institucional.',
-		herramienta: 'Plan de Vivienda 2036 · Plan de Sanidad 2036',
+		herramienta: 'Plan de Vivienda 2036 · Plan de Sanidad 2036 · Plan Ceuta',
 		estado: 'disponible',
 		estadoNota:
-			'Dos planes completos ya trabajados como ejemplo real. La generación automatizada de nuevos planes sigue en desarrollo.',
+			'Tres planes completos ya trabajados como ejemplo real. La generación automatizada de nuevos planes sigue en desarrollo.',
 		accion: { label: 'Revisar una propuesta', href: '/pulso/soluciones' }
 	},
 	{
