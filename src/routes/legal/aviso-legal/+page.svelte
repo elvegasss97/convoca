@@ -25,7 +25,7 @@
 		</p>
 		<ul>
 			<li>
-				<strong>Titular:</strong> Elias Vega, persona física (proyecto en fase de prototipo, sin una sociedad
+				<strong>Titular:</strong> Elías Vega, persona física (proyecto en fase de prototipo, sin una sociedad
 				mercantil constituida a día de hoy).
 			</li>
 			<li>Contacto: <a href="mailto:convocahelp@outlook.es">convocahelp@outlook.es</a></li>

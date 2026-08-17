@@ -25,7 +25,7 @@
 	<section>
 		<h2 id="responsable">1. Responsable del tratamiento</h2>
 		<p>
-			Elias Vega, persona física responsable de Convoca (proyecto en fase de prototipo, sin una
+			Elías Vega, persona física responsable de Convoca (proyecto en fase de prototipo, sin una
 			sociedad mercantil constituida a día de hoy).
 		</p>
 		<ul>
