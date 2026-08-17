@@ -29,7 +29,7 @@
 			sociedad mercantil constituida a día de hoy).
 		</p>
 		<ul>
-			<li>Contacto: <a href="mailto:convocahelp@outlook.es">convocahelp@outlook.es</a></li>
+			<li>Contacto: <a href="mailto:contacto@convoca.cloud">contacto@convoca.cloud</a></li>
 			<li>
 				NIF y domicilio a efectos de notificaciones: <strong>pendientes de completar</strong> — se añadirán
 				a este documento antes de un lanzamiento público real.
@@ -147,7 +147,7 @@
 		<p>
 			Puedes ejercer en cualquier momento tus derechos de acceso, rectificación, supresión,
 			oposición, limitación y portabilidad de tus datos, escribiendo a
-			<a href="mailto:convocahelp@outlook.es">convocahelp@outlook.es</a>. También tienes derecho a
+			<a href="mailto:contacto@convoca.cloud">contacto@convoca.cloud</a>. También tienes derecho a
 			presentar una reclamación ante la Agencia Española de Protección de Datos (AEPD,
 			<a href="https://www.aepd.es" target="_blank" rel="noopener noreferrer">www.aepd.es</a>) si
 			consideras que no hemos tratado tus datos correctamente.

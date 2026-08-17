@@ -20,7 +20,7 @@ export const RELATED_LEGAL_LINKS: RelatedLegalLink[] = [
 	{ href: '/legal/terminos#moderacion', label: 'Denunciar contenido' },
 	{
 		href:
-			'mailto:convocahelp@outlook.es' +
+			'mailto:contacto@convoca.cloud' +
 			'?subject=' +
 			encodeURIComponent('Solicitud de revisión de una decisión') +
 			'&body=' +
