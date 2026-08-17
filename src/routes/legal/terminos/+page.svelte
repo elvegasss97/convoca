@@ -134,7 +134,7 @@
 		<p>
 			Cualquier persona puede <strong>denunciar</strong> una convocatoria o un canal que considere
 			inapropiado, usando el botón "Reportar" disponible en su ficha, o escribiendo a
-			<a href="mailto:convocahelp@outlook.es">convocahelp@outlook.es</a>. Convoca puede suspender o
+			<a href="mailto:contacto@convoca.cloud">contacto@convoca.cloud</a>. Convoca puede suspender o
 			cerrar una cuenta que incumpla repetidamente estas normas, sin perjuicio de las acciones
 			legales que puedan corresponder.
 		</p>
@@ -185,7 +185,7 @@
 			<li>Cierra sesión si usas un dispositivo compartido o público.</li>
 			<li>
 				Avísanos de inmediato escribiendo a
-				<a href="mailto:convocahelp@outlook.es">convocahelp@outlook.es</a> si sospechas de un acceso no
+				<a href="mailto:contacto@convoca.cloud">contacto@convoca.cloud</a> si sospechas de un acceso no
 				autorizado a tu cuenta.
 			</li>
 		</ul>
@@ -252,7 +252,7 @@
 		<h2 id="contacto">13. Contacto</h2>
 		<p>
 			Para cualquier consulta sobre estos términos, escribe a
-			<a href="mailto:convocahelp@outlook.es">convocahelp@outlook.es</a>.
+			<a href="mailto:contacto@convoca.cloud">contacto@convoca.cloud</a>.
 		</p>
 	</section>
 </LegalPageShell>

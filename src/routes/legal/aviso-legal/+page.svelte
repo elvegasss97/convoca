@@ -28,7 +28,7 @@
 				<strong>Titular:</strong> Elías Vega, persona física (proyecto en fase de prototipo, sin una sociedad
 				mercantil constituida a día de hoy).
 			</li>
-			<li>Contacto: <a href="mailto:convocahelp@outlook.es">convocahelp@outlook.es</a></li>
+			<li>Contacto: <a href="mailto:contacto@convoca.cloud">contacto@convoca.cloud</a></li>
 			<li>
 				NIF y domicilio: <strong>[DATOS DEL TITULAR PENDIENTES DE COMPLETAR]</strong> — se añadirán a
 				este documento antes de un lanzamiento público real.
