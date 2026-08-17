@@ -46,7 +46,9 @@
 	import SanidadRiesgos from '$lib/components/pulso/SanidadRiesgos.svelte';
 	import CeutaPresupuesto from '$lib/components/pulso/CeutaPresupuesto.svelte';
 	import CeutaCircuito72h from '$lib/components/pulso/CeutaCircuito72h.svelte';
+	import TopicMethodologyBlock from '$lib/components/pulso/TopicMethodologyBlock.svelte';
 	import { viviendaMapData, sanidadMapData } from '$lib/data/planMapData';
+	import { TOPIC_METHODOLOGY } from '$lib/data/topicMethodologyData';
 	import { submitMeasureAlternative } from '$lib/services/topicsService';
 	import {
 		listMyMeasureParticipationResponses,
@@ -380,6 +382,8 @@
 		<AlertTriangle class="mt-0.5 size-3.5 shrink-0" />
 		Borrador elaborado por Convoca. No representa automáticamente la opinión de los participantes.
 	</div>
+
+	<TopicMethodologyBlock {topic} methodology={TOPIC_METHODOLOGY[topic.slug] ?? {}} />
 
 	<!-- Navegación interna -->
 	<nav
