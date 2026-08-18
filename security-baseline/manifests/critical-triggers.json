@@ -6,8 +6,13 @@
 			"function": "prevent_role_self_update",
 			"table": "public.profiles",
 			"definedIn": "supabase/migrations/0001_extensions_and_helpers.sql",
-			"laterModifiedIn": ["supabase/migrations/0008_security_hardening.sql", "supabase/migrations/0012_fix_admin_role_promotion.sql", "supabase/migrations/0015_fix_organizer_takeover_no_session.sql"],
-			"why": "Único trigger que impide que una cuenta sin privilegios de staff se autoasigne un rol de moderador/admin. Ver seguridad/19 §2 (Roles) para el matiz conocido: no bloquea escalación lateral moderator→admin — decisión de producto abierta, no resuelta por esta baseline."
+			"laterModifiedIn": [
+				"supabase/migrations/0008_security_hardening.sql",
+				"supabase/migrations/0012_fix_admin_role_promotion.sql",
+				"supabase/migrations/0015_fix_organizer_takeover_no_session.sql",
+				"supabase/migrations/0048_close_role_lateral_escalation.sql"
+			],
+			"why": "Único trigger que impide que una cuenta cambie un rol de public.profiles mediante la API. Desde 0048 (Fase 1 del Centro de Operaciones), bloquea CUALQUIER cambio de rol por API sin excepción — incluida la escalación lateral moderator→admin, antes permitida (ver seguridad/19 §2 y §17, hallazgo ya cerrado)."
 		},
 		{
 			"trigger": "enforce_reports_rate_limit",

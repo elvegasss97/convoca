@@ -289,6 +289,8 @@ export interface VerificationDocument {
 	eventId?: string;
 	type: VerificationDocumentType;
 	fileName: string;
+	/** Ruta dentro del bucket privado `verification-documents` (0006). Solo la ruta: el archivo en sí solo se obtiene con una URL firmada (ver `getVerificationDocumentSignedUrl`, Centro de Operaciones Fase 1). */
+	storagePath: string;
 	status: VerificationDocumentStatus;
 	submittedAt: string;
 	reviewedAt?: string;
@@ -319,6 +321,22 @@ export interface AuditLog {
 	createdAt: string;
 	/** Presente solo en acciones `hide_channel`/`unhide_channel`. */
 	channelId?: string;
+}
+
+export type AuditTrailActorType = 'human' | 'agent';
+
+/**
+ * Fila resumida de `public.audit_trail` (auditoría genérica, Centro de
+ * Operaciones — `supabase/migrations/0049_audit_trail.sql`). Deliberadamente
+ * sin `id`/`targetId`/`actorId`/`metadata`: el bloque "Actividad reciente"
+ * no necesita identificadores ni detalles internos, solo qué ocurrió,
+ * dónde y cuándo.
+ */
+export interface AuditTrailEntry {
+	action: string;
+	targetType: string;
+	actorType: AuditTrailActorType;
+	createdAt: string;
 }
 
 /** Reporte de un canal de coordinación. Nunca público, ni para quien reporta ni para el organizador. */
@@ -470,6 +488,33 @@ export interface OpenVoiceContribution {
 	updatedAt: string;
 	/** undefined = activa. Retirada por la propia cuenta (soft-delete). */
 	withdrawnAt?: string;
+}
+
+/**
+ * Estado interno de moderación/procesamiento de una aportación — nunca lo
+ * ve ni lo cambia la propia cuenta que la envió (ver
+ * `enforce_open_voice_contribution_update`, 0047). Solo moderación/
+ * administración (Centro de Operaciones, Fase 1).
+ */
+export type OpenVoiceModerationStatus = 'pending' | 'approved' | 'flagged' | 'rejected';
+
+/**
+ * Fila de la cola de moderación de Voz abierta — deliberadamente SIN
+ * `userId`/identidad de quien la envió: el panel de moderación de esta
+ * fase solo necesita contenido y ámbito para decidir, no "quién" (mismo
+ * criterio de mínima exposición de datos personales que ya aplica a
+ * `reported_by_user_id` en denuncias). RLS permite a staff leer también
+ * `user_id` si en el futuro hiciera falta — este tipo simplemente no lo
+ * expone en la interfaz de esta fase.
+ */
+export interface OpenVoiceModerationItem {
+	id: string;
+	content: string;
+	scope: OpenVoiceScope;
+	status: OpenVoiceStatus;
+	moderationStatus: OpenVoiceModerationStatus;
+	createdAt: string;
+	updatedAt: string;
 }
 
 // ---------------------------------------------------------------------------

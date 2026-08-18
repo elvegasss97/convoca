@@ -1,4 +1,5 @@
 import type {
+	AuditTrailActorType,
 	ChannelPlatform,
 	ChannelReportReason,
 	ChannelType,
@@ -7,6 +8,7 @@ import type {
 	ConcernProposalStatus,
 	ConcernScopeType,
 	ConcernStatus,
+	OpenVoiceModerationStatus,
 	OpenVoiceScopeType,
 	OpenVoiceStatus,
 	EventCategory,
@@ -258,6 +260,14 @@ export const openVoiceStatusLabels: Record<OpenVoiceStatus, string> = {
 	posible_propuesta: 'Posible propuesta'
 };
 
+/** Copy para el Centro de Operaciones (Fase 1) — nunca visible para quien participa. */
+export const openVoiceModerationStatusLabels: Record<OpenVoiceModerationStatus, string> = {
+	pending: 'Pendiente de revisión',
+	approved: 'Aprobada',
+	flagged: 'Marcada',
+	rejected: 'Rechazada'
+};
+
 // ---------------------------------------------------------------------------
 // Pulso ciudadano — Temas ("Preocupaciones → Soluciones")
 // ---------------------------------------------------------------------------
@@ -477,4 +487,30 @@ export const nextBlockVoteRoundStatusLabels: Record<NextBlockVoteRoundStatus, st
 	scheduled: 'Próximamente',
 	open: 'Abierta',
 	closed: 'Cerrada'
+};
+
+// ---------------------------------------------------------------------------
+// Centro de Operaciones — audit_trail ("Actividad reciente")
+// ---------------------------------------------------------------------------
+
+/**
+ * Catálogo cerrado en `public.audit_trail.action` (0049/0050/0051). Se
+ * amplía aquí en el mismo momento en que se amplíe el `check` de la
+ * columna en una migración nueva.
+ */
+export const auditTrailActionLabels: Record<string, string> = {
+	open_voice_moderation_update: 'Cambio de estado de moderación (Voz abierta)',
+	verification_document_review: 'Revisión de documento de verificación',
+	verification_document_signed_url_issued: 'Visualización de documento de verificación'
+};
+
+/** Catálogo cerrado en `public.audit_trail.target_type` (0049). */
+export const auditTrailTargetTypeLabels: Record<string, string> = {
+	open_voice_contribution: 'Voz abierta',
+	verification_document: 'Documentación'
+};
+
+export const auditTrailActorTypeLabels: Record<AuditTrailActorType, string> = {
+	human: 'Humano',
+	agent: 'Agente de IA'
 };

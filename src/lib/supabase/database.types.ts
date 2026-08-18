@@ -113,6 +113,39 @@ export type Database = {
 					}
 				];
 			};
+			audit_trail: {
+				Row: {
+					action: string;
+					actor_id: string;
+					actor_type: string;
+					created_at: string;
+					id: string;
+					metadata: Json;
+					target_id: string;
+					target_type: string;
+				};
+				Insert: {
+					action: string;
+					actor_id: string;
+					actor_type?: string;
+					created_at?: string;
+					id?: string;
+					metadata?: Json;
+					target_id: string;
+					target_type: string;
+				};
+				Update: {
+					action?: string;
+					actor_id?: string;
+					actor_type?: string;
+					created_at?: string;
+					id?: string;
+					metadata?: Json;
+					target_id?: string;
+					target_type?: string;
+				};
+				Relationships: [];
+			};
 			channel_reports: {
 				Row: {
 					channel_id: string;
@@ -2466,6 +2499,10 @@ export type Database = {
 			};
 			get_pulso_participant_count: { Args: never; Returns: number };
 			is_moderator_or_admin: { Args: never; Returns: boolean };
+			log_verification_document_view: {
+				Args: { p_document_id: string };
+				Returns: undefined;
+			};
 			purge_old_attendance_rate_limits: { Args: never; Returns: undefined };
 			purge_old_attendance_responses: { Args: never; Returns: undefined };
 			purge_old_write_rate_limits: { Args: never; Returns: undefined };

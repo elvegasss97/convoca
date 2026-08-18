@@ -11,6 +11,8 @@
 import { supabase } from '$lib/supabase/client';
 import type {
 	OpenVoiceContribution,
+	OpenVoiceModerationItem,
+	OpenVoiceModerationStatus,
 	OpenVoiceScope,
 	OpenVoiceScopeType,
 	OpenVoiceStatus
@@ -121,4 +123,102 @@ export async function withdrawOpenVoiceContribution(id: string): Promise<void> {
 		.update({ withdrawn_at: new Date().toISOString() })
 		.eq('id', id);
 	if (error) throw new Error(toUserMessage(error, 'No se ha podido retirar tu aportación.'));
+}
+
+// ---------------------------------------------------------------------------
+// Moderación (Centro de Operaciones, Fase 1) — solo accesible en la práctica
+// para moderación/administración: RLS (`open_voice_contributions_select_
+// own_or_staff`/`_update_own_or_staff`, 0047) es quien realmente lo exige,
+// esto es solo la capa de acceso a datos que el panel usa para hablar con
+// esa RLS. Deliberadamente sin `userId`/identidad de quien envió: ver
+// `OpenVoiceModerationItem` en `$lib/types`.
+// ---------------------------------------------------------------------------
+
+interface OpenVoiceModerationRow {
+	id: string;
+	content: string;
+	scope_type: string;
+	scope_value: string | null;
+	scope_municipality_ine_code: string | null;
+	status: string;
+	moderation_status: string;
+	created_at: string;
+	updated_at: string;
+}
+
+const MODERATION_SELECT_COLUMNS =
+	'id, content, scope_type, scope_value, scope_municipality_ine_code, status, moderation_status, created_at, updated_at';
+
+function rowToModerationItem(row: OpenVoiceModerationRow): OpenVoiceModerationItem {
+	return {
+		id: row.id,
+		content: row.content,
+		scope: {
+			type: row.scope_type as OpenVoiceScopeType,
+			value: row.scope_value ?? undefined,
+			municipalityCode: row.scope_municipality_ine_code ?? undefined
+		},
+		status: row.status as OpenVoiceStatus,
+		moderationStatus: row.moderation_status as OpenVoiceModerationStatus,
+		createdAt: row.created_at,
+		updatedAt: row.updated_at
+	};
+}
+
+/**
+ * Cola de moderación: aportaciones activas (no retiradas) pendientes de
+ * revisión, más antiguas primero (orden natural de una cola). Retiradas
+ * excluidas a propósito: moderar algo que la propia persona ya retiró no
+ * tiene sentido — RLS ya deja de listarlas en "Mis aportaciones", y aquí
+ * tampoco aportan nada a la cola.
+ */
+export async function listPendingOpenVoiceContributionsForModeration(): Promise<
+	OpenVoiceModerationItem[]
+> {
+	const { data, error } = await supabase
+		.from('open_voice_contributions')
+		.select(MODERATION_SELECT_COLUMNS)
+		.eq('moderation_status', 'pending')
+		.is('withdrawn_at', null)
+		.order('created_at', { ascending: true });
+	if (error) throw error;
+	return (data ?? []).map(rowToModerationItem);
+}
+
+/**
+ * Cambia EXCLUSIVAMENTE `moderation_status` — el único campo que esta
+ * fase expone para moderar. El resto de columnas (contenido, ámbito,
+ * autor, `status` del recorrido futuro, retirada) permanece fuera de este
+ * servicio a propósito: `enforce_open_voice_contribution_update` (0047)
+ * las bloquea igualmente aunque se intentaran mandar, pero no mandarlas
+ * siquiera es la garantía de que este código nunca lo intente. La
+ * auditoría de este cambio la genera automáticamente el trigger
+ * `open_voice_contributions_log_moderation_update` (0050) — este
+ * servicio no escribe en `audit_trail` directamente.
+ */
+export async function setOpenVoiceModerationStatus(
+	id: string,
+	moderationStatus: OpenVoiceModerationStatus
+): Promise<void> {
+	const { error } = await supabase
+		.from('open_voice_contributions')
+		.update({ moderation_status: moderationStatus })
+		.eq('id', id);
+	if (error)
+		throw new Error(toUserMessage(error, 'No se ha podido actualizar el estado de moderación.'));
+}
+
+/**
+ * Nº total de aportaciones activas (Centro de Operaciones, "Resumen").
+ * `head: true` + `count: 'exact'`: Postgres calcula el conteo, PostgREST lo
+ * devuelve en una cabecera — ninguna fila viaja al cliente, no es un
+ * agregado calculado a partir de datos individuales descargados.
+ */
+export async function countActiveOpenVoiceContributions(): Promise<number> {
+	const { count, error } = await supabase
+		.from('open_voice_contributions')
+		.select('id', { count: 'exact', head: true })
+		.is('withdrawn_at', null);
+	if (error) throw error;
+	return count ?? 0;
 }
