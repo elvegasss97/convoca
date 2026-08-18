@@ -25,6 +25,15 @@
 	 * intercambiado el token de la URL por una sesión temporal y dispara el
 	 * evento `PASSWORD_RECOVERY`. En ese momento cambiamos a "elegir nueva
 	 * contraseña" en vez de mostrar el formulario de solicitud.
+	 *
+	 * Los enlaces de INVITACIÓN (creación de la primera cuenta de staff
+	 * desde el panel de Supabase, ver /acceso-interno) usan `type=invite`
+	 * en vez de `type=recovery`: el SDK emite `SIGNED_IN` en ese caso, no
+	 * `PASSWORD_RECOVERY` (ver GoTrueClient.js, `redirectType === 'recovery'
+	 * ? 'PASSWORD_RECOVERY' : 'SIGNED_IN'`). Se detecta aparte mirando el
+	 * propio hash de la URL — el flujo de "olvidé mi contraseña" nunca
+	 * genera un enlace con `type=invite`, así que esto no cambia nada del
+	 * caso normal de recuperación.
 	 */
 	let recoveryMode = $state(false);
 	let newPassword = $state('');
@@ -34,6 +43,9 @@
 	let confirmed = $state(false);
 
 	$effect(() => {
+		if (typeof window !== 'undefined' && window.location.hash.includes('type=invite')) {
+			recoveryMode = true;
+		}
 		const {
 			data: { subscription }
 		} = supabase.auth.onAuthStateChange((event) => {
