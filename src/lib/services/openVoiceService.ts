@@ -207,3 +207,18 @@ export async function setOpenVoiceModerationStatus(
 	if (error)
 		throw new Error(toUserMessage(error, 'No se ha podido actualizar el estado de moderación.'));
 }
+
+/**
+ * Nº total de aportaciones activas (Centro de Operaciones, "Resumen").
+ * `head: true` + `count: 'exact'`: Postgres calcula el conteo, PostgREST lo
+ * devuelve en una cabecera — ninguna fila viaja al cliente, no es un
+ * agregado calculado a partir de datos individuales descargados.
+ */
+export async function countActiveOpenVoiceContributions(): Promise<number> {
+	const { count, error } = await supabase
+		.from('open_voice_contributions')
+		.select('id', { count: 'exact', head: true })
+		.is('withdrawn_at', null);
+	if (error) throw error;
+	return count ?? 0;
+}

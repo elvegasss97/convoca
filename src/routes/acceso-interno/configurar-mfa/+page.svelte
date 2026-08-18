@@ -16,23 +16,29 @@
 	let errorMessage = $state<string | null>(null);
 
 	/**
-	 * `data:image/svg+xml;utf-8,${encodeURIComponent(...)}` (la forma que
-	 * sugiere el propio comentario del SDK de Supabase) usa un parámetro de
-	 * MIME inválido (`;utf-8` en vez de `;charset=utf-8`) — Firefox lo
-	 * rechaza directamente y muestra el texto alternativo en vez de la
-	 * imagen; Chrome es más permisivo y lo deja pasar, lo que hizo que no
-	 * se detectara hasta probarlo en Firefox. base64 evita el problema de
-	 * raíz: es la forma de data URI más soportada de forma universal, sin
-	 * ambigüedad de MIME/charset.
+	 * Comprobado empíricamente (capturando el valor real que devuelve
+	 * `supabase.auth.mfa.enroll()` contra convoca-staging, no solo
+	 * confiando en el comentario del SDK): `data.totp.qr_code` YA es una
+	 * URI `data:image/svg+xml;utf-8,<...>` completa, no SVG en crudo — el
+	 * comentario del SDK ("prepend `data:image/svg+xml;utf-8,` al valor")
+	 * está desactualizado para esta versión de la API. Envolverla nosotros
+	 * otra vez (como hacía la versión anterior de este archivo) produce una
+	 * URI anidada e inválida: el navegador la interpreta bien como
+	 * `base64`, pero al decodificarla obtiene el TEXTO
+	 * "data:image/svg+xml;utf-8,<?xml..." en vez de una imagen — de ahí que
+	 * se viera el texto alternativo en lugar del QR. Se usa el valor tal
+	 * cual si ya viene como `data:`, con un envoltorio de reserva por si
+	 * una versión futura de la API vuelve a devolver solo el SVG en crudo.
 	 */
-	function svgToBase64DataUrl(svg: string): string {
-		const bytes = new TextEncoder().encode(svg);
+	function toQrImageSrc(qrCode: string): string {
+		if (qrCode.startsWith('data:')) return qrCode;
+		const bytes = new TextEncoder().encode(qrCode);
 		let binary = '';
 		for (const byte of bytes) binary += String.fromCharCode(byte);
 		return `data:image/svg+xml;base64,${btoa(binary)}`;
 	}
 
-	const qrDataUrl = $derived(qrCodeSvg ? svgToBase64DataUrl(qrCodeSvg) : '');
+	const qrDataUrl = $derived(qrCodeSvg ? toQrImageSrc(qrCodeSvg) : '');
 
 	onMount(async () => {
 		try {

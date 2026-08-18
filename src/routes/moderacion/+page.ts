@@ -10,10 +10,18 @@ import {
 import { getPendingDocuments, listOrganizers } from '$lib/services/organizersService';
 import { listReportedChannels } from '$lib/services/channelsService';
 import { listPublicEvents } from '$lib/services/eventsService';
-import { listConcerns, listConcernProposals } from '$lib/services/concernsService';
+import {
+	listConcerns,
+	listConcernProposals,
+	getPulsoParticipantCount
+} from '$lib/services/concernsService';
 import { listTopics, listPendingMeasureAlternatives } from '$lib/services/topicsService';
-import { listNextBlockVoteRounds } from '$lib/services/nextBlockVoteService';
-import { listPendingOpenVoiceContributionsForModeration } from '$lib/services/openVoiceService';
+import { listNextBlockVoteRounds, getNextBlockVoteTotal } from '$lib/services/nextBlockVoteService';
+import {
+	listPendingOpenVoiceContributionsForModeration,
+	countActiveOpenVoiceContributions
+} from '$lib/services/openVoiceService';
+import { listRecentAuditTrail } from '$lib/services/auditTrailService';
 
 /**
  * Forzado a CSR: `authService.getSession()` lee la sesión de Supabase desde
@@ -77,6 +85,41 @@ export const load: PageLoad = async ({ url }) => {
 		listPendingOpenVoiceContributionsForModeration()
 	]);
 
+	/**
+	 * Datos exclusivos de la pestaña "Resumen": aparte del `Promise.all`
+	 * crítico de arriba (si esas consultas fallan, ninguna otra pestaña
+	 * puede funcionar, así que un fallo ahí debe seguir rompiendo la
+	 * carga entera) porque un fallo aquí no debe impedir usar el resto del
+	 * panel — cada resultado se degrada a `null` (interpretado como "error
+	 * al calcular este indicador", nunca como 0) en vez de tirar abajo la
+	 * página completa.
+	 */
+	const [participantCountResult, openVoiceTotalResult, recentAuditTrailResult] =
+		await Promise.allSettled([
+			getPulsoParticipantCount(),
+			countActiveOpenVoiceContributions(),
+			listRecentAuditTrail(8)
+		]);
+	const participantCount =
+		participantCountResult.status === 'fulfilled' ? participantCountResult.value : null;
+	const openVoiceTotal =
+		openVoiceTotalResult.status === 'fulfilled' ? openVoiceTotalResult.value : null;
+	const recentAuditTrail =
+		recentAuditTrailResult.status === 'fulfilled' ? recentAuditTrailResult.value : null;
+
+	// Total de votos de la ronda de "Tú eliges el próximo bloque" ACTIVA, si
+	// hay alguna — total exacto, nunca desglose por opción (mismo criterio
+	// de privacidad de 0043: el desglose sí necesita umbral, el total no).
+	const activeVoteRound = nextBlockVoteRounds.find((r) => r.status === 'open');
+	let activeVoteTotal: number | null = null;
+	if (activeVoteRound) {
+		try {
+			activeVoteTotal = await getNextBlockVoteTotal(activeVoteRound.id);
+		} catch {
+			activeVoteTotal = null;
+		}
+	}
+
 	return {
 		session,
 		pending,
@@ -91,6 +134,11 @@ export const load: PageLoad = async ({ url }) => {
 		topics,
 		pendingAlternatives,
 		nextBlockVoteRounds,
-		pendingOpenVoiceContributions
+		pendingOpenVoiceContributions,
+		participantCount,
+		openVoiceTotal,
+		recentAuditTrail,
+		activeVoteRound,
+		activeVoteTotal
 	};
 };

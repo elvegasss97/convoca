@@ -89,7 +89,14 @@ export async function changeStaffPassword(newPassword: string): Promise<void> {
 
 export interface TotpEnrollment {
 	factorId: string;
-	/** SVG del código QR. Renderizar como `data:image/svg+xml;utf-8,${encodeURIComponent(qrCodeSvg)}` (indicación del propio SDK de Supabase). */
+	/**
+	 * Comprobado empíricamente contra convoca-staging: `data.totp.qr_code`
+	 * ya es una URI `data:image/svg+xml;utf-8,<...>` completa, no SVG en
+	 * crudo (el comentario del SDK de Supabase que sugiere anteponer ese
+	 * prefijo está desactualizado para esta versión de la API). Ver
+	 * `toQrImageSrc()` en `/acceso-interno/configurar-mfa/+page.svelte`
+	 * para cómo se renderiza sin volver a envolverla.
+	 */
 	qrCodeSvg: string;
 	/** Alternativa en texto por si no se puede escanear el QR. */
 	secret: string;

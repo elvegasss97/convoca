@@ -323,6 +323,22 @@ export interface AuditLog {
 	channelId?: string;
 }
 
+export type AuditTrailActorType = 'human' | 'agent';
+
+/**
+ * Fila resumida de `public.audit_trail` (auditoría genérica, Centro de
+ * Operaciones — `supabase/migrations/0049_audit_trail.sql`). Deliberadamente
+ * sin `id`/`targetId`/`actorId`/`metadata`: el bloque "Actividad reciente"
+ * no necesita identificadores ni detalles internos, solo qué ocurrió,
+ * dónde y cuándo.
+ */
+export interface AuditTrailEntry {
+	action: string;
+	targetType: string;
+	actorType: AuditTrailActorType;
+	createdAt: string;
+}
+
 /** Reporte de un canal de coordinación. Nunca público, ni para quien reporta ni para el organizador. */
 export interface ChannelReport {
 	id: string;
