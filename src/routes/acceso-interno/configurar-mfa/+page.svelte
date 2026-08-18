@@ -15,9 +15,24 @@
 	let submitting = $state(false);
 	let errorMessage = $state<string | null>(null);
 
-	const qrDataUrl = $derived(
-		qrCodeSvg ? `data:image/svg+xml;utf-8,${encodeURIComponent(qrCodeSvg)}` : ''
-	);
+	/**
+	 * `data:image/svg+xml;utf-8,${encodeURIComponent(...)}` (la forma que
+	 * sugiere el propio comentario del SDK de Supabase) usa un parámetro de
+	 * MIME inválido (`;utf-8` en vez de `;charset=utf-8`) — Firefox lo
+	 * rechaza directamente y muestra el texto alternativo en vez de la
+	 * imagen; Chrome es más permisivo y lo deja pasar, lo que hizo que no
+	 * se detectara hasta probarlo en Firefox. base64 evita el problema de
+	 * raíz: es la forma de data URI más soportada de forma universal, sin
+	 * ambigüedad de MIME/charset.
+	 */
+	function svgToBase64DataUrl(svg: string): string {
+		const bytes = new TextEncoder().encode(svg);
+		let binary = '';
+		for (const byte of bytes) binary += String.fromCharCode(byte);
+		return `data:image/svg+xml;base64,${btoa(binary)}`;
+	}
+
+	const qrDataUrl = $derived(qrCodeSvg ? svgToBase64DataUrl(qrCodeSvg) : '');
 
 	onMount(async () => {
 		try {
