@@ -440,6 +440,39 @@ export interface ConcernProposal {
 }
 
 // ---------------------------------------------------------------------------
+// Pulso ciudadano — Voz abierta (Escucha ciudadana)
+// ---------------------------------------------------------------------------
+
+/**
+ * Igual que `ConcernScopeType`, con un 5º valor para "no se limita a un
+ * único lugar" — no aplica a `concerns`/`concern_proposals` (su esquema no
+ * lo admite), solo a `open_voice_contributions`.
+ */
+export type OpenVoiceScopeType = ConcernScopeType | 'multiple';
+
+export interface OpenVoiceScope {
+	type: OpenVoiceScopeType;
+	/** Nombre de la comunidad/provincia/municipio. undefined cuando type es 'nacional' o 'multiple'. */
+	value?: string;
+	/** Código INE del municipio (5 dígitos), solo presente cuando type es 'municipio'. Identificador estable — ver supabase/migrations/0047_voz_abierta.sql (public.ine_municipalities). */
+	municipalityCode?: string;
+}
+
+/** Progreso visible para quien participa. Todo nace en 'recibida'; los otros dos estados los pone un proceso futuro, nunca el cliente. */
+export type OpenVoiceStatus = 'recibida' | 'analisis_conjunto' | 'posible_propuesta';
+
+export interface OpenVoiceContribution {
+	id: string;
+	content: string;
+	scope: OpenVoiceScope;
+	status: OpenVoiceStatus;
+	createdAt: string;
+	updatedAt: string;
+	/** undefined = activa. Retirada por la propia cuenta (soft-delete). */
+	withdrawnAt?: string;
+}
+
+// ---------------------------------------------------------------------------
 // Pulso ciudadano — Temas ("Preocupaciones → Soluciones")
 // ---------------------------------------------------------------------------
 

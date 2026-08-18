@@ -967,6 +967,77 @@ export type Database = {
 					}
 				];
 			};
+			ine_municipalities: {
+				Row: {
+					ine_code: string;
+					name: string;
+					province_code: string;
+				};
+				Insert: {
+					ine_code: string;
+					name: string;
+					province_code: string;
+				};
+				Update: {
+					ine_code?: string;
+					name?: string;
+					province_code?: string;
+				};
+				Relationships: [];
+			};
+			open_voice_contributions: {
+				Row: {
+					content: string;
+					created_at: string;
+					id: string;
+					moderation_status: string;
+					privacy_notice_version: string | null;
+					scope_municipality_ine_code: string | null;
+					scope_type: string;
+					scope_value: string | null;
+					status: string;
+					updated_at: string;
+					user_id: string;
+					withdrawn_at: string | null;
+				};
+				Insert: {
+					content: string;
+					created_at?: string;
+					id?: string;
+					moderation_status?: string;
+					privacy_notice_version?: string | null;
+					scope_municipality_ine_code?: string | null;
+					scope_type: string;
+					scope_value?: string | null;
+					status?: string;
+					updated_at?: string;
+					user_id: string;
+					withdrawn_at?: string | null;
+				};
+				Update: {
+					content?: string;
+					created_at?: string;
+					id?: string;
+					moderation_status?: string;
+					privacy_notice_version?: string | null;
+					scope_municipality_ine_code?: string | null;
+					scope_type?: string;
+					scope_value?: string | null;
+					status?: string;
+					updated_at?: string;
+					user_id?: string;
+					withdrawn_at?: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'open_voice_contributions_scope_municipality_ine_code_fkey';
+						columns: ['scope_municipality_ine_code'];
+						isOneToOne: false;
+						referencedRelation: 'ine_municipalities';
+						referencedColumns: ['ine_code'];
+					}
+				];
+			};
 			organizer_private_profiles: {
 				Row: {
 					accepted_peaceful_use_at: string | null;
