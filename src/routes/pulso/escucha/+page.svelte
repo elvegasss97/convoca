@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Ear, ArrowRight, Users } from '@lucide/svelte';
+	import { Ear, ArrowRight, Users, MessageCircleHeart } from '@lucide/svelte';
 	import type { PageData } from './$types';
 	import { concernCategoryLabels } from '$lib/labels';
 	import Seo from '$lib/components/Seo.svelte';
@@ -59,6 +59,35 @@
 			</div>
 		{/if}
 	</section>
+
+	<a
+		href="/pulso/escucha/voz-abierta"
+		class="group mb-6 flex flex-col gap-4 rounded-2xl border border-brand-200 bg-gradient-to-br from-brand-50 to-white p-5 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover sm:flex-row sm:items-center sm:justify-between sm:p-6"
+	>
+		<div class="flex items-start gap-3.5">
+			<span
+				class="flex size-11 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-700"
+			>
+				<MessageCircleHeart class="size-5" strokeWidth={2.25} />
+			</span>
+			<div>
+				<p class="text-xs font-semibold tracking-wide text-brand-700 uppercase">Voz abierta</p>
+				<h2 class="mt-0.5 font-display text-lg font-semibold text-ink-900 sm:text-xl">
+					Cuéntanos lo que no estamos viendo
+				</h2>
+				<p class="mt-1 max-w-xl text-sm leading-relaxed text-ink-600">
+					Hay problemas que no caben en una lista. Explícanos con tus propias palabras qué está
+					pasando, dónde ocurre y por qué importa.
+				</p>
+				<p class="mt-1 text-xs font-medium text-ink-400">Sin casillas ni temas predefinidos.</p>
+			</div>
+		</div>
+		<span
+			class="flex shrink-0 items-center gap-1.5 self-start rounded-full bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white group-hover:bg-brand-800 sm:self-auto"
+		>
+			Contarlo con mis palabras <ArrowRight class="size-3.5" />
+		</span>
+	</a>
 
 	{#if data.active.length > 0}
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

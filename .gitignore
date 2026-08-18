@@ -30,3 +30,8 @@ vite.config.ts.timestamp-*
 
 # Supabase CLI local state (project link cache, no secrets but not versioned)
 supabase/.temp/
+
+# Salida intermedia y reproducible de scripts/data/generate-municipios.py
+# (se regenera desde el fichero oficial del INE; su contenido ya vive
+# íntegro en la migración correspondiente, no hace falta versionarla).
+scripts/data/output/

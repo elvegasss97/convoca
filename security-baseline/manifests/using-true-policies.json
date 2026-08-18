@@ -14,6 +14,13 @@
 			"operation": "select",
 			"definedIn": "supabase/migrations/0038_proximo_bloque.sql",
 			"why": "A diferencia de concern_listening_rounds/participation_rounds, no existe estado 'draft' que ocultar: cualquiera puede ver que la votación existe y en qué estado está."
+		},
+		{
+			"policy": "ine_municipalities_select_public",
+			"table": "public.ine_municipalities",
+			"operation": "select",
+			"definedIn": "supabase/migrations/0047_voz_abierta.sql",
+			"why": "Catálogo territorial oficial del INE (municipios/provincias), geografía administrativa pública sin ninguna relación con cuentas ni contenido de la plataforma — no hay nada que proteger. Tabla de solo lectura: no tiene políticas de INSERT/UPDATE/DELETE para ningún rol."
 		}
 	]
 }

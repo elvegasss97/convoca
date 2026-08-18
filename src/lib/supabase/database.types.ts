@@ -801,6 +801,24 @@ export type Database = {
 					}
 				];
 			};
+			ine_municipalities: {
+				Row: {
+					ine_code: string;
+					name: string;
+					province_code: string;
+				};
+				Insert: {
+					ine_code: string;
+					name: string;
+					province_code: string;
+				};
+				Update: {
+					ine_code?: string;
+					name?: string;
+					province_code?: string;
+				};
+				Relationships: [];
+			};
 			measure_participation_responses: {
 				Row: {
 					comment: string | null;
@@ -964,6 +982,59 @@ export type Database = {
 						isOneToOne: false;
 						referencedRelation: 'next_block_vote_rounds';
 						referencedColumns: ['id'];
+					}
+				];
+			};
+			open_voice_contributions: {
+				Row: {
+					content: string;
+					created_at: string;
+					id: string;
+					moderation_status: string;
+					privacy_notice_version: string | null;
+					scope_municipality_ine_code: string | null;
+					scope_type: string;
+					scope_value: string | null;
+					status: string;
+					updated_at: string;
+					user_id: string;
+					withdrawn_at: string | null;
+				};
+				Insert: {
+					content: string;
+					created_at?: string;
+					id?: string;
+					moderation_status?: string;
+					privacy_notice_version?: string | null;
+					scope_municipality_ine_code?: string | null;
+					scope_type: string;
+					scope_value?: string | null;
+					status?: string;
+					updated_at?: string;
+					user_id: string;
+					withdrawn_at?: string | null;
+				};
+				Update: {
+					content?: string;
+					created_at?: string;
+					id?: string;
+					moderation_status?: string;
+					privacy_notice_version?: string | null;
+					scope_municipality_ine_code?: string | null;
+					scope_type?: string;
+					scope_value?: string | null;
+					status?: string;
+					updated_at?: string;
+					user_id?: string;
+					withdrawn_at?: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'open_voice_contributions_scope_municipality_ine_code_fkey';
+						columns: ['scope_municipality_ine_code'];
+						isOneToOne: false;
+						referencedRelation: 'ine_municipalities';
+						referencedColumns: ['ine_code'];
 					}
 				];
 			};
@@ -2187,38 +2258,29 @@ export type Database = {
 					}
 				];
 			};
-		};
-		Views: {
-			reports_moderation: {
+			write_rate_limits: {
 				Row: {
-					created_at: string | null;
-					details: string | null;
-					event_id: string | null;
-					id: string | null;
-					reason: string | null;
-					resolved_at: string | null;
-					status: string | null;
+					action: string;
+					called_at: string;
+					id: number;
+					user_id: string;
 				};
 				Insert: {
-					created_at?: string | null;
-					details?: string | null;
-					event_id?: string | null;
-					id?: string | null;
-					reason?: string | null;
-					resolved_at?: string | null;
-					status?: string | null;
+					action: string;
+					called_at?: string;
+					id?: never;
+					user_id: string;
 				};
 				Update: {
-					created_at?: string | null;
-					details?: string | null;
-					event_id?: string | null;
-					id?: string | null;
-					reason?: string | null;
-					resolved_at?: string | null;
-					status?: string | null;
+					action?: string;
+					called_at?: string;
+					id?: never;
+					user_id?: string;
 				};
 				Relationships: [];
 			};
+		};
+		Views: {
 			channel_reports_moderation: {
 				Row: {
 					channel_id: string | null;
@@ -2247,7 +2309,53 @@ export type Database = {
 					resolved_at?: string | null;
 					status?: string | null;
 				};
-				Relationships: [];
+				Relationships: [
+					{
+						foreignKeyName: 'channel_reports_channel_id_fkey';
+						columns: ['channel_id'];
+						isOneToOne: false;
+						referencedRelation: 'event_communication_channels';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			reports_moderation: {
+				Row: {
+					created_at: string | null;
+					details: string | null;
+					event_id: string | null;
+					id: string | null;
+					reason: string | null;
+					resolved_at: string | null;
+					status: string | null;
+				};
+				Insert: {
+					created_at?: string | null;
+					details?: string | null;
+					event_id?: string | null;
+					id?: string | null;
+					reason?: string | null;
+					resolved_at?: string | null;
+					status?: string | null;
+				};
+				Update: {
+					created_at?: string | null;
+					details?: string | null;
+					event_id?: string | null;
+					id?: string | null;
+					reason?: string | null;
+					resolved_at?: string | null;
+					status?: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'reports_event_id_fkey';
+						columns: ['event_id'];
+						isOneToOne: false;
+						referencedRelation: 'events';
+						referencedColumns: ['id'];
+					}
+				];
 			};
 		};
 		Functions: {
@@ -2360,6 +2468,7 @@ export type Database = {
 			is_moderator_or_admin: { Args: never; Returns: boolean };
 			purge_old_attendance_rate_limits: { Args: never; Returns: undefined };
 			purge_old_attendance_responses: { Args: never; Returns: undefined };
+			purge_old_write_rate_limits: { Args: never; Returns: undefined };
 			set_attendance: {
 				Args: { p_dedup_token: string; p_event_id: string; p_response?: string };
 				Returns: undefined;

@@ -7,6 +7,8 @@ import type {
 	ConcernProposalStatus,
 	ConcernScopeType,
 	ConcernStatus,
+	OpenVoiceScopeType,
+	OpenVoiceStatus,
 	EventCategory,
 	EventStatus,
 	EventTheme,
@@ -222,6 +224,38 @@ export const concernProposalStatusLabels: Record<ConcernProposalStatus, string> 
 	pending: 'Pendiente de revisión',
 	approved: 'Aprobada',
 	rejected: 'Rechazada'
+};
+
+// ---------------------------------------------------------------------------
+// Pulso ciudadano — Voz abierta
+// ---------------------------------------------------------------------------
+
+/**
+ * Copy propio para el selector "¿Dónde ocurre?" de Voz abierta — distinto
+ * (más conversacional) del genérico `concernScopeTypeLabels` usado por
+ * `concerns`/`concern_proposals`, y con la opción adicional 'multiple'.
+ */
+export const openVoiceScopeTypeLabels: Record<OpenVoiceScopeType, string> = {
+	municipio: 'En mi municipio',
+	provincia: 'En mi provincia o ciudad autónoma',
+	comunidad_autonoma: 'En mi comunidad o ciudad autónoma',
+	nacional: 'En toda España',
+	multiple: 'No se limita a un único lugar'
+};
+
+/** Orden de presentación pedido para el selector de ámbito de Voz abierta. */
+export const OPEN_VOICE_SCOPE_TYPES: OpenVoiceScopeType[] = [
+	'municipio',
+	'provincia',
+	'comunidad_autonoma',
+	'nacional',
+	'multiple'
+];
+
+export const openVoiceStatusLabels: Record<OpenVoiceStatus, string> = {
+	recibida: 'Recibida',
+	analisis_conjunto: 'Análisis conjunto',
+	posible_propuesta: 'Posible propuesta'
 };
 
 // ---------------------------------------------------------------------------

@@ -24,6 +24,7 @@ import type {
 	ConcernStatus
 } from '$lib/types';
 import { randomId } from '$lib/utils/id';
+import { communityNameVariants } from '$lib/utils/territoryScope';
 import { rowToEvent } from './eventsService';
 
 // ---------------------------------------------------------------------------
@@ -140,7 +141,17 @@ export async function listConcerns(options: ListConcernsOptions = {}): Promise<C
 	let query = supabase.from('concerns').select('*').order('created_at', { ascending: false });
 	if (options.status) query = query.eq('status', options.status);
 	if (options.scope && options.scope.type !== 'nacional' && options.scope.value) {
-		query = query.eq('scope_type', options.scope.type).eq('scope_value', options.scope.value);
+		query = query.eq('scope_type', options.scope.type);
+		// Filtrar por igualdad estricta dejaría invisibles filas que aún
+		// tengan el nombre antiguo de una comunidad ya renombrada (ver
+		// communityNameVariants(): hoy solo aplica a Baleares, "Islas
+		// Baleares" -> "Illes Balears") mientras la normalización de datos de
+		// la migración 0047 no haya llegado a ese entorno.
+		if (options.scope.type === 'comunidad_autonoma') {
+			query = query.in('scope_value', communityNameVariants(options.scope.value));
+		} else {
+			query = query.eq('scope_value', options.scope.value);
+		}
 	} else if (options.scope?.type === 'nacional') {
 		query = query.eq('scope_type', 'nacional');
 	}
