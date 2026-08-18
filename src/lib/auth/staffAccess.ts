@@ -39,3 +39,25 @@ export function nextMfaStep(currentLevel: string | null, nextLevel: string | nul
 	if (nextLevel === 'aal2') return 'verify';
 	return 'enroll';
 }
+
+/**
+ * Paso completo de acceso de staff: cambio de contraseña obligatorio
+ * (cuentas creadas con contraseña temporal de un solo uso, vía la API
+ * administrativa de Supabase — nunca por invitación por correo) antes
+ * incluso de comprobar el MFA.
+ */
+export type StaffAccessStep = 'change-password' | MfaStep;
+
+/**
+ * `user_metadata.must_change_password` lo fija la API administrativa al
+ * crear una cuenta de staff con contraseña temporal, y esta misma app lo
+ * borra (`changeStaffPassword()`) en cuanto la persona establece la
+ * suya. No es un mecanismo de seguridad en sí — quien de verdad decide
+ * si puede entrar es RLS (rol + aal2) — solo evita que alguien siga
+ * usando la contraseña temporal más allá del primer acceso.
+ */
+export function mustChangePassword(
+	userMetadata: Record<string, unknown> | null | undefined
+): boolean {
+	return userMetadata?.must_change_password === true;
+}

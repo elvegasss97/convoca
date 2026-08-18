@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isStaffRole, nextMfaStep } from './staffAccess';
+import { isStaffRole, mustChangePassword, nextMfaStep } from './staffAccess';
 
 describe('isStaffRole', () => {
 	it('moderator y admin cuentan como staff', () => {
@@ -32,5 +32,20 @@ describe('nextMfaStep', () => {
 	it('enroll también si currentLevel/nextLevel llegan null (defensivo)', () => {
 		expect(nextMfaStep(null, null)).toBe('enroll');
 		expect(nextMfaStep(null, 'aal1')).toBe('enroll');
+	});
+});
+
+describe('mustChangePassword', () => {
+	it('true solo cuando must_change_password es exactamente true', () => {
+		expect(mustChangePassword({ must_change_password: true })).toBe(true);
+	});
+
+	it('false cuando falta, es false, o el metadata es null/undefined', () => {
+		expect(mustChangePassword({})).toBe(false);
+		expect(mustChangePassword({ must_change_password: false })).toBe(false);
+		expect(mustChangePassword(null)).toBe(false);
+		expect(mustChangePassword(undefined)).toBe(false);
+		// Valor "truthy" pero no booleano: no debe colarse por coerción laxa.
+		expect(mustChangePassword({ must_change_password: 'true' })).toBe(false);
 	});
 });

@@ -1,7 +1,7 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { authService } from '$lib/auth/authService';
-import { currentStaffMfaStep } from '$lib/auth/staffAuthService';
+import { currentStaffAccessStep } from '$lib/auth/staffAuthService';
 import {
 	getTopicById,
 	listTopicSources,
@@ -29,9 +29,10 @@ export const load: PageLoad = async ({ params, url }) => {
 	}
 
 	// Ver el mismo comentario en src/routes/moderacion/+page.ts.
-	const mfaStep = await currentStaffMfaStep();
-	if (mfaStep === 'enroll') redirect(303, '/acceso-interno/configurar-mfa');
-	if (mfaStep === 'verify') redirect(303, '/acceso-interno/verificar');
+	const accessStep = await currentStaffAccessStep();
+	if (accessStep === 'change-password') redirect(303, '/acceso-interno/cambiar-contrasena');
+	if (accessStep === 'enroll') redirect(303, '/acceso-interno/configurar-mfa');
+	if (accessStep === 'verify') redirect(303, '/acceso-interno/verificar');
 
 	const allConcerns = await listConcerns();
 	const isNew = params.id === 'nuevo';

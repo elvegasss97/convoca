@@ -1,6 +1,6 @@
 import { supabase } from '$lib/supabase/client';
 import { authService } from './authService';
-import { isStaffRole, nextMfaStep, type MfaStep } from './staffAccess';
+import { isStaffRole, mustChangePassword, nextMfaStep, type StaffAccessStep } from './staffAccess';
 
 /**
  * Acceso interno de staff (/acceso-interno): correo+contraseña exclusivo
@@ -25,15 +25,20 @@ export const STAFF_ACCESS_DENIED_MESSAGE =
  * Estado de acceso de la sesión activa: 'not-staff' si no hay sesión o el
  * rol no es moderator/admin (mismo caso, a propósito: no se distingue de
  * cara a la interfaz — ver `STAFF_ACCESS_DENIED_MESSAGE`); si no,
- * `MfaStep` según el nivel de verificación en dos pasos alcanzado.
+ * `StaffAccessStep` — primero cambio de contraseña obligatorio (cuentas
+ * creadas con contraseña temporal vía la API administrativa), luego el
+ * nivel de verificación en dos pasos alcanzado.
  *
  * Esta comprobación es solo de conveniencia para decidir a qué pantalla
  * ir — la barrera real es RLS (`is_moderator_or_admin()`, 0052). Nada
  * aquí concede ni revoca acceso a datos por sí mismo.
  */
-export async function currentStaffMfaStep(): Promise<MfaStep | 'not-staff'> {
+export async function currentStaffAccessStep(): Promise<StaffAccessStep | 'not-staff'> {
 	const session = await authService.getSession();
 	if (!session || !isStaffRole(session.user.role)) return 'not-staff';
+
+	const { data: userData } = await supabase.auth.getUser();
+	if (mustChangePassword(userData.user?.user_metadata)) return 'change-password';
 
 	const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 	if (error) {
@@ -49,19 +54,33 @@ export async function currentStaffMfaStep(): Promise<MfaStep | 'not-staff'> {
  * de error si un correo dado tiene o no una cuenta, ni si esa cuenta es
  * de staff.
  */
-export async function signInStaff(email: string, password: string): Promise<MfaStep> {
+export async function signInStaff(email: string, password: string): Promise<StaffAccessStep> {
 	const { error } = await supabase.auth.signInWithPassword({
 		email: email.trim().toLowerCase(),
 		password
 	});
 	if (error) throw new Error(STAFF_ACCESS_DENIED_MESSAGE);
 
-	const step = await currentStaffMfaStep();
+	const step = await currentStaffAccessStep();
 	if (step === 'not-staff') {
 		await supabase.auth.signOut();
 		throw new Error(STAFF_ACCESS_DENIED_MESSAGE);
 	}
 	return step;
+}
+
+/**
+ * Establece la contraseña definitiva y borra el marcador de contraseña
+ * temporal (`user_metadata.must_change_password`). `updateUser({ data })`
+ * combina con el `user_metadata` existente (no lo sustituye entero), así
+ * que no hace falta volver a mandar el resto.
+ */
+export async function changeStaffPassword(newPassword: string): Promise<void> {
+	const { error } = await supabase.auth.updateUser({
+		password: newPassword,
+		data: { must_change_password: false }
+	});
+	if (error) throw new Error('No se ha podido actualizar la contraseña. Inténtalo de nuevo.');
 }
 
 // ---------------------------------------------------------------------------

@@ -19,6 +19,18 @@ const { authMocks, getSessionMock, fromMock } = vi.hoisted(() => {
 			error: null as { message: string } | null
 		})),
 		signOut: vi.fn(async () => ({ error: null })),
+		getUser: vi.fn(async () => ({
+			data: {
+				user: { user_metadata: {} as Record<string, unknown> } as {
+					user_metadata: Record<string, unknown>;
+				} | null
+			},
+			error: null
+		})),
+		updateUser: vi.fn(async () => ({
+			data: {} as Record<string, unknown> | null,
+			error: null as { message: string } | null
+		})),
 		mfa: {
 			getAuthenticatorAssuranceLevel: vi.fn(async () => ({
 				data: { currentLevel: 'aal1' as string | null, nextLevel: 'aal1' as string | null },
@@ -56,7 +68,8 @@ vi.mock('./authService', () => ({
 }));
 
 import {
-	currentStaffMfaStep,
+	changeStaffPassword,
+	currentStaffAccessStep,
 	enrollTotp,
 	getVerifiedTotpFactorId,
 	signInStaff,
@@ -67,6 +80,8 @@ import {
 beforeEach(() => {
 	vi.clearAllMocks();
 	authMocks.signInWithPassword.mockResolvedValue({ data: { session: {} }, error: null });
+	authMocks.getUser.mockResolvedValue({ data: { user: { user_metadata: {} } }, error: null });
+	authMocks.updateUser.mockResolvedValue({ data: {}, error: null });
 	authMocks.mfa.getAuthenticatorAssuranceLevel.mockResolvedValue({
 		data: { currentLevel: 'aal1', nextLevel: 'aal1' },
 		error: null
@@ -75,24 +90,34 @@ beforeEach(() => {
 	getSessionMock.mockResolvedValue(null);
 });
 
-describe('currentStaffMfaStep', () => {
+describe('currentStaffAccessStep', () => {
 	it('not-staff si no hay sesión', async () => {
 		getSessionMock.mockResolvedValue(null);
-		expect(await currentStaffMfaStep()).toBe('not-staff');
+		expect(await currentStaffAccessStep()).toBe('not-staff');
 	});
 
 	it('not-staff si la sesión es de un organizer', async () => {
 		getSessionMock.mockResolvedValue({ user: { id: 'u1', role: 'organizer' } });
-		expect(await currentStaffMfaStep()).toBe('not-staff');
+		expect(await currentStaffAccessStep()).toBe('not-staff');
 	});
 
-	it('deriva el paso a partir del AAL para una sesión de staff', async () => {
+	it('change-password si la cuenta tiene una contraseña temporal pendiente, antes incluso de mirar el MFA', async () => {
+		getSessionMock.mockResolvedValue({ user: { id: 'u1', role: 'admin' } });
+		authMocks.getUser.mockResolvedValue({
+			data: { user: { user_metadata: { must_change_password: true } } },
+			error: null
+		});
+		expect(await currentStaffAccessStep()).toBe('change-password');
+		expect(authMocks.mfa.getAuthenticatorAssuranceLevel).not.toHaveBeenCalled();
+	});
+
+	it('deriva el paso a partir del AAL para una sesión de staff sin contraseña pendiente', async () => {
 		getSessionMock.mockResolvedValue({ user: { id: 'u1', role: 'moderator' } });
 		authMocks.mfa.getAuthenticatorAssuranceLevel.mockResolvedValue({
 			data: { currentLevel: 'aal2', nextLevel: 'aal2' },
 			error: null
 		});
-		expect(await currentStaffMfaStep()).toBe('proceed');
+		expect(await currentStaffAccessStep()).toBe('proceed');
 	});
 });
 
@@ -179,5 +204,22 @@ describe('getVerifiedTotpFactorId', () => {
 	it('undefined si no hay ningún factor verificado', async () => {
 		authMocks.mfa.listFactors.mockResolvedValue({ data: { all: [], totp: [] }, error: null });
 		expect(await getVerifiedTotpFactorId()).toBeUndefined();
+	});
+});
+
+describe('changeStaffPassword', () => {
+	it('envía la nueva contraseña y borra el marcador de contraseña temporal', async () => {
+		await changeStaffPassword('nueva-contrasena-larga');
+		expect(authMocks.updateUser).toHaveBeenCalledWith({
+			password: 'nueva-contrasena-larga',
+			data: { must_change_password: false }
+		});
+	});
+
+	it('lanza un mensaje legible si Supabase rechaza la actualización', async () => {
+		authMocks.updateUser.mockResolvedValue({ data: null, error: { message: 'weak password' } });
+		await expect(changeStaffPassword('123')).rejects.toThrow(
+			'No se ha podido actualizar la contraseña. Inténtalo de nuevo.'
+		);
 	});
 });

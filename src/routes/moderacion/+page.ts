@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { authService } from '$lib/auth/authService';
-import { currentStaffMfaStep } from '$lib/auth/staffAuthService';
+import { currentStaffAccessStep } from '$lib/auth/staffAuthService';
 import {
 	listPendingReview,
 	listReportedEvents,
@@ -42,9 +42,10 @@ export const load: PageLoad = async ({ url }) => {
 	// permiso crudos y lleva a la pantalla correcta (configurar MFA por
 	// primera vez, o verificar si ya hay un factor pero la sesión sigue en
 	// aal1).
-	const mfaStep = await currentStaffMfaStep();
-	if (mfaStep === 'enroll') redirect(303, '/acceso-interno/configurar-mfa');
-	if (mfaStep === 'verify') redirect(303, '/acceso-interno/verificar');
+	const accessStep = await currentStaffAccessStep();
+	if (accessStep === 'change-password') redirect(303, '/acceso-interno/cambiar-contrasena');
+	if (accessStep === 'enroll') redirect(303, '/acceso-interno/configurar-mfa');
+	if (accessStep === 'verify') redirect(303, '/acceso-interno/verificar');
 
 	const [
 		pending,

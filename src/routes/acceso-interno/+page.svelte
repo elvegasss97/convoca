@@ -3,15 +3,24 @@
 	import Seo from '$lib/components/Seo.svelte';
 	import { Eye, EyeOff, LogIn, Loader2, AlertCircle, ShieldCheck } from '@lucide/svelte';
 	import { signInStaff } from '$lib/auth/staffAuthService';
+	import type { StaffAccessStep } from '$lib/auth/staffAccess';
 
 	/**
 	 * Formulario de correo+contraseña exclusivo de personal autorizado. A
 	 * propósito NO hay ningún enlace de "crear cuenta": esta pantalla nunca
-	 * registra cuentas nuevas — la primera cuenta admin se crea por
-	 * invitación desde el panel de Supabase (ver procedimiento en el README
-	 * interno de la Fase 1), y cualquier ascenso posterior sigue siendo
+	 * registra cuentas nuevas — las cuentas de staff se crean con
+	 * contraseña temporal vía la API administrativa de Supabase (nunca por
+	 * invitación por correo, para evitar depender de la configuración de
+	 * redirección de Supabase), y cualquier ascenso posterior sigue siendo
 	 * manual (SQL Editor), nunca desde aquí.
 	 */
+
+	const DESTINATION_BY_STEP: Record<StaffAccessStep, string> = {
+		'change-password': '/acceso-interno/cambiar-contrasena',
+		enroll: '/acceso-interno/configurar-mfa',
+		verify: '/acceso-interno/verificar',
+		proceed: '/moderacion'
+	};
 
 	let email = $state('');
 	let password = $state('');
@@ -26,13 +35,7 @@
 		submitting = true;
 		try {
 			const step = await signInStaff(email, password);
-			const destination =
-				step === 'proceed'
-					? '/moderacion'
-					: step === 'verify'
-						? '/acceso-interno/verificar'
-						: '/acceso-interno/configurar-mfa';
-			await goto(destination, { replaceState: true });
+			await goto(DESTINATION_BY_STEP[step], { replaceState: true });
 		} catch (err) {
 			errorMessage = err instanceof Error ? err.message : 'No se ha podido iniciar sesión.';
 		} finally {

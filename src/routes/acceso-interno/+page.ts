@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import { currentStaffMfaStep } from '$lib/auth/staffAuthService';
+import { currentStaffAccessStep } from '$lib/auth/staffAuthService';
 
 /**
  * `ssr = false` por el mismo motivo que `/moderacion` (`authService`
@@ -17,8 +17,9 @@ export const ssr = false;
  * absoluto), se renderiza el formulario de acceso.
  */
 export const load: PageLoad = async () => {
-	const step = await currentStaffMfaStep();
+	const step = await currentStaffAccessStep();
 	if (step === 'proceed') redirect(303, '/moderacion');
 	if (step === 'verify') redirect(303, '/acceso-interno/verificar');
 	if (step === 'enroll') redirect(303, '/acceso-interno/configurar-mfa');
+	if (step === 'change-password') redirect(303, '/acceso-interno/cambiar-contrasena');
 };
