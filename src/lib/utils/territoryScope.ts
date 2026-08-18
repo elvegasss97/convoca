@@ -76,3 +76,23 @@ const COMMUNITY_NAME_OVERRIDES: Record<string, string> = {
 export function unifiedCommunityName(name: string): string {
 	return COMMUNITY_NAME_OVERRIDES[name] ?? name;
 }
+
+/**
+ * Alias conocidos de un nombre de comunidad autónoma, para filtrar sin
+ * ocultar filas escritas con el nombre antiguo. La migración 0047 normaliza
+ * `concerns`/`concern_proposals` (`'Islas Baleares'` -> `'Illes Balears'`)
+ * en el momento de aplicarse, pero entre que el código nuevo se despliega y
+ * esa migración se aplica de verdad —o si algún cliente con caché queda
+ * atrás un instante— podría existir de forma transitoria una fila con el
+ * nombre antiguo: filtrar por igualdad estricta la dejaría invisible. Se usa
+ * en el filtro de lectura (`concernsService.listConcerns`), nunca al
+ * escribir — toda escritura nueva usa siempre `unifiedCommunityName()`.
+ */
+const COMMUNITY_NAME_ALIASES: Record<string, string[]> = {
+	'Illes Balears': ['Illes Balears', 'Islas Baleares'],
+	'Islas Baleares': ['Illes Balears', 'Islas Baleares']
+};
+
+export function communityNameVariants(name: string): string[] {
+	return COMMUNITY_NAME_ALIASES[name] ?? [name];
+}

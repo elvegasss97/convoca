@@ -41,9 +41,15 @@
 --      `enforce_write_rate_limit()` — mismo mecanismo, ninguna tabla ni
 --      trigger paralelo.
 --   4. `get_pulso_participant_count()` (0026) se redefine para contar
---      también personas únicas que hayan aportado en Voz abierta, sin
---      inflar el contador si ya habían participado en `concern_responses`
---      (UNION de user_id, no SUMA de filas).
+--      también personas únicas que hayan aportado ACTIVAMENTE en Voz
+--      abierta (withdrawn_at is null), sin inflar el contador si ya habían
+--      participado en `concern_responses` (UNION de user_id, no SUMA de
+--      filas) ni si su única aportación ya está retirada.
+--   5. Normalización de datos: las filas ya existentes de `concerns`/
+--      `concern_proposals` con `scope_value = 'Islas Baleares'` pasan a
+--      `'Illes Balears'` (mismo nombre unificado que ahora usa
+--      `TerritoryPicker` en los dos niveles, provincia y comunidad — ver
+--      §5 más abajo para el porqué exacto y qué tablas NO se tocan).
 --
 -- Privacidad y moderación: el texto original es SIEMPRE privado — solo la
 -- propia cuenta y moderación/administración (`is_moderator_or_admin()`,
@@ -8332,9 +8338,19 @@ create table public.open_voice_contributions (
 		or (scope_type = 'municipio' and scope_value is not null and scope_municipality_ine_code is not null)
 	),
 	-- Aportación "mínimamente significativa" sin imponer estructura: no vacía
-	-- ni solo espacios, con una longitud mínima pequeña a propósito (no es una
-	-- validación de calidad de contenido, solo descarta envíos accidentales).
-	constraint open_voice_contributions_content_not_blank check (char_length(btrim(content)) >= 20),
+	-- ni formada solo por espacios en blanco, con una longitud mínima pequeña
+	-- a propósito (no es una validación de calidad de contenido, solo
+	-- descarta envíos accidentales). btrim(content) de UN solo argumento en
+	-- Postgres recorta ÚNICAMENTE el carácter espacio (' ') — un contenido
+	-- formado solo por saltos de línea/tabulaciones pasaría igual esa
+	-- comprobación. El segundo argumento amplía el conjunto de caracteres
+	-- recortados a espacio/tabulador/salto de línea/retorno de
+	-- carro/tabulador vertical/salto de página — SOLO al principio y al
+	-- final (btrim nunca toca el interior de la cadena): un texto legítimo
+	-- con espacios internos generosos no pierde ni un carácter interno.
+	constraint open_voice_contributions_content_not_blank check (
+		char_length(btrim(content, E' \t\n\r\v\f')) >= 20
+	),
 	-- Guarda técnica generosa (no editorial): muy por encima de los 20.000
 	-- caracteres que el flujo debe conservar íntegros sin truncar, pensada
 	-- solo para descartar cargas abusivas o de varios megabytes.
@@ -8461,6 +8477,12 @@ begin
 	if new.withdrawn_at is null then
 		raise exception 'Solo puedes retirar tu aportación, no modificarla.';
 	end if;
+	-- La fecha de retirada la fija SIEMPRE el servidor, nunca el valor que
+	-- envíe el cliente: basta con que el cliente mande cualquier valor no
+	-- nulo para señalar la intención de retirar (el servicio del cliente ya
+	-- manda la hora actual, pero una llamada directa a la API podría mandar
+	-- cualquier fecha arbitraria si no se sobrescribiera aquí).
+	new.withdrawn_at := now();
 	return new;
 end;
 $$;
@@ -8550,8 +8572,12 @@ create trigger enforce_open_voice_contributions_rate_limit
 -- 4. get_pulso_participant_count(): incluye Voz abierta sin duplicar
 --    personas (UNION de user_id, no unión de filas — alguien que ya cuenta
 --    por concern_responses no vuelve a sumar por aportar en Voz abierta).
---    Mismo signature (sin argumentos, retorna bigint) que 0026: CREATE OR
---    REPLACE conserva los grants ya existentes (anon, authenticated).
+--    Solo cuentan aportaciones ACTIVAS de Voz abierta (withdrawn_at is
+--    null): quien retira su única aportación deja de contar como
+--    participante por esa vía (si además respondió alguna concern, sigue
+--    contando igual, por esa otra participación real). Mismo signature
+--    (sin argumentos, retorna bigint) que 0026: CREATE OR REPLACE conserva
+--    los grants ya existentes (anon, authenticated).
 -- ---------------------------------------------------------------------------
 
 create or replace function public.get_pulso_participant_count()
@@ -8564,12 +8590,44 @@ as $$
 	select count(distinct user_id) from (
 		select user_id from public.concern_responses
 		union
-		select user_id from public.open_voice_contributions
+		select user_id from public.open_voice_contributions where withdrawn_at is null
 	) as participants;
 $$;
 
 comment on function public.get_pulso_participant_count is
-	'Número de personas distintas que han participado en Pulso ciudadano: respuestas a preocupaciones (concern_responses) o aportaciones de Voz abierta (open_voice_contributions), sin duplicar a quien ha hecho ambas cosas.';
+	'Número de personas distintas que han participado en Pulso ciudadano: respuestas a preocupaciones (concern_responses) o aportaciones ACTIVAS de Voz abierta (open_voice_contributions, withdrawn_at is null), sin duplicar a quien ha hecho ambas cosas.';
+
+-- ---------------------------------------------------------------------------
+-- 5. Normalización "Islas Baleares" -> "Illes Balears" en concerns/
+--    concern_proposals (nunca en concern_listening_contexts ni en
+--    concern_listening_survey_responses: esas dos tablas alimentan el
+--    selector de comunidad autónoma PROPIO de Vivienda/Sanidad,
+--    independiente de TerritoryPicker, que sigue usando "Islas Baleares" a
+--    propósito — ver el comentario de unifiedCommunityName() en
+--    src/lib/utils/territoryScope.ts para el porqué exacto).
+--
+--    TerritoryPicker.svelte unifica el nombre de comunidad autónoma de
+--    Baleares a "Illes Balears" en los 3 usos que sí pasan por él
+--    (concerns, concern_proposals y Voz abierta) — a partir de esta
+--    migración, cualquier fila NUEVA con scope_type = 'comunidad_autonoma'
+--    para Baleares se guardará ya como "Illes Balears", nunca más como
+--    "Islas Baleares". Esta sección normaliza las filas YA EXISTENTES para
+--    que no queden huérfanas del nuevo desplegable (que ya no ofrece
+--    "Islas Baleares" como opción seleccionable).
+--
+--    Idempotente: si ya no queda ninguna fila con el nombre antiguo, el
+--    UPDATE no afecta a ninguna fila. Vuelve a disparar el trigger
+--    `..._set_updated_at` de cada tabla sobre las filas tocadas —
+--    aceptable, refleja una corrección real del dato.
+-- ---------------------------------------------------------------------------
+
+update public.concerns
+set scope_value = 'Illes Balears'
+where scope_type = 'comunidad_autonoma' and scope_value = 'Islas Baleares';
+
+update public.concern_proposals
+set scope_value = 'Illes Balears'
+where scope_type = 'comunidad_autonoma' and scope_value = 'Islas Baleares';
 
 -- ---------------------------------------------------------------------------
 -- Recorrido futuro (documentado, no implementado en esta migración): esta

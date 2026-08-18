@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+	communityNameVariants,
 	resetScopeOnTypeChange,
 	scopeIsMunicipio,
 	scopeNeedsValue,
@@ -86,5 +87,30 @@ describe('unifiedCommunityName', () => {
 	it('deja el resto de nombres sin cambios', () => {
 		expect(unifiedCommunityName('Aragón')).toBe('Aragón');
 		expect(unifiedCommunityName('Ciudad de Ceuta')).toBe('Ciudad de Ceuta');
+	});
+});
+
+describe('communityNameVariants', () => {
+	it('el nombre unificado ("Illes Balears") incluye también el antiguo ("Islas Baleares")', () => {
+		const variants = communityNameVariants('Illes Balears');
+		expect(variants).toContain('Illes Balears');
+		expect(variants).toContain('Islas Baleares');
+	});
+
+	it('el nombre antiguo ("Islas Baleares") incluye también el unificado ("Illes Balears")', () => {
+		const variants = communityNameVariants('Islas Baleares');
+		expect(variants).toContain('Illes Balears');
+		expect(variants).toContain('Islas Baleares');
+	});
+
+	it('una comunidad sin alias conocido devuelve solo su propio nombre', () => {
+		expect(communityNameVariants('Cataluña')).toEqual(['Cataluña']);
+	});
+
+	it('consistencia: el resultado de unifiedCommunityName() siempre está entre sus propios communityNameVariants()', () => {
+		const original = 'Islas Baleares';
+		const unified = unifiedCommunityName(original);
+		expect(communityNameVariants(unified)).toContain(unified);
+		expect(communityNameVariants(original)).toContain(unified);
 	});
 });

@@ -95,6 +95,22 @@ describe('municipios: integridad referencial', () => {
 		const codes = municipalities.map((m) => m.ineCode);
 		expect(new Set(codes).size).toBe(codes.length);
 	});
+
+	it('Ceuta tiene exactamente un municipio (ella misma)', () => {
+		const ceutaProvinceCode = provinceCodes.find((p) => p.name === 'Ceuta')!.code;
+		const ceutaMunicipalities = municipalities.filter((m) => m.provinceCode === ceutaProvinceCode);
+		expect(ceutaMunicipalities).toHaveLength(1);
+		expect(ceutaMunicipalities[0].name).toBe('Ceuta');
+	});
+
+	it('Melilla tiene exactamente un municipio (ella misma)', () => {
+		const melillaProvinceCode = provinceCodes.find((p) => p.name === 'Melilla')!.code;
+		const melillaMunicipalities = municipalities.filter(
+			(m) => m.provinceCode === melillaProvinceCode
+		);
+		expect(melillaMunicipalities).toHaveLength(1);
+		expect(melillaMunicipalities[0].name).toBe('Melilla');
+	});
 });
 
 describe('nombre unificado de Baleares', () => {
