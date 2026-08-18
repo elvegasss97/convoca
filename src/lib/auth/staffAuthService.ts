@@ -61,7 +61,20 @@ export async function signInStaff(email: string, password: string): Promise<Staf
 	});
 	if (error) throw new Error(STAFF_ACCESS_DENIED_MESSAGE);
 
-	const step = await currentStaffAccessStep();
+	let step: StaffAccessStep | 'not-staff';
+	try {
+		step = await currentStaffAccessStep();
+	} catch {
+		// Cualquier fallo al comprobar el estado tras un login que sí
+		// aceptó la contraseña (p. ej. un error de red al consultar el AAL)
+		// debe verse EXACTAMENTE igual que un simple acceso denegado — un
+		// mensaje técnico distinto en este punto confirmaría que las
+		// credenciales eran válidas, lo que permitiría a alguien probando
+		// contraseñas averiguar si un correo dado es de una cuenta de
+		// staff (hallazgo B2, revisión PR #27).
+		await supabase.auth.signOut();
+		throw new Error(STAFF_ACCESS_DENIED_MESSAGE);
+	}
 	if (step === 'not-staff') {
 		await supabase.auth.signOut();
 		throw new Error(STAFF_ACCESS_DENIED_MESSAGE);
@@ -75,7 +88,22 @@ export async function signInStaff(email: string, password: string): Promise<Staf
  * combina con el `user_metadata` existente (no lo sustituye entero), así
  * que no hace falta volver a mandar el resto.
  */
+/**
+ * El mínimo de 8 caracteres ya lo exige el formulario
+ * (`acceso-interno/cambiar-contrasena/+page.svelte`, deshabilita el envío
+ * por debajo de esa longitud); se repite aquí como defensa en profundidad
+ * para cualquier llamada directa a esta función que se salte la interfaz
+ * (hallazgo B3, revisión PR #27). La política de contraseñas GLOBAL de
+ * Supabase (longitud mínima, complejidad, comprobación contra filtraciones
+ * conocidas, etc., configurable en Authentication → Policies del proyecto)
+ * es un ajuste de PLATAFORMA independiente de este chequeo de aplicación —
+ * esta corrección no toca esa configuración remota.
+ */
 export async function changeStaffPassword(newPassword: string): Promise<void> {
+	if (newPassword.length < 8) {
+		throw new Error('La contraseña debe tener al menos 8 caracteres.');
+	}
+
 	const { error } = await supabase.auth.updateUser({
 		password: newPassword,
 		data: { must_change_password: false }

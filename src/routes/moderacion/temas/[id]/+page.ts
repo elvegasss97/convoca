@@ -2,6 +2,7 @@ import { redirect, error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { authService } from '$lib/auth/authService';
 import { currentStaffAccessStep } from '$lib/auth/staffAuthService';
+import { isStaffRole } from '$lib/auth/staffAccess';
 import {
 	getTopicById,
 	listTopicSources,
@@ -22,10 +23,12 @@ import { listRounds } from '$lib/services/participationService';
 /** Forzado a CSR: ver el mismo comentario en `src/routes/moderacion/+page.ts`. */
 export const ssr = false;
 
-export const load: PageLoad = async ({ params, url }) => {
+export const load: PageLoad = async ({ params }) => {
 	const session = await authService.getSession();
-	if (!session || (session.user.role !== 'moderator' && session.user.role !== 'admin')) {
-		redirect(303, `/login?redirect=${encodeURIComponent(url.pathname)}`);
+	// Ver el mismo comentario en src/routes/moderacion/+page.ts (hallazgo
+	// B1, revisión PR #27): /acceso-interno, nunca /login.
+	if (!session || !isStaffRole(session.user.role)) {
+		redirect(303, '/acceso-interno');
 	}
 
 	// Ver el mismo comentario en src/routes/moderacion/+page.ts.

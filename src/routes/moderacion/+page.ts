@@ -2,6 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { authService } from '$lib/auth/authService';
 import { currentStaffAccessStep } from '$lib/auth/staffAuthService';
+import { isStaffRole } from '$lib/auth/staffAccess';
 import {
 	listPendingReview,
 	listReportedEvents,
@@ -35,13 +36,20 @@ import { listRecentAuditTrail } from '$lib/services/auditTrailService';
  */
 export const ssr = false;
 
-export const load: PageLoad = async ({ url }) => {
+export const load: PageLoad = async () => {
 	const session = await authService.getSession();
 
 	// Ruta separada del panel del organizador a propósito: ni comparte rutas
 	// ni permisos. Un organizador normal no puede entrar aquí.
-	if (!session || (session.user.role !== 'moderator' && session.user.role !== 'admin')) {
-		redirect(303, `/login?redirect=${encodeURIComponent(url.pathname)}`);
+	//
+	// Estado "not-staff" explícito (sin sesión, o con sesión pero rol no
+	// staff): antes redirigía a /login, la pantalla de Google para
+	// ciudadanía — un destino que nunca concede acceso aquí, así que quien
+	// llegara sin sesión de staff quedaba en un callejón sin salida real
+	// (hallazgo B1, revisión PR #27). /acceso-interno es la única pantalla
+	// que sí puede llevar hasta aquí.
+	if (!session || !isStaffRole(session.user.role)) {
+		redirect(303, '/acceso-interno');
 	}
 
 	// Comprobación de UX: la barrera real es RLS — is_moderator_or_admin()

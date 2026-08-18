@@ -146,6 +146,16 @@ describe('signInStaff', () => {
 		await expect(signInStaff('x@test.local', 'good')).resolves.toBe('verify');
 		expect(authMocks.signOut).not.toHaveBeenCalled();
 	});
+
+	it('mismo mensaje genérico si falla la comprobación del AAL tras un login válido — no revela que la contraseña era correcta (B2)', async () => {
+		getSessionMock.mockResolvedValue({ user: { id: 'u1', role: 'admin' } });
+		authMocks.mfa.getAuthenticatorAssuranceLevel.mockResolvedValue({
+			data: { currentLevel: null, nextLevel: null },
+			error: { message: 'network error' }
+		});
+		await expect(signInStaff('x@test.local', 'good')).rejects.toThrow(STAFF_ACCESS_DENIED_MESSAGE);
+		expect(authMocks.signOut).toHaveBeenCalledTimes(1);
+	});
 });
 
 describe('enrollTotp', () => {
@@ -218,8 +228,23 @@ describe('changeStaffPassword', () => {
 
 	it('lanza un mensaje legible si Supabase rechaza la actualización', async () => {
 		authMocks.updateUser.mockResolvedValue({ data: null, error: { message: 'weak password' } });
-		await expect(changeStaffPassword('123')).rejects.toThrow(
+		await expect(changeStaffPassword('weakpass')).rejects.toThrow(
 			'No se ha podido actualizar la contraseña. Inténtalo de nuevo.'
 		);
+	});
+
+	it('rechaza contraseñas de menos de 8 caracteres SIN llamar a Supabase (defensa en profundidad, B3)', async () => {
+		await expect(changeStaffPassword('1234567')).rejects.toThrow(
+			'La contraseña debe tener al menos 8 caracteres.'
+		);
+		expect(authMocks.updateUser).not.toHaveBeenCalled();
+	});
+
+	it('acepta exactamente 8 caracteres (el límite no es "más de 8")', async () => {
+		await changeStaffPassword('12345678');
+		expect(authMocks.updateUser).toHaveBeenCalledWith({
+			password: '12345678',
+			data: { must_change_password: false }
+		});
 	});
 });
