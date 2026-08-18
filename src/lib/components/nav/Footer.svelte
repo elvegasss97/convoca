@@ -8,6 +8,6 @@
 			>Declaración de uso pacífico</a
 		>
 		<a href="/legal/aviso-legal" class="hover:text-brand-700 hover:underline">Aviso legal</a>
-		<span class="sm:ml-auto">© Convoca</span>
+		<a href="/acceso-interno" class="sm:ml-auto no-underline hover:no-underline">© Convoca</a>
 	</div>
 </footer>
