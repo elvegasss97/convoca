@@ -165,18 +165,25 @@ export async function reviewDocument(
  * (`verification_documents_storage_select_own_or_staff`) — esta función
  * no concede ningún acceso nuevo, solo genera el enlace temporal.
  *
- * Se registra la visualización ANTES de generar la URL (RPC `SECURITY
- * DEFINER` `log_verification_document_view`, 0051, que revalida permiso
- * de staff por su cuenta): si quien llama no es moderación/administración,
- * el RPC falla y nunca se llega a pedir la URL firmada.
+ * `documentId` es la ÚNICA entrada — deliberadamente NO acepta un
+ * `storagePath` aparte (corrige el hallazgo M1 de la revisión del PR
+ * #27, ver 0053: antes se podían mandar por separado un `documentId` y
+ * un `storagePath` de documentos distintos, y la auditoría quedaba
+ * asociada al documento equivocado). El RPC `SECURITY DEFINER`
+ * `log_verification_document_view` (0053) resuelve él mismo, en
+ * servidor, el `storage_path` real de esa fila — revalidando permiso de
+ * staff (rol + aal2) y que el documento exista — y lo devuelve; ese es
+ * el ÚNICO valor que se usa para firmar la URL, así que no puede
+ * divergir del que queda auditado.
  */
 const VERIFICATION_DOCUMENT_SIGNED_URL_TTL_SECONDS = 120;
 
-export async function getVerificationDocumentSignedUrl(documentId: string, storagePath: string) {
-	const { error: logError } = await supabase.rpc('log_verification_document_view', {
-		p_document_id: documentId
-	});
-	if (logError) throw new Error('No tienes permiso para ver este documento.');
+export async function getVerificationDocumentSignedUrl(documentId: string): Promise<string> {
+	const { data: storagePath, error: logError } = await supabase.rpc(
+		'log_verification_document_view',
+		{ p_document_id: documentId }
+	);
+	if (logError || !storagePath) throw new Error('No tienes permiso para ver este documento.');
 
 	const { data, error } = await supabase.storage
 		.from('verification-documents')

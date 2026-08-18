@@ -294,15 +294,18 @@
 
 	/**
 	 * Abre el archivo real con una URL firmada de corta duración (nunca un
-	 * archivo público, ver `getVerificationDocumentSignedUrl`). Queda
-	 * registrado en `audit_trail` por el propio RPC antes de que exista la
+	 * archivo público, ver `getVerificationDocumentSignedUrl`). Solo se
+	 * pasa `documentId`: el `storage_path` real lo resuelve el propio RPC
+	 * en servidor (0053), nunca este componente — así no hay manera de que
+	 * la URL abierta y lo que queda auditado correspondan a documentos
+	 * distintos. Queda registrado en `audit_trail` antes de que exista la
 	 * URL — si falla el registro, no llega a abrirse nada.
 	 */
 	let viewingDocId = $state<string | null>(null);
-	async function viewDocument(documentId: string, storagePath: string) {
+	async function viewDocument(documentId: string) {
 		viewingDocId = documentId;
 		try {
-			const url = await getVerificationDocumentSignedUrl(documentId, storagePath);
+			const url = await getVerificationDocumentSignedUrl(documentId);
 			window.open(url, '_blank', 'noopener');
 		} catch (err) {
 			alert(err instanceof Error ? err.message : 'No se ha podido abrir el documento.');
@@ -689,7 +692,7 @@
 									<button
 										type="button"
 										disabled={viewingDocId === doc.id}
-										onclick={() => viewDocument(doc.id, doc.storagePath)}
+										onclick={() => viewDocument(doc.id)}
 										class="flex items-center gap-1.5 rounded-full border border-ink-200 px-3 py-1.5 text-xs font-semibold text-ink-600 hover:bg-ink-50 disabled:opacity-50"
 									>
 										<FileSearch class="size-3.5" />
