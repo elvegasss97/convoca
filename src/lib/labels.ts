@@ -7,6 +7,7 @@ import type {
 	ConcernProposalStatus,
 	ConcernScopeType,
 	ConcernStatus,
+	OpenVoiceModerationStatus,
 	OpenVoiceScopeType,
 	OpenVoiceStatus,
 	EventCategory,
@@ -256,6 +257,14 @@ export const openVoiceStatusLabels: Record<OpenVoiceStatus, string> = {
 	recibida: 'Recibida',
 	analisis_conjunto: 'Análisis conjunto',
 	posible_propuesta: 'Posible propuesta'
+};
+
+/** Copy para el Centro de Operaciones (Fase 1) — nunca visible para quien participa. */
+export const openVoiceModerationStatusLabels: Record<OpenVoiceModerationStatus, string> = {
+	pending: 'Pendiente de revisión',
+	approved: 'Aprobada',
+	flagged: 'Marcada',
+	rejected: 'Rechazada'
 };
 
 // ---------------------------------------------------------------------------

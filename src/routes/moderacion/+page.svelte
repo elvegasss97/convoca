@@ -14,10 +14,13 @@
 		CalendarDays,
 		Activity,
 		Lightbulb,
-		Plus
+		Plus,
+		MessageCircleHeart,
+		FileSearch
 	} from '@lucide/svelte';
 	import PulsoModerationPanel from '$lib/components/pulso/PulsoModerationPanel.svelte';
 	import NextBlockVoteAdminPanel from '$lib/components/pulso/NextBlockVoteAdminPanel.svelte';
+	import VozAbiertaModerationPanel from '$lib/components/pulso/VozAbiertaModerationPanel.svelte';
 	import TopicCard from '$lib/components/pulso/TopicCard.svelte';
 	import type { PageData } from './$types';
 	import type { AuditLog, Event, ModerationAction } from '$lib/types';
@@ -30,7 +33,10 @@
 	} from '$lib/labels';
 	import { formatEventDate, formatEventTime, formatRelativeTime } from '$lib/utils/date';
 	import { applyModerationAction, listAllAuditLogs } from '$lib/services/moderationService';
-	import { reviewDocument } from '$lib/services/organizersService';
+	import {
+		reviewDocument,
+		getVerificationDocumentSignedUrl
+	} from '$lib/services/organizersService';
 	import { getEvent } from '$lib/services/eventsService';
 	import { setChannelHidden, listReportedChannels } from '$lib/services/channelsService';
 	import StatusPill from '$lib/components/StatusPill.svelte';
@@ -50,6 +56,7 @@
 	let concernProposals = $state(data.concernProposals);
 	let topics = $state(data.topics);
 	let nextBlockVoteRounds = $state(data.nextBlockVoteRounds);
+	let pendingOpenVoiceContributions = $state(data.pendingOpenVoiceContributions);
 	const pendingAlternativesCount = $derived(data.pendingAlternatives.length);
 
 	const orgNameById = $derived(new Map(data.organizers.map((o) => [o.id, o.displayName])));
@@ -59,6 +66,7 @@
 		{ key: 'reportadas', label: 'Reportadas', icon: Flag },
 		{ key: 'documentacion', label: 'Documentación', icon: FileCheck2 },
 		{ key: 'pulso', label: 'Pulso ciudadano', icon: Activity },
+		{ key: 'vozAbierta', label: 'Voz abierta', icon: MessageCircleHeart },
 		{ key: 'temas', label: 'Temas', icon: Lightbulb },
 		{ key: 'registro', label: 'Registro de decisiones', icon: ScrollText }
 	] as const;
@@ -153,6 +161,25 @@
 		pendingDocuments = pendingDocuments.filter((d) => d.id !== documentId);
 	}
 
+	/**
+	 * Abre el archivo real con una URL firmada de corta duración (nunca un
+	 * archivo público, ver `getVerificationDocumentSignedUrl`). Queda
+	 * registrado en `audit_trail` por el propio RPC antes de que exista la
+	 * URL — si falla el registro, no llega a abrirse nada.
+	 */
+	let viewingDocId = $state<string | null>(null);
+	async function viewDocument(documentId: string, storagePath: string) {
+		viewingDocId = documentId;
+		try {
+			const url = await getVerificationDocumentSignedUrl(documentId, storagePath);
+			window.open(url, '_blank', 'noopener');
+		} catch (err) {
+			alert(err instanceof Error ? err.message : 'No se ha podido abrir el documento.');
+		} finally {
+			viewingDocId = null;
+		}
+	}
+
 	let auditEventTitles = $state<Map<string, string>>(new Map());
 	$effect(() => {
 		const ids = [...new Set(auditLog.map((l: AuditLog) => l.eventId))];
@@ -208,6 +235,10 @@
 				{:else if tab.key === 'pulso' && concernProposals.filter((p) => p.status === 'pending').length > 0}
 					<span class="rounded-full bg-warning-100 px-1.5 text-xs font-bold text-warning-700">
 						{concernProposals.filter((p) => p.status === 'pending').length}
+					</span>
+				{:else if tab.key === 'vozAbierta' && pendingOpenVoiceContributions.length > 0}
+					<span class="rounded-full bg-warning-100 px-1.5 text-xs font-bold text-warning-700">
+						{pendingOpenVoiceContributions.length}
 					</span>
 				{:else if tab.key === 'temas' && pendingAlternativesCount > 0}
 					<span class="rounded-full bg-warning-100 px-1.5 text-xs font-bold text-warning-700">
@@ -412,6 +443,15 @@
 							<div class="flex gap-2">
 								<button
 									type="button"
+									disabled={viewingDocId === doc.id}
+									onclick={() => viewDocument(doc.id, doc.storagePath)}
+									class="flex items-center gap-1.5 rounded-full border border-ink-200 px-3 py-1.5 text-xs font-semibold text-ink-600 hover:bg-ink-50 disabled:opacity-50"
+								>
+									<FileSearch class="size-3.5" />
+									{viewingDocId === doc.id ? 'Abriendo…' : 'Ver documento'}
+								</button>
+								<button
+									type="button"
 									onclick={() => reviewDoc(doc.id, 'approved')}
 									class="rounded-full bg-brand-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-800"
 								>
@@ -437,6 +477,8 @@
 				moderatorId={MODERATOR_ID}
 			/>
 			<NextBlockVoteAdminPanel bind:rounds={nextBlockVoteRounds} moderatorId={MODERATOR_ID} />
+		{:else if activeTab === 'vozAbierta'}
+			<VozAbiertaModerationPanel bind:items={pendingOpenVoiceContributions} />
 		{:else if activeTab === 'temas'}
 			<div>
 				<a

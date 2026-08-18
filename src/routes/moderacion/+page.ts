@@ -12,6 +12,7 @@ import { listPublicEvents } from '$lib/services/eventsService';
 import { listConcerns, listConcernProposals } from '$lib/services/concernsService';
 import { listTopics, listPendingMeasureAlternatives } from '$lib/services/topicsService';
 import { listNextBlockVoteRounds } from '$lib/services/nextBlockVoteService';
+import { listPendingOpenVoiceContributionsForModeration } from '$lib/services/openVoiceService';
 
 /**
  * Forzado a CSR: `authService.getSession()` lee la sesión de Supabase desde
@@ -46,7 +47,8 @@ export const load: PageLoad = async ({ url }) => {
 		publicEvents,
 		topics,
 		pendingAlternatives,
-		nextBlockVoteRounds
+		nextBlockVoteRounds,
+		pendingOpenVoiceContributions
 	] = await Promise.all([
 		listPendingReview(),
 		listReportedEvents(),
@@ -59,7 +61,8 @@ export const load: PageLoad = async ({ url }) => {
 		listPublicEvents(),
 		listTopics(),
 		listPendingMeasureAlternatives(),
-		listNextBlockVoteRounds()
+		listNextBlockVoteRounds(),
+		listPendingOpenVoiceContributionsForModeration()
 	]);
 
 	return {
@@ -75,6 +78,7 @@ export const load: PageLoad = async ({ url }) => {
 		publicEvents,
 		topics,
 		pendingAlternatives,
-		nextBlockVoteRounds
+		nextBlockVoteRounds,
+		pendingOpenVoiceContributions
 	};
 };
