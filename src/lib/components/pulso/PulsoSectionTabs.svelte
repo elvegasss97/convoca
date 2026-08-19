@@ -1,14 +1,16 @@
 <script lang="ts">
-	import { Ear, FileEdit } from '@lucide/svelte';
+	import { Ear, FileEdit, MapPinned } from '@lucide/svelte';
 
 	interface Props {
-		active: 'escucha' | 'propuestas';
+		active: 'escucha' | 'propuestas' | 'municipal';
 	}
 
 	let { active }: Props = $props();
 </script>
 
-<div class="inline-flex rounded-full border border-ink-200 bg-white p-1 shadow-sm">
+<div
+	class="inline-flex max-w-full flex-wrap rounded-2xl border border-ink-200 bg-white p-1 shadow-sm sm:rounded-full"
+>
 	<a
 		href="/pulso/escucha"
 		aria-current={active === 'escucha' ? 'page' : undefined}
@@ -27,6 +29,16 @@
 			? 'bg-brand-700 text-white'
 			: 'text-ink-600 hover:bg-ink-50'}"
 	>
-		<FileEdit class="size-4" /> Propuestas de Convoca
+		<FileEdit class="size-4" /> Propuestas
+	</a>
+	<a
+		href="/pulso/municipal"
+		aria-current={active === 'municipal' ? 'page' : undefined}
+		class="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition {active ===
+		'municipal'
+			? 'bg-brand-700 text-white'
+			: 'text-ink-600 hover:bg-ink-50'}"
+	>
+		<MapPinned class="size-4" /> Muro municipal
 	</a>
 </div>
