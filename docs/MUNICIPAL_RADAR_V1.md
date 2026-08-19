@@ -98,3 +98,7 @@ No deben añadirse esos overrides hasta haber revisado realmente:
 ## Contenido inicial
 
 La migración NO siembra noticias ni reclamaciones reales automáticamente. Los primeros problemas deben entrar como filas documentadas con fuente, fecha, competencia y evidencia revisadas. Esto evita convertir un titular o una denuncia unilateral en un hecho de CONVOCA.
+
+## Correcciones posteriores
+
+- **`0055_fix_municipal_petition_anon_execute_grant.sql`**: hallazgo confirmado empíricamente contra staging tras aplicar 0054. `revoke all on function ... from public` no retira el `EXECUTE` que este proyecto de Supabase concede por defecto a `anon`/`authenticated` en cada función nueva de `public` — hace falta revocar de `anon` explícitamente, aparte de `public` (mismo patrón que `0042_security_hardening_review3.sql` ya estableció para `set_concern_listening_priorities` y funciones hermanas, que 0054 no replicó). Sin 0055, una llamada anónima a `create_municipal_petition`/`set_municipal_petition_support` llegaba a ejecutar el cuerpo de la función (aunque el `auth.uid() is null` interno seguía bloqueando cualquier efecto real). **Al escribir nuevas funciones `SECURITY DEFINER` de solo-`authenticated` en este proyecto, revocar siempre de `public` Y `anon` por separado, nunca solo de `public`.**
