@@ -1090,3 +1090,96 @@ export interface NextBlockVoteResultRow {
 	optionCode: NextBlockVoteOptionCode;
 	voteCount: number;
 }
+
+// ---------------------------------------------------------------------------
+// Radar municipal / recogidas de firmas
+// ---------------------------------------------------------------------------
+
+/** Categorías operativas del Muro Municipal. Deliberadamente cortas y no partidistas. */
+export type MunicipalIssueCategory =
+	| 'limpieza'
+	| 'movilidad'
+	| 'espacio_publico'
+	| 'vivienda'
+	| 'accesibilidad'
+	| 'seguridad'
+	| 'medioambiente'
+	| 'servicios_publicos'
+	| 'equipamientos'
+	| 'otro';
+
+/**
+ * Ciclo público del problema. `detected` es bandeja interna: nunca debe
+ * aparecer en la API pública hasta que una persona/agente autorizado lo
+ * verifique y publique.
+ */
+export type MunicipalIssueStatus = 'detected' | 'verified' | 'in_action' | 'resolved';
+export type MunicipalEvidenceLevel = 'low' | 'medium' | 'high';
+export type MunicipalIssueOrigin = 'agent' | 'citizen' | 'staff';
+export type MunicipalIssueSourceKind = 'official' | 'media' | 'association' | 'other';
+
+export interface MunicipalIssueSource {
+	id: string;
+	issueId: string;
+	title: string;
+	url: string;
+	publisher?: string;
+	kind: MunicipalIssueSourceKind;
+	publishedAt?: string;
+	createdAt: string;
+}
+
+export interface MunicipalIssueSuggestion {
+	id: string;
+	issueId: string;
+	position: number;
+	text: string;
+	authorKind: 'agent' | 'staff';
+	createdAt: string;
+}
+
+export interface MunicipalIssue {
+	id: string;
+	slug: string;
+	title: string;
+	summary: string;
+	category: MunicipalIssueCategory;
+	municipalityName: string;
+	municipalityIneCode?: string;
+	provinceCode: string;
+	point: GeoPoint;
+	status: MunicipalIssueStatus;
+	competenceLabel?: string;
+	evidenceLevel: MunicipalEvidenceLevel;
+	origin: MunicipalIssueOrigin;
+	detectedAt: string;
+	publishedAt?: string;
+	resolvedAt?: string;
+	createdAt: string;
+	updatedAt: string;
+	sources: MunicipalIssueSource[];
+	suggestions: MunicipalIssueSuggestion[];
+}
+
+export type MunicipalPetitionStatus = 'open' | 'closed' | 'resolved' | 'hidden';
+export type MunicipalPetitionOrigin = 'citizen' | 'convoca_pilot';
+
+export interface MunicipalPetition {
+	id: string;
+	slug: string;
+	issueId?: string;
+	title: string;
+	requestText: string;
+	targetName: string;
+	municipalityName: string;
+	municipalityIneCode: string;
+	provinceCode: string;
+	point: GeoPoint;
+	status: MunicipalPetitionStatus;
+	origin: MunicipalPetitionOrigin;
+	publishedAt: string;
+	createdAt: string;
+	updatedAt: string;
+	supportCount: number;
+	isSupportedByMe?: boolean;
+}

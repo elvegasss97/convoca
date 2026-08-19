@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Activity, Ear, FileEdit, ArrowRight, Users, Vote } from '@lucide/svelte';
+	import { Activity, Ear, FileEdit, ArrowRight, Users, Vote, MapPinned } from '@lucide/svelte';
 	import type { PageData } from './$types';
 	import Seo from '$lib/components/Seo.svelte';
 
@@ -81,7 +81,7 @@
 		</p>
 	</a>
 
-	<div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+	<div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
 		<a
 			href="/pulso/escucha"
 			class="group flex flex-col gap-3 rounded-2xl border border-ink-100 bg-white p-5 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover sm:p-6"
@@ -139,10 +139,31 @@
 				Consultar y revisar la propuesta <ArrowRight class="size-3.5" />
 			</a>
 		</div>
+
+		<a
+			href="/pulso/municipal"
+			class="group flex flex-col gap-3 rounded-2xl border border-ink-100 bg-white p-5 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover sm:p-6"
+		>
+			<span
+				class="flex size-11 items-center justify-center rounded-full bg-brand-100 text-brand-700"
+			>
+				<MapPinned class="size-5" strokeWidth={2.25} />
+			</span>
+			<h2 class="font-display text-lg font-semibold text-ink-900">Muro municipal</h2>
+			<p class="text-sm leading-relaxed text-ink-600">
+				Un mapa vivo de problemas concretos de pueblos y ciudades, con fuentes, posibles vías y
+				recogidas de apoyos abiertas por ciudadanos.
+			</p>
+			<p
+				class="mt-auto flex items-center gap-1 text-sm font-semibold text-brand-700 group-hover:underline"
+			>
+				Explorar el mapa municipal <ArrowRight class="size-3.5" />
+			</p>
+		</a>
 	</div>
 
 	<p class="mt-8 text-center text-xs leading-relaxed text-ink-400 sm:text-left">
-		Escucha ciudadana y Propuestas de Convoca forman parte del mismo recorrido: la ciudadanía
-		señala, Convoca investiga y propone, la ciudadanía revisa, Convoca mejora.
+		Escucha ciudadana, Propuestas y Muro municipal forman parte del mismo recorrido: la ciudadanía
+		señala, CONVOCA documenta y propone, la ciudadanía revisa y puede movilizar apoyos.
 	</p>
 </div>
