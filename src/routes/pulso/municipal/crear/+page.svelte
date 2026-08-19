@@ -157,9 +157,15 @@
 					placeholder="Ej. Reparar el parque infantil de la Plaza Mayor"
 					class="mt-1.5 w-full rounded-xl border-ink-200 text-sm focus:border-brand-500 focus:ring-brand-500"
 				/>
-				<p class="mt-1 text-xs text-ink-400">
-					Una petición concreta funciona mejor que una reclamación genérica.
-				</p>
+				{#if title.trim().length > 0 && title.trim().length < 8}
+					<p class="mt-1 text-xs text-critical-700">
+						Necesitas al menos 8 caracteres (llevas {title.trim().length}).
+					</p>
+				{:else}
+					<p class="mt-1 text-xs text-ink-400">
+						Una petición concreta funciona mejor que una reclamación genérica.
+					</p>
+				{/if}
 			</div>
 
 			<div>
