@@ -192,7 +192,16 @@
 					placeholder="Describe qué ocurre y qué actuación concreta solicitas…"
 					class="mt-1.5 w-full rounded-xl border-ink-200 text-sm focus:border-brand-500 focus:ring-brand-500"
 				></textarea>
-				<p class="mt-1 text-right text-xs text-ink-400">{requestText.length}/2200</p>
+				<div class="mt-1 flex items-center justify-between gap-2 text-xs">
+					{#if requestText.trim().length > 0 && requestText.trim().length < 20}
+						<p class="text-critical-700">
+							Necesitas al menos 20 caracteres (llevas {requestText.trim().length}).
+						</p>
+					{:else}
+						<span></span>
+					{/if}
+					<p class="shrink-0 text-ink-400">{requestText.length}/2200</p>
+				</div>
 			</div>
 
 			<div>
