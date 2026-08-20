@@ -3,6 +3,38 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
 	public: {
 		Tables: {
+			_municipal_issue_review_authorizations: {
+				Row: {
+					action: string;
+					actor_id: string;
+					created_at: string;
+					issue_id: string;
+					txid: number;
+				};
+				Insert: {
+					action: string;
+					actor_id: string;
+					created_at?: string;
+					issue_id: string;
+					txid?: number;
+				};
+				Update: {
+					action?: string;
+					actor_id?: string;
+					created_at?: string;
+					issue_id?: string;
+					txid?: number;
+				};
+				Relationships: [
+					{
+						foreignKeyName: '_municipal_issue_review_authorizations_issue_id_fkey';
+						columns: ['issue_id'];
+						isOneToOne: false;
+						referencedRelation: 'municipal_issues';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			attendance_rate_limits: {
 				Row: {
 					called_at: string;
