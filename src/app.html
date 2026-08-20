@@ -4,18 +4,6 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="text-scale" content="scale" />
-		<style>
-			/* Evita que las etiquetas largas del calendario visual ensanchen la página
-			   completa en móvil. El contenido sigue siendo legible y el Gantt mantiene
-			   su propio desplazamiento horizontal interno. */
-			#calendario [style*="grid-template-columns: repeat("] > button {
-				min-width: 0;
-			}
-			#calendario .whitespace-nowrap {
-				white-space: normal !important;
-				overflow-wrap: anywhere;
-			}
-		</style>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

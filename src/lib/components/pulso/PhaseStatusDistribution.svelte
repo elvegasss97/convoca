@@ -34,13 +34,16 @@
 	}
 </script>
 
-<div class="grid gap-2 sm:gap-4" style="grid-template-columns: repeat({phases.length}, 1fr);">
+<div
+	class="grid gap-2 sm:gap-4"
+	style="grid-template-columns: repeat({phases.length}, minmax(0, 1fr));"
+>
 	{#each phases as phase (phase.id)}
 		{@const counts = countsByPhaseId.get(phase.id) ?? {}}
 		{@const phaseTotal = total(phase.id)}
-		<button type="button" onclick={() => onSelectPhase(phase.id)} class="group text-center">
+		<button type="button" onclick={() => onSelectPhase(phase.id)} class="group min-w-0 text-center">
 			<div
-				class="mb-2 text-xs font-bold"
+				class="mb-2 text-xs leading-tight font-bold break-words"
 				style={`color:${activePhaseId === phase.id ? 'var(--color-brand-700)' : 'var(--color-ink-700)'}`}
 			>
 				{phaseShortLabel(phase)}
