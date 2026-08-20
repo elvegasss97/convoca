@@ -5,8 +5,6 @@
 	import {
 		Bot,
 		CheckCircle2,
-		ChevronRight,
-		CircleDot,
 		ExternalLink,
 		FileSignature,
 		Flag,
@@ -39,9 +37,9 @@
 	let mode = $state<'issues' | 'petitions'>(initialView === 'petitions' ? 'petitions' : 'issues');
 	let issues = $state<MunicipalIssue[]>(data.issues);
 	let petitions = $state<MunicipalPetition[]>(data.petitions);
-	let selectedIssue = $state<MunicipalIssue | null>(issues[0] ?? null);
+	let selectedIssue = $state<MunicipalIssue | null>(null);
 	let selectedPetition = $state<MunicipalPetition | null>(
-		petitions.find((item) => item.id === initialPetitionId) ?? petitions[0] ?? null
+		initialPetitionId ? (petitions.find((item) => item.id === initialPetitionId) ?? null) : null
 	);
 	let signingId = $state<string | null>(null);
 	let signingError = $state<string | null>(null);
@@ -89,10 +87,12 @@
 
 	function chooseIssue(issue: MunicipalIssue) {
 		selectedIssue = issue;
+		selectedPetition = null;
 	}
 
 	function choosePetition(petition: MunicipalPetition) {
 		selectedPetition = petition;
+		selectedIssue = null;
 		signingError = null;
 		consentPetitionId = null;
 		supportConsentChecked = false;
@@ -104,11 +104,19 @@
 		}
 	}
 
+	function closeSelection() {
+		selectedIssue = null;
+		selectedPetition = null;
+		consentPetitionId = null;
+		supportConsentChecked = false;
+		reportingPetitionId = null;
+		reportError = null;
+		signingError = null;
+	}
+
 	function switchMode(next: 'issues' | 'petitions') {
 		mode = next;
-		signingError = null;
-		if (next === 'issues' && !selectedIssue) selectedIssue = issues[0] ?? null;
-		if (next === 'petitions' && !selectedPetition) selectedPetition = petitions[0] ?? null;
+		closeSelection();
 	}
 
 	function supportLoginRedirect(petitionId: string): string {
@@ -297,11 +305,21 @@
 							{selectedIssue.title}
 						</h2>
 					</div>
-					<span
-						class="shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-700"
-					>
-						{issueStatusLabel[selectedIssue.status]}
-					</span>
+					<div class="flex shrink-0 items-center gap-1.5">
+						<span
+							class="rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-700"
+						>
+							{issueStatusLabel[selectedIssue.status]}
+						</span>
+						<button
+							type="button"
+							onclick={closeSelection}
+							class="rounded-full p-1.5 text-ink-400 transition hover:bg-ink-50 hover:text-ink-700"
+							aria-label="Cerrar ficha"
+						>
+							<X class="size-4" />
+						</button>
+					</div>
 				</div>
 
 				<p class="mt-2 text-sm leading-relaxed text-ink-600">{selectedIssue.summary}</p>
@@ -363,9 +381,19 @@
 			<article
 				class="absolute top-3 left-3 z-10 w-[min(390px,calc(100%-1.5rem))] rounded-3xl border border-white/70 bg-white/95 p-4 shadow-card-hover backdrop-blur sm:p-5"
 			>
-				<div class="flex items-center gap-1.5 text-xs font-semibold text-brand-700">
-					<MapPin class="size-3.5" />
-					{selectedPetition.municipalityName}
+				<div class="flex items-start justify-between gap-3">
+					<div class="flex items-center gap-1.5 text-xs font-semibold text-brand-700">
+						<MapPin class="size-3.5" />
+						{selectedPetition.municipalityName}
+					</div>
+					<button
+						type="button"
+						onclick={closeSelection}
+						class="rounded-full p-1.5 text-ink-400 transition hover:bg-ink-50 hover:text-ink-700"
+						aria-label="Cerrar ficha"
+					>
+						<X class="size-4" />
+					</button>
 				</div>
 				<h2 class="mt-1 font-display text-lg leading-snug font-semibold text-ink-900">
 					{selectedPetition.title}
@@ -496,29 +524,6 @@
 					</div>
 				{/if}
 			</article>
-		{:else}
-			<div
-				class="absolute top-3 left-3 z-10 w-[min(380px,calc(100%-1.5rem))] rounded-3xl border border-white/70 bg-white/95 p-5 shadow-card-hover backdrop-blur"
-			>
-				<div
-					class="flex size-10 items-center justify-center rounded-full bg-brand-100 text-brand-700"
-				>
-					<CircleDot class="size-5" />
-				</div>
-				<h2 class="mt-3 font-display text-lg font-semibold text-ink-900">
-					El mapa todavía está vacío
-				</h2>
-				<p class="mt-1 text-sm leading-relaxed text-ink-600">
-					Los problemas verificados y las recogidas aparecerán aquí en cuanto se publiquen en la
-					nueva base municipal.
-				</p>
-				<a
-					href="/pulso/municipal/crear"
-					class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:underline"
-				>
-					Abrir la primera recogida <ChevronRight class="size-4" />
-				</a>
-			</div>
 		{/if}
 	</div>
 	<p class="mt-2 text-right text-[10px] text-ink-400">
