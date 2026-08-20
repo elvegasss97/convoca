@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { tick } from 'svelte';
 	import {
 		LogIn,
 		Loader2,
@@ -259,7 +260,31 @@
 	let showResults = $state(false);
 	let showPortadaResults = $state(false);
 
-	function discardDraft() {
+	async function revealCurrentStep() {
+		if (!browser) return;
+
+		const activeElement = document.activeElement;
+		if (activeElement instanceof HTMLElement) activeElement.blur();
+
+		// Espera a que Svelte haya sustituido el contenido del paso anterior.
+		await tick();
+
+		// Dos frames dejan que el teclado móvil termine de ceder espacio al viewport
+		// antes de recolocar la pregunta nueva. Evita quedarse visualmente en el
+		// fondo del formulario con un botón deshabilitado y pensar que se ha bloqueado.
+		requestAnimationFrame(() => {
+			requestAnimationFrame(() => {
+				const progress = document.querySelector<HTMLElement>('[data-sanidad-listening-progress]');
+				if (!progress) return;
+				progress.scrollIntoView({
+					behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+					block: 'start'
+				});
+			});
+		});
+	}
+
+	async function discardDraft() {
 		const confirmed = confirm(
 			'¿Borrar tu borrador guardado en este dispositivo y empezar de nuevo? Esto no afecta a ninguna respuesta que ya hayas enviado.'
 		);
@@ -269,6 +294,7 @@
 		step = 1;
 		pendingAutoSubmit = false;
 		restoredFromDraft = false;
+		await revealCurrentStep();
 	}
 
 	function resolveConflictKeepServer() {
@@ -280,13 +306,14 @@
 		conflict = null;
 	}
 
-	function resolveConflictKeepDraft() {
+	async function resolveConflictKeepDraft() {
 		if (!conflict) return;
 		form = conflict.draftForm;
 		step = conflict.draftStep > 0 ? conflict.draftStep : 1;
 		finished = false;
 		restoredFromDraft = true;
 		conflict = null;
+		await revealCurrentStep();
 	}
 
 	// Persistencia local continua (con debounce): sobrevive a recargas y al
@@ -365,17 +392,37 @@
 		return true;
 	});
 
-	function nextStep() {
+	async function startListening() {
+		step = 1;
+		await revealCurrentStep();
+	}
+
+	async function nextStep() {
 		restoredFromDraft = false;
 		if (step === 6) {
-			finish();
+			await finish();
 		} else {
 			step += 1;
+			await revealCurrentStep();
 		}
 	}
-	function prevStep() {
+
+	async function prevStep() {
 		restoredFromDraft = false;
-		if (step > 0) step -= 1;
+		if (step > 0) {
+			step -= 1;
+			await revealCurrentStep();
+		}
+	}
+
+	async function omitStep() {
+		restoredFromDraft = false;
+		if (step === 6) {
+			await finish();
+		} else {
+			step += 1;
+			await revealCurrentStep();
+		}
 	}
 
 	function toInput(): ListeningSurveyInput {
@@ -424,10 +471,11 @@
 		}
 	}
 
-	function editResponse() {
+	async function editResponse() {
 		finished = false;
 		step = 1;
 		showResults = false;
+		await revealCurrentStep();
 	}
 
 	const STEP_LABELS = ['Dónde falla', 'Causa', 'Medidas', 'Compromisos', 'Qué falta', 'Territorio'];
@@ -561,7 +609,7 @@
 		<div class="mt-4 flex flex-wrap items-center gap-2">
 			<button
 				type="button"
-				onclick={() => (step = 1)}
+				onclick={startListening}
 				class="flex items-center gap-1.5 rounded-full bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-800"
 			>
 				Empezar la escucha <ArrowRight class="size-4" />
@@ -637,7 +685,11 @@
 
 {#snippet stepContent()}
 	<!-- Progreso -->
-	<ol class="flex flex-wrap gap-1.5 text-xs" aria-label="Progreso de la escucha">
+	<ol
+		data-sanidad-listening-progress
+		class="scroll-mt-20 flex flex-wrap gap-1.5 text-xs"
+		aria-label="Progreso de la escucha"
+	>
 		{#each STEP_LABELS as label, i (label)}
 			<li
 				class="rounded-full border px-2.5 py-1 font-medium {step === i + 1
@@ -907,7 +959,7 @@
 		{#if step >= 5}
 			<button
 				type="button"
-				onclick={() => (step === 6 ? finish() : (step += 1))}
+				onclick={omitStep}
 				class="rounded-full border border-ink-200 px-3.5 py-2 text-sm font-medium text-ink-700 hover:bg-ink-50"
 			>
 				Omitir
