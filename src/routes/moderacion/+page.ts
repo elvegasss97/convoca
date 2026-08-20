@@ -24,7 +24,6 @@ import {
 } from '$lib/services/openVoiceService';
 import { listRecentAuditTrail } from '$lib/services/auditTrailService';
 import { listReportedMunicipalPetitions } from '$lib/services/municipalService';
-import { listDetectedMunicipalIssuesForModeration } from '$lib/services/municipalRadarModerationService';
 
 /**
  * Forzado a CSR: `authService.getSession()` lee la sesión de Supabase desde
@@ -45,7 +44,6 @@ export const load: PageLoad = async () => {
 		redirect(303, '/acceso-interno');
 	}
 
-	// La barrera real es RLS: is_moderator_or_admin() exige rol staff + aal2.
 	const accessStep = await currentStaffAccessStep();
 	if (accessStep === 'change-password') redirect(303, '/acceso-interno/cambiar-contrasena');
 	if (accessStep === 'enroll') redirect(303, '/acceso-interno/configurar-mfa');
@@ -65,8 +63,7 @@ export const load: PageLoad = async () => {
 		pendingAlternatives,
 		nextBlockVoteRounds,
 		pendingOpenVoiceContributions,
-		reportedMunicipalPetitions,
-		detectedMunicipalIssues
+		reportedMunicipalPetitions
 	] = await Promise.all([
 		listPendingReview(),
 		listReportedEvents(),
@@ -81,8 +78,7 @@ export const load: PageLoad = async () => {
 		listPendingMeasureAlternatives(),
 		listNextBlockVoteRounds(),
 		listPendingOpenVoiceContributionsForModeration(),
-		listReportedMunicipalPetitions(),
-		listDetectedMunicipalIssuesForModeration()
+		listReportedMunicipalPetitions()
 	]);
 
 	const [participantCountResult, openVoiceTotalResult, recentAuditTrailResult] =
@@ -124,7 +120,6 @@ export const load: PageLoad = async () => {
 		nextBlockVoteRounds,
 		pendingOpenVoiceContributions,
 		reportedMunicipalPetitions,
-		detectedMunicipalIssues,
 		participantCount,
 		openVoiceTotal,
 		recentAuditTrail,
