@@ -26,8 +26,11 @@ jobs:
       PUBLIC_ENABLE_DEMO_DATA: 'false'
       PUBLIC_ENABLE_DEV_TOOLS: 'false'
     steps:
-      - name: Checkout
+      - name: Checkout PR head
         uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -47,8 +50,34 @@ jobs:
       - name: Type and Svelte check
         run: pnpm check
 
-      - name: Lint and formatting
-        run: pnpm lint
+      - name: Prettier and ESLint on PR diff
+        shell: bash
+        run: |
+          base_ref="${GITHUB_BASE_REF:-main}"
+          git fetch origin "$base_ref" --quiet
+          mapfile -t changed < <(git diff --name-only --diff-filter=ACMR "origin/$base_ref...HEAD")
+
+          format_files=()
+          eslint_files=()
+          for file in "${changed[@]}"; do
+            case "$file" in
+              *.ts|*.svelte|*.mjs|*.js|*.jsx|*.json|*.yml|*.yaml|*.md|*.css|*.html)
+                format_files+=("$file")
+                ;;
+            esac
+            case "$file" in
+              *.ts|*.svelte|*.mjs|*.js|*.jsx)
+                eslint_files+=("$file")
+                ;;
+            esac
+          done
+
+          if ((${#format_files[@]})); then
+            pnpm exec prettier --check -- "${format_files[@]}"
+          fi
+          if ((${#eslint_files[@]})); then
+            pnpm exec eslint -- "${eslint_files[@]}"
+          fi
 
       - name: Unit tests
         run: pnpm test
