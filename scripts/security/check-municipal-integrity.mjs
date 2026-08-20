@@ -5,6 +5,10 @@ const migration = readFileSync(
 	'supabase/migrations/0056_municipal_integrity_privacy_hardening.sql',
 	'utf8'
 );
+const ingestionMigration = readFileSync(
+	'supabase/migrations/0058_municipal_detected_location_nullable.sql',
+	'utf8'
+);
 const edge = readFileSync('supabase/functions/create-municipal-petition/index.ts', 'utf8');
 const service = readFileSync('src/lib/services/municipalService.ts', 'utf8');
 const createPage = readFileSync('src/routes/pulso/municipal/crear/+page.svelte', 'utf8');
@@ -67,6 +71,18 @@ const checks = [
 			) &&
 			/new\.lat := v_lat/i.test(migration) &&
 			/new\.lng := v_lng/i.test(migration)
+	],
+	[
+		'hallazgos detected pueden esperar geocodificación sin coordenadas inventadas',
+		/alter column lat drop not null/i.test(ingestionMigration) &&
+			/alter column lng drop not null/i.test(ingestionMigration)
+	],
+	[
+		'estados públicos siguen exigiendo INE y coordenadas',
+		/municipal_issues_public_location_required/i.test(ingestionMigration) &&
+		/status = 'detected'[\s\S]*?municipality_ine_code is not null[\s\S]*?lat is not null[\s\S]*?lng is not null/i.test(
+			ingestionMigration
+		)
 	],
 	[
 		'apoyo exige versión exacta de consentimiento',
