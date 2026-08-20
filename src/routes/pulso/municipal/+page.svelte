@@ -457,11 +457,10 @@
 							/>
 							<span>
 								Doy mi <strong class="font-semibold text-ink-800">consentimiento explícito</strong>
-								para que CONVOCA vincule internamente este apoyo a mi cuenta con el fin de impedir
-								duplicados, permitirme retirarlo y mostrar únicamente el recuento agregado. Según el
-								tema, el apoyo puede revelar información especialmente sensible, incluida una
-								opinión política. Mi identidad no se publica. Puedo retirar el apoyo en cualquier
-								momento.
+								para que CONVOCA vincule internamente este apoyo a mi cuenta con el fin de impedir duplicados,
+								permitirme retirarlo y mostrar únicamente el recuento agregado. Según el tema, el apoyo
+								puede revelar información especialmente sensible, incluida una opinión política. Mi identidad
+								no se publica. Puedo retirar el apoyo en cualquier momento.
 								<a href="/legal/privacidad" class="font-semibold text-brand-700 hover:underline"
 									>Privacidad</a
 								>.
