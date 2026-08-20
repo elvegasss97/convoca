@@ -57,19 +57,9 @@ jobs:
 
           calendario = Path('src/lib/components/pulso/CalendarioVisual.svelte')
           text = calendario.read_text()
-          old = """\tfunction phaseShortLabel(phase: TopicTimelinePhase): string {
-          \tif (/100\\s*d[ií]as/i.test(phase.title)) return '100 días';
-          \tconst years = [...phase.title.matchAll(/\\b(20\\d{2})\\b/g)].map((m) => m[1]);
-          \tif (years.length >= 2) {
-          \t\tconst first = years[0];
-          \t\tconst last = years[years.length - 1];
-          \t\treturn `${first}–${last.slice(-2)}`;
-          \t}
-          \tif (years.length === 1) return years[0];
-          \treturn phase.title;
-          }
-          """
-          new = """\tfunction phaseShortLabel(phase: TopicTimelinePhase): string {
+          start = text.index('\tfunction phaseShortLabel(phase: TopicTimelinePhase): string {')
+          end = text.index('\n\n\t// Etiquetas de tono', start)
+          replacement = """\tfunction phaseShortLabel(phase: TopicTimelinePhase): string {
           \tif (/100\\s*d[ií]as/i.test(phase.title)) return '100 días';
 
           \tconst dayRange = phase.title.match(/\\bd[ií]as\\s+(\\d+)\\s+a\\s+(\\d+)\\b/i);
@@ -92,11 +82,8 @@ jobs:
           \t}
           \tif (years.length === 1) return years[0];
           \treturn phase.title;
-          }
-          """
-          if old not in text:
-              raise SystemExit('phaseShortLabel snippet not found')
-          text = text.replace(old, new, 1)
+          }"""
+          text = text[:start] + replacement + text[end:]
           text = text.replace(
               'style="grid-template-columns: repeat({phases.length}, 1fr);"',
               'style="grid-template-columns: repeat({phases.length}, minmax(0, 1fr));"',
