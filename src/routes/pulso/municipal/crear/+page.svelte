@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
 	import { ArrowLeft, CheckCircle2, FileSignature, Loader2, MapPin, Send } from '@lucide/svelte';
 	import type { PageData } from './$types';
 	import Seo from '$lib/components/Seo.svelte';
 	import MunicipalitySearchCombobox from '$lib/components/pulso/MunicipalitySearchCombobox.svelte';
 	import { authState } from '$lib/auth/session.svelte';
+	import { getMyOrganizerPrivateProfile, hasCompletedLegalAcceptance } from '$lib/auth/authService';
 	import { createMunicipalPetition } from '$lib/services/municipalService';
-	import { loadMunicipalitiesCatalog, municipalityById } from '$lib/data/municipios';
-	import { provinceByCode } from '$lib/data/provinceCodes';
-	import { geocodeAddressSuggestions } from '$lib/utils/geocode';
 
 	let { data }: { data: PageData } = $props();
 
@@ -20,6 +20,9 @@
 	let submitting = $state(false);
 	let submitError = $state<string | null>(null);
 	let done = $state(false);
+	let createdPetitionId = $state<string | null>(null);
+
+	const DRAFT_KEY = 'convoca:municipal-petition:draft:v1';
 
 	const titleValid = $derived(title.trim().length >= 8 && title.trim().length <= 160);
 	const requestValid = $derived(
@@ -29,47 +32,90 @@
 	const municipalityValid = $derived(Boolean(municipalityIneCode && municipalityName));
 	const formValid = $derived(titleValid && requestValid && targetValid && municipalityValid);
 
-	async function resolveMunicipalityPoint() {
-		if (data.issue && data.issue.municipalityIneCode === municipalityIneCode)
-			return data.issue.point;
-		if (!municipalityIneCode || !municipalityName) throw new Error('Selecciona un municipio.');
-
-		const catalog = await loadMunicipalitiesCatalog();
-		const municipality = municipalityById(catalog, municipalityIneCode);
-		if (!municipality) throw new Error('No se ha encontrado el municipio seleccionado.');
-		const province = provinceByCode[municipality.provinceCode]?.name ?? '';
-		const results = await geocodeAddressSuggestions(
-			`${municipality.name}, ${province}, España`,
-			undefined,
-			undefined,
-			1
-		);
-		const point = results[0]?.point;
-		if (!point) throw new Error('No se ha podido ubicar el municipio en el mapa.');
-		return point;
+	function redirectBack(): string {
+		return `/pulso/municipal/crear${data.issue ? `?issue=${encodeURIComponent(data.issue.id)}` : ''}`;
 	}
+
+	function persistDraft() {
+		if (!browser) return;
+		try {
+			sessionStorage.setItem(
+				DRAFT_KEY,
+				JSON.stringify({
+					title,
+					requestText,
+					targetName,
+					municipalityIneCode,
+					municipalityName,
+					issueId: data.issue?.id ?? null
+				})
+			);
+		} catch {
+			// Si el almacenamiento está bloqueado, el flujo sigue funcionando;
+			// simplemente no se puede restaurar el borrador tras login/legal.
+		}
+	}
+
+	function clearDraft() {
+		if (!browser) return;
+		try {
+			sessionStorage.removeItem(DRAFT_KEY);
+		} catch {
+			// Sin almacenamiento disponible no hay nada que limpiar.
+		}
+	}
+
+	onMount(() => {
+		try {
+			const raw = sessionStorage.getItem(DRAFT_KEY);
+			if (!raw) return;
+			const draft = JSON.parse(raw) as {
+				title?: unknown;
+				requestText?: unknown;
+				targetName?: unknown;
+				municipalityIneCode?: unknown;
+				municipalityName?: unknown;
+				issueId?: unknown;
+			};
+			if ((draft.issueId ?? null) !== (data.issue?.id ?? null)) return;
+			if (typeof draft.title === 'string') title = draft.title;
+			if (typeof draft.requestText === 'string') requestText = draft.requestText;
+			if (typeof draft.targetName === 'string') targetName = draft.targetName;
+			if (typeof draft.municipalityIneCode === 'string') municipalityIneCode = draft.municipalityIneCode;
+			if (typeof draft.municipalityName === 'string') municipalityName = draft.municipalityName;
+		} catch {
+			clearDraft();
+		}
+	});
 
 	async function submit() {
 		if (submitting || !formValid) return;
-		if (!authState.session) {
-			const redirect = `/pulso/municipal/crear${data.issue ? `?issue=${encodeURIComponent(data.issue.id)}` : ''}`;
-			await goto(`/login?redirect=${encodeURIComponent(redirect)}`);
+		const session = authState.session;
+		if (!session) {
+			persistDraft();
+			await goto(`/login?redirect=${encodeURIComponent(redirectBack())}`);
 			return;
 		}
 		if (!municipalityIneCode) return;
 
+		const profile = await getMyOrganizerPrivateProfile(session.user.id);
+		if (!hasCompletedLegalAcceptance(profile)) {
+			persistDraft();
+			await goto(`/aceptar-condiciones?redirect=${encodeURIComponent(redirectBack())}`);
+			return;
+		}
+
 		submitting = true;
 		submitError = null;
 		try {
-			const point = await resolveMunicipalityPoint();
-			await createMunicipalPetition({
+			createdPetitionId = await createMunicipalPetition({
 				title: title.trim(),
 				requestText: requestText.trim(),
 				targetName: targetName.trim(),
 				municipalityIneCode,
-				point,
 				issueId: data.issue?.id
 			});
+			clearDraft();
 			done = true;
 		} catch (err) {
 			console.error('No se pudo abrir la recogida municipal', err);
@@ -107,7 +153,7 @@
 				Ya forma parte del mapa de Firmas. Cada cuenta puede apoyarla una sola vez.
 			</p>
 			<a
-				href="/pulso/municipal"
+				href={`/pulso/municipal?view=petitions${createdPetitionId ? `&petition=${encodeURIComponent(createdPetitionId)}` : ''}`}
 				class="mt-5 inline-flex items-center justify-center rounded-full bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-800"
 			>
 				Verla en el mapa
@@ -228,7 +274,10 @@
 			>
 				<strong class="font-semibold text-ink-700">Importante:</strong> aquí “firmar” significa apoyar
 				una iniciativa ciudadana dentro de CONVOCA. No se presenta como firma jurídica válida para una
-				ILP u otro procedimiento administrativo oficial.
+				ILP u otro procedimiento administrativo oficial. Al publicar, tu cuenta queda vinculada
+				internamente como creadora mientras exista; esa identidad no se muestra en la API pública y se
+				anonimiza si eliminas tu cuenta. Consulta la
+				<a href="/legal/privacidad" class="font-semibold text-brand-700 hover:underline">Política de privacidad</a>.
 			</div>
 
 			{#if submitError}

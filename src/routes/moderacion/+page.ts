@@ -23,6 +23,7 @@ import {
 	countActiveOpenVoiceContributions
 } from '$lib/services/openVoiceService';
 import { listRecentAuditTrail } from '$lib/services/auditTrailService';
+import { listReportedMunicipalPetitions } from '$lib/services/municipalService';
 
 /**
  * Forzado a CSR: `authService.getSession()` lee la sesión de Supabase desde
@@ -76,7 +77,8 @@ export const load: PageLoad = async () => {
 		topics,
 		pendingAlternatives,
 		nextBlockVoteRounds,
-		pendingOpenVoiceContributions
+		pendingOpenVoiceContributions,
+		reportedMunicipalPetitions
 	] = await Promise.all([
 		listPendingReview(),
 		listReportedEvents(),
@@ -90,7 +92,8 @@ export const load: PageLoad = async () => {
 		listTopics(),
 		listPendingMeasureAlternatives(),
 		listNextBlockVoteRounds(),
-		listPendingOpenVoiceContributionsForModeration()
+		listPendingOpenVoiceContributionsForModeration(),
+		listReportedMunicipalPetitions()
 	]);
 
 	/**
@@ -143,6 +146,7 @@ export const load: PageLoad = async () => {
 		pendingAlternatives,
 		nextBlockVoteRounds,
 		pendingOpenVoiceContributions,
+		reportedMunicipalPetitions,
 		participantCount,
 		openVoiceTotal,
 		recentAuditTrail,

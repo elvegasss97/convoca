@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import {
 		Bot,
 		CheckCircle2,
@@ -8,12 +9,14 @@
 		CircleDot,
 		ExternalLink,
 		FileSignature,
+		Flag,
 		Lightbulb,
 		MapPinned,
 		MapPin,
 		Plus,
 		Radar,
 		RefreshCw,
+		X,
 		ShieldCheck,
 		Users
 	} from '@lucide/svelte';
@@ -25,17 +28,32 @@
 	import { authState } from '$lib/auth/session.svelte';
 	import {
 		getMyMunicipalPetitionSupports,
-		setMunicipalPetitionSupport
+		reportMunicipalPetition,
+		setMunicipalPetitionSupport,
+		type MunicipalPetitionReportReason
 	} from '$lib/services/municipalService';
 
 	let { data }: { data: PageData } = $props();
-	let mode = $state<'issues' | 'petitions'>('issues');
+	const initialPetitionId = page.url.searchParams.get('petition');
+	const initialView = page.url.searchParams.get('view');
+	let mode = $state<'issues' | 'petitions'>(initialView === 'petitions' ? 'petitions' : 'issues');
 	let issues = $state<MunicipalIssue[]>(data.issues);
 	let petitions = $state<MunicipalPetition[]>(data.petitions);
 	let selectedIssue = $state<MunicipalIssue | null>(issues[0] ?? null);
-	let selectedPetition = $state<MunicipalPetition | null>(petitions[0] ?? null);
+	let selectedPetition = $state<MunicipalPetition | null>(
+		petitions.find((item) => item.id === initialPetitionId) ?? petitions[0] ?? null
+	);
 	let signingId = $state<string | null>(null);
 	let signingError = $state<string | null>(null);
+	let consentPetitionId = $state<string | null>(null);
+	let supportConsentChecked = $state(false);
+	let reportingPetitionId = $state<string | null>(null);
+	let reportReason = $state<MunicipalPetitionReportReason>('spam');
+	let reportDetails = $state('');
+	let reportSubmitting = $state(false);
+	let reportMessage = $state<string | null>(null);
+	let reportMessagePetitionId = $state<string | null>(null);
+	let reportError = $state<string | null>(null);
 
 	const numberFormatter = new Intl.NumberFormat('es-ES');
 
@@ -75,6 +93,15 @@
 
 	function choosePetition(petition: MunicipalPetition) {
 		selectedPetition = petition;
+		signingError = null;
+		consentPetitionId = null;
+		supportConsentChecked = false;
+		reportingPetitionId = null;
+		reportError = null;
+		if (reportMessagePetitionId !== petition.id) {
+			reportMessage = null;
+			reportMessagePetitionId = null;
+		}
 	}
 
 	function switchMode(next: 'issues' | 'petitions') {
@@ -84,17 +111,16 @@
 		if (next === 'petitions' && !selectedPetition) selectedPetition = petitions[0] ?? null;
 	}
 
-	async function toggleSupport(petition: MunicipalPetition) {
+	function supportLoginRedirect(petitionId: string): string {
+		return `/pulso/municipal?view=petitions&petition=${encodeURIComponent(petitionId)}`;
+	}
+
+	async function applySupport(petition: MunicipalPetition, next: boolean, explicitConsent = false) {
 		if (signingId) return;
-		if (!authState.session) {
-			await goto(`/login?redirect=${encodeURIComponent('/pulso/municipal')}`);
-			return;
-		}
-		const next = !petition.isSupportedByMe;
 		signingId = petition.id;
 		signingError = null;
 		try {
-			await setMunicipalPetitionSupport(petition.id, next);
+			await setMunicipalPetitionSupport(petition.id, next, explicitConsent);
 			petitions = petitions.map((item) =>
 				item.id === petition.id
 					? {
@@ -105,11 +131,65 @@
 					: item
 			);
 			selectedPetition = petitions.find((item) => item.id === petition.id) ?? selectedPetition;
+			consentPetitionId = null;
+			supportConsentChecked = false;
 		} catch (err) {
 			console.error('No se pudo cambiar el apoyo municipal', err);
 			signingError = 'No se ha podido registrar tu apoyo. Inténtalo de nuevo.';
 		} finally {
 			signingId = null;
+		}
+	}
+
+	async function toggleSupport(petition: MunicipalPetition) {
+		if (signingId) return;
+		if (!authState.session) {
+			await goto(`/login?redirect=${encodeURIComponent(supportLoginRedirect(petition.id))}`);
+			return;
+		}
+		if (petition.isSupportedByMe) {
+			await applySupport(petition, false);
+			return;
+		}
+		consentPetitionId = petition.id;
+		supportConsentChecked = false;
+		signingError = null;
+	}
+
+	async function confirmSupport(petition: MunicipalPetition) {
+		if (!supportConsentChecked) return;
+		await applySupport(petition, true, true);
+	}
+
+	async function openReport(petition: MunicipalPetition) {
+		reportMessage = null;
+		reportMessagePetitionId = null;
+		reportError = null;
+		if (!authState.session) {
+			await goto(`/login?redirect=${encodeURIComponent(supportLoginRedirect(petition.id))}`);
+			return;
+		}
+		reportingPetitionId = petition.id;
+		reportReason = 'spam';
+		reportDetails = '';
+	}
+
+	async function submitReport(petition: MunicipalPetition) {
+		if (reportSubmitting) return;
+		reportSubmitting = true;
+		reportError = null;
+		reportMessage = null;
+		reportMessagePetitionId = null;
+		try {
+			await reportMunicipalPetition(petition.id, reportReason, reportDetails);
+			reportingPetitionId = null;
+			reportMessage = 'Reporte enviado a moderación. Gracias.';
+			reportMessagePetitionId = petition.id;
+		} catch (err) {
+			console.error('No se pudo reportar la recogida municipal', err);
+			reportError = 'No se ha podido enviar el reporte. Inténtalo de nuevo.';
+		} finally {
+			reportSubmitting = false;
 		}
 	}
 </script>
@@ -322,6 +402,46 @@
 						{/if}
 					</button>
 				</div>
+
+				{#if consentPetitionId === selectedPetition.id && !selectedPetition.isSupportedByMe}
+					<div class="mt-3 rounded-2xl border border-brand-200 bg-brand-50 p-3.5">
+						<div class="flex items-start justify-between gap-3">
+							<p class="text-xs font-semibold text-brand-900">Confirmar apoyo</p>
+							<button
+								type="button"
+								onclick={() => { consentPetitionId = null; supportConsentChecked = false; }}
+								class="rounded-full p-1 text-ink-400 hover:bg-white hover:text-ink-700"
+								aria-label="Cancelar"
+							>
+								<X class="size-4" />
+							</button>
+						</div>
+						<label class="mt-2 flex cursor-pointer items-start gap-2.5 text-[11px] leading-relaxed text-ink-600">
+							<input
+								type="checkbox"
+								bind:checked={supportConsentChecked}
+								class="mt-0.5 rounded border-ink-300 text-brand-700 focus:ring-brand-500"
+							/>
+							<span>
+								Doy mi <strong class="font-semibold text-ink-800">consentimiento explícito</strong> para que
+								CONVOCA vincule internamente este apoyo a mi cuenta con el fin de impedir duplicados,
+								permitirme retirarlo y mostrar únicamente el recuento agregado. Según el tema, el apoyo
+								puede revelar información especialmente sensible, incluida una opinión política. Mi identidad
+								no se publica. Puedo retirar el apoyo en
+								cualquier momento. <a href="/legal/privacidad" class="font-semibold text-brand-700 hover:underline">Privacidad</a>.
+							</span>
+						</label>
+						<button
+							type="button"
+							disabled={!supportConsentChecked || signingId === selectedPetition.id}
+							onclick={() => selectedPetition && confirmSupport(selectedPetition)}
+							class="mt-3 w-full rounded-full bg-brand-700 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-50"
+						>
+							Confirmar apoyo
+						</button>
+					</div>
+				{/if}
+
 				{#if signingError}
 					<p class="mt-2 text-xs font-medium text-critical-700">{signingError}</p>
 				{/if}
@@ -329,6 +449,52 @@
 					Este apoyo pertenece a CONVOCA y no equivale por sí solo a una firma jurídica para una ILP
 					u otro procedimiento oficial.
 				</p>
+
+				<div class="mt-3 border-t border-ink-100 pt-3">
+					<button
+						type="button"
+						onclick={() => selectedPetition && openReport(selectedPetition)}
+						class="inline-flex items-center gap-1.5 text-[11px] font-medium text-ink-400 hover:text-critical-700"
+					>
+						<Flag class="size-3.5" /> Reportar esta recogida
+					</button>
+					{#if reportMessage && reportMessagePetitionId === selectedPetition.id}
+						<p class="mt-2 text-xs font-medium text-brand-700">{reportMessage}</p>
+					{/if}
+				</div>
+
+				{#if reportingPetitionId === selectedPetition.id}
+					<div class="mt-3 rounded-2xl border border-ink-200 bg-white p-3.5 shadow-sm">
+						<div class="flex items-center justify-between gap-2">
+							<p class="text-xs font-semibold text-ink-800">Reportar a moderación</p>
+							<button type="button" onclick={() => { reportingPetitionId = null; reportError = null; }} class="rounded-full p-1 text-ink-400 hover:bg-ink-50" aria-label="Cerrar reporte"><X class="size-4" /></button>
+						</div>
+						<select bind:value={reportReason} class="mt-2 w-full rounded-xl border-ink-200 text-xs focus:border-brand-500 focus:ring-brand-500">
+							<option value="spam">Spam o duplicado abusivo</option>
+							<option value="abuse">Insultos, acoso o abuso</option>
+							<option value="personal_data">Datos personales expuestos</option>
+							<option value="misleading">Información engañosa</option>
+							<option value="illegal">Contenido potencialmente ilegal</option>
+							<option value="other">Otro motivo</option>
+						</select>
+						<textarea
+							bind:value={reportDetails}
+							maxlength="1000"
+							rows="3"
+							placeholder="Detalle opcional (mínimo 3 caracteres si lo completas)"
+							class="mt-2 w-full rounded-xl border-ink-200 text-xs focus:border-brand-500 focus:ring-brand-500"
+						></textarea>
+						{#if reportError}<p class="mt-1.5 text-xs font-medium text-critical-700">{reportError}</p>{/if}
+						<button
+							type="button"
+							disabled={reportSubmitting || (reportDetails.trim().length > 0 && reportDetails.trim().length < 3)}
+							onclick={() => selectedPetition && submitReport(selectedPetition)}
+							class="mt-2 w-full rounded-full bg-ink-800 px-4 py-2 text-xs font-semibold text-white hover:bg-ink-900 disabled:opacity-50"
+						>
+							{reportSubmitting ? 'Enviando…' : 'Enviar reporte'}
+						</button>
+					</div>
+				{/if}
 			</article>
 		{:else}
 			<div
@@ -355,6 +521,10 @@
 			</div>
 		{/if}
 	</div>
+	<p class="mt-2 text-right text-[10px] text-ink-400">
+		Ubicación municipal verificada con datos/servicios de
+		<a href="https://www.cartociudad.es" target="_blank" rel="noopener noreferrer" class="font-medium hover:text-brand-700 hover:underline">CartoCiudad · CNIG/IGN</a>.
+	</p>
 
 	<section class="mt-8">
 		<div class="mb-3 flex items-end justify-between gap-3">

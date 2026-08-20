@@ -5,6 +5,7 @@ const ZERO = {
 	openVoicePending: 0,
 	eventsReported: 0,
 	channelsReported: 0,
+	municipalPetitionsReported: 0,
 	eventsPending: 0,
 	documentsPending: 0,
 	proposalsPending: 0,
@@ -33,9 +34,14 @@ describe('buildAttentionItems', () => {
 		expect(many.label).toBe('3 convocatorias pendientes de revisión');
 	});
 
-	it('reportadas (convocatorias) y reportadas (canales) son dos entradas separadas, mismo destino', () => {
-		const items = buildAttentionItems({ ...ZERO, eventsReported: 1, channelsReported: 2 });
-		expect(items).toHaveLength(2);
+	it('las tres colas reportadas comparten destino y tono crítico', () => {
+		const items = buildAttentionItems({
+			...ZERO,
+			eventsReported: 1,
+			channelsReported: 2,
+			municipalPetitionsReported: 3
+		});
+		expect(items).toHaveLength(3);
 		expect(items.every((i) => i.key === 'reportadas')).toBe(true);
 		expect(items.every((i) => i.tone === 'critical')).toBe(true);
 	});
@@ -71,7 +77,8 @@ describe('totalPendingModerationItems', () => {
 			proposalsPending: 1,
 			alternativesPending: 1,
 			eventsReported: 10,
-			channelsReported: 10
+			channelsReported: 10,
+			municipalPetitionsReported: 10
 		});
 		expect(total).toBe(8);
 	});

@@ -34,6 +34,7 @@ steps.push({ id: 'security-definer', cmd: 'node', args: ['scripts/security/check
 steps.push({ id: 'using-true', cmd: 'node', args: ['scripts/security/check-using-true.mjs'] });
 steps.push({ id: 'session-architecture', cmd: 'node', args: ['scripts/security/check-session-architecture.mjs'] });
 steps.push({ id: 'edge-functions', cmd: 'node', args: ['scripts/security/check-edge-functions.mjs'] });
+steps.push({ id: 'municipal-integrity', cmd: 'node', args: ['scripts/security/check-municipal-integrity.mjs'] });
 steps.push({ id: 'storage', cmd: 'node', args: ['scripts/security/check-storage.mjs'] });
 
 if (!skipBuild) {
