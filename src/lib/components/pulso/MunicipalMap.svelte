@@ -138,9 +138,8 @@
 				}
 			});
 
-			// Halo: es la "iluminación" del mapa. En Firmas crece con el número
-			// de apoyos; en Problemas marca focos activos sin convertirlo en heatmap
-			// opaco que tape la geografía.
+			// Halo visible pero translúcido: debe leerse como una "luz" sin ocultar
+			// la geografía. En Firmas aumenta con el número de apoyos.
 			instance.addLayer({
 				id: 'municipal-cluster-glow',
 				type: 'circle',
@@ -148,20 +147,20 @@
 				filter: ['has', 'point_count'],
 				paint: {
 					'circle-color': '#279583',
-					'circle-opacity': 0.2,
-					'circle-blur': 0.8,
+					'circle-opacity': 0.34,
+					'circle-blur': 0.72,
 					'circle-radius': [
 						'interpolate',
 						['linear'],
 						['coalesce', ['get', 'totalWeight'], ['get', 'point_count']],
 						1,
-						22,
+						28,
 						100,
-						38,
+						44,
 						1000,
-						60,
+						66,
 						10000,
-						82
+						88
 					]
 				}
 			});
@@ -200,20 +199,20 @@
 				filter: ['!', ['has', 'point_count']],
 				paint: {
 					'circle-color': '#43b29e',
-					'circle-opacity': 0.27,
-					'circle-blur': 0.82,
+					'circle-opacity': 0.42,
+					'circle-blur': 0.7,
 					'circle-radius': [
 						'interpolate',
 						['linear'],
 						['get', 'weight'],
 						1,
-						18,
+						24,
 						100,
-						28,
+						36,
 						1000,
-						44,
+						52,
 						10000,
-						68
+						74
 					]
 				}
 			});
@@ -300,11 +299,24 @@
 
 <div class="relative overflow-hidden rounded-3xl border border-ink-100 bg-ink-100 shadow-card">
 	<div bind:this={container} class="h-[64vh] min-h-[430px] w-full sm:h-[68vh]"></div>
-	<div
-		class="pointer-events-none absolute bottom-3 left-3 rounded-full border border-white/70 bg-white/90 px-3 py-1.5 text-[11px] font-medium text-ink-600 shadow-sm backdrop-blur"
-	>
-		{mode === 'issues'
-			? 'Cada luz = un problema documentado'
-			: 'Más brillo = más apoyos ciudadanos'}
-	</div>
 </div>
+
+<style>
+	/* Las fichas pertenecen a la página padre. Evitamos que vuelvan a flotar sobre
+	   el mapa aunque conserven temporalmente sus utilidades Tailwind de posición. */
+	:global(div.relative > article.absolute.top-3.left-3.z-10) {
+		position: static !important;
+		top: auto !important;
+		left: auto !important;
+		z-index: auto !important;
+		width: 100% !important;
+		margin-top: 0.75rem;
+		backdrop-filter: none;
+	}
+
+	/* Si una vista no tiene aún elementos públicos, no mostramos una gran tarjeta
+	   de estado vacío: el mapa queda como protagonista y completamente despejado. */
+	:global(section.mt-8:has(> .border-dashed)) {
+		display: none;
+	}
+</style>
