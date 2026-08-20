@@ -18,6 +18,8 @@ const reviewEdge = readFileSync('supabase/functions/review-municipal-issue/index
 const service = readFileSync('src/lib/services/municipalService.ts', 'utf8');
 const radarService = readFileSync('src/lib/services/municipalRadarModerationService.ts', 'utf8');
 const createPage = readFileSync('src/routes/pulso/municipal/crear/+page.svelte', 'utf8');
+const municipalPage = readFileSync('src/routes/pulso/municipal/+page.svelte', 'utf8');
+const municipalMap = readFileSync('src/lib/components/pulso/MunicipalMap.svelte', 'utf8');
 const legalVersions = readFileSync('src/lib/legal/versions.ts', 'utf8');
 const labels = readFileSync('src/lib/labels.ts', 'utf8');
 const postflight = readFileSync('supabase/ops/0056_postflight.sql', 'utf8');
@@ -70,6 +72,9 @@ const checks = [
 	['servicio cliente tampoco acepta point/lat/lng al crear', !(/export interface CreateMunicipalPetitionInput \{[\s\S]*?\n\}/.exec(service)?.[0] ?? '').match(/\b(?:lat|lng|point)\??\s*:/)],
 	['formulario municipal ya no usa Nominatim desde navegador', !/nominatim|resolveMunicipalityPoint/i.test(createPage)],
 	['servicio de Radar solo revisa mediante Edge Function', /functions\.invoke\('review-municipal-issue'/.test(radarService) && !/\.update\(\{\s*status:\s*'verified'/i.test(radarService)],
+	['mapa municipal mantiene interacción y dragPan explícitos', /interactive:\s*true/.test(municipalMap) && /dragPan:\s*true/.test(municipalMap) && /instance\.dragPan\.enable\(\)/.test(municipalMap)],
+	['muro municipal no auto-selecciona la primera ficha', /let selectedIssue = \$state<MunicipalIssue \| null>\(null\)/.test(municipalPage) && /initialPetitionId \? \(petitions\.find/.test(municipalPage) && !/selectedIssue = \$state<MunicipalIssue \| null>\(issues\[0\]/.test(municipalPage)],
+	['fichas municipales pueden cerrarse y el estado vacío no tapa el mapa', /function closeSelection\(\)/.test(municipalPage) && /aria-label="Cerrar ficha"/.test(municipalPage) && !/El mapa todavía está vacío/.test(municipalPage)],
 	['audit trail municipal previo mantiene etiquetas visibles', /municipal_petition_report_dismissed/.test(labels) && /municipal_petition_hidden/.test(labels) && /municipal_petition:\s*'Recogida municipal'/.test(labels)],
 	['postflight 0056 cubre trigger territorial y privacidad de reportes', /municipal_issues_public_location_guard/.test(postflight) && /municipal_petition_reports[^\n]*reporter_id/.test(postflight) && /reviewed_by/.test(postflight)],
 	['versiones legales del módulo coinciden con gate SQL', /terms:\s*'2026-08-20'/.test(legalVersions) && /privacy:\s*'2026-08-20'/.test(legalVersions) && /peacefulUse:\s*'2026-08-01'/.test(legalVersions)]
