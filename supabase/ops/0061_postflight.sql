@@ -6,16 +6,59 @@ do $$
 declare
   v_review_def text;
   v_guard_def text;
+  v_table_owner oid;
+  v_review_owner oid;
+  v_review_secdef boolean;
+  v_rls_enabled boolean;
 begin
   if to_regclass('public._municipal_issue_review_authorizations') is null then
     raise exception 'FAIL: falta la tabla de autorización de un solo uso.';
   end if;
 
+  select c.relowner, c.relrowsecurity
+    into v_table_owner, v_rls_enabled
+  from pg_class c
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname = 'public'
+    and c.relname = '_municipal_issue_review_authorizations';
+
+  if not coalesce(v_rls_enabled, false) then
+    raise exception 'FAIL: RLS no está habilitado en la tabla de autorización.';
+  end if;
+
+  if exists (
+    select 1 from pg_policy
+    where polrelid = 'public._municipal_issue_review_authorizations'::regclass
+  ) then
+    raise exception 'FAIL: la tabla de autorización no debe exponer ninguna policy RLS.';
+  end if;
+
   if has_table_privilege('anon', 'public._municipal_issue_review_authorizations', 'SELECT')
      or has_table_privilege('anon', 'public._municipal_issue_review_authorizations', 'INSERT')
+     or has_table_privilege('anon', 'public._municipal_issue_review_authorizations', 'UPDATE')
+     or has_table_privilege('anon', 'public._municipal_issue_review_authorizations', 'DELETE')
      or has_table_privilege('authenticated', 'public._municipal_issue_review_authorizations', 'SELECT')
-     or has_table_privilege('authenticated', 'public._municipal_issue_review_authorizations', 'INSERT') then
-    raise exception 'FAIL: anon/authenticated conservan privilegios sobre la tabla de autorización; deja de ser infalsificable.';
+     or has_table_privilege('authenticated', 'public._municipal_issue_review_authorizations', 'INSERT')
+     or has_table_privilege('authenticated', 'public._municipal_issue_review_authorizations', 'UPDATE')
+     or has_table_privilege('authenticated', 'public._municipal_issue_review_authorizations', 'DELETE')
+     or has_table_privilege('service_role', 'public._municipal_issue_review_authorizations', 'SELECT')
+     or has_table_privilege('service_role', 'public._municipal_issue_review_authorizations', 'INSERT')
+     or has_table_privilege('service_role', 'public._municipal_issue_review_authorizations', 'UPDATE')
+     or has_table_privilege('service_role', 'public._municipal_issue_review_authorizations', 'DELETE') then
+    raise exception 'FAIL: un rol API conserva DML sobre la tabla de autorización; deja de ser owner-only.';
+  end if;
+
+  select p.proowner, p.prosecdef
+    into v_review_owner, v_review_secdef
+  from pg_proc p
+  where p.oid = 'public.review_municipal_issue(uuid,text)'::regprocedure;
+
+  if not coalesce(v_review_secdef, false) then
+    raise exception 'FAIL: review_municipal_issue debe seguir siendo SECURITY DEFINER.';
+  end if;
+
+  if v_table_owner is distinct from v_review_owner then
+    raise exception 'FAIL: la tabla de autorización y la RPC SECURITY DEFINER no comparten owner.';
   end if;
 
   select pg_get_functiondef('public.enforce_municipal_issue_review_path()'::regprocedure)
@@ -41,6 +84,10 @@ begin
 
   if has_function_privilege('anon', 'public.review_municipal_issue(uuid,text)', 'EXECUTE') then
     raise exception 'FAIL: anon conserva EXECUTE sobre review_municipal_issue.';
+  end if;
+
+  if has_function_privilege('service_role', 'public.review_municipal_issue(uuid,text)', 'EXECUTE') then
+    raise exception 'FAIL: service_role no necesita ejecutar la decisión humana auditada.';
   end if;
 
   if not has_function_privilege('authenticated', 'public.review_municipal_issue(uuid,text)', 'EXECUTE') then
