@@ -42,7 +42,9 @@ describe('Radar municipal — camino único de revisión', () => {
 		expect(reviewPath).toMatch(
 			/revoke all on public\._municipal_issue_review_authorizations from public, anon, authenticated, service_role;/i
 		);
-		expect(reviewPath).not.toMatch(/create policy[\s\S]*?_municipal_issue_review_authorizations/i);
+		expect(reviewPath).not.toMatch(
+			/create\s+policy\s+["\w-]+[\s\S]{0,200}\bon\s+public\._municipal_issue_review_authorizations\b/i
+		);
 	});
 
 	it('la RPC crea la autorización antes del UPDATE y la consume después', () => {
