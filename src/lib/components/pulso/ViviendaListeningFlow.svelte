@@ -37,6 +37,7 @@
 		type ListeningContextInput
 	} from '$lib/services/listeningService';
 	import { authState } from '$lib/auth/session.svelte';
+	import { revealFlowStep } from '$lib/utils/flowNavigation';
 
 	interface Props {
 		round?: ListeningRound;
@@ -53,6 +54,7 @@
 
 	let responses = $state<ListeningResponse[]>(initialResponses);
 
+	const FLOW_ANCHOR = '[data-vivienda-listening-progress]';
 	const OTHER_CAUSE_CODE = 'otra_causa';
 	const UNKNOWN_CAUSE_CODE = 'sin_informacion_causa';
 
@@ -175,6 +177,7 @@
 			prioritiesSaveState = 'saved';
 			deepenIndex = 0;
 			step = 'deepen';
+			await revealFlowStep(FLOW_ANCHOR);
 		} catch (err) {
 			prioritiesSaveState = 'error';
 			prioritiesSaveError =
@@ -257,6 +260,7 @@
 			} else {
 				step = 'context';
 			}
+			await revealFlowStep(FLOW_ANCHOR);
 		} catch (err) {
 			deepenSaveState = 'error';
 			deepenSaveError =
@@ -264,7 +268,7 @@
 		}
 	}
 
-	function goBackFromDeepen() {
+	async function goBackFromDeepen() {
 		if (
 			deepenDirty &&
 			!confirm('Tienes texto sin guardar en el comentario. ¿Salir sin guardarlo?')
@@ -279,6 +283,7 @@
 		} else {
 			step = 'priorities';
 		}
+		await revealFlowStep(FLOW_ANCHOR);
 	}
 
 	let community = $state(context?.community ?? '');
@@ -289,6 +294,7 @@
 	async function saveContextAndContinue() {
 		if (!round) {
 			step = 'summary';
+			await revealFlowStep(FLOW_ANCHOR);
 			return;
 		}
 		contextSaveState = 'saving';
@@ -303,13 +309,20 @@
 			}
 			contextSaveState = 'saved';
 			step = 'summary';
+			await revealFlowStep(FLOW_ANCHOR);
 		} catch {
 			contextSaveState = 'error';
 		}
 	}
 
-	function skipContext() {
+	async function skipContext() {
 		step = 'summary';
+		await revealFlowStep(FLOW_ANCHOR);
+	}
+
+	async function backToDeepen() {
+		step = 'deepen';
+		await revealFlowStep(FLOW_ANCHOR);
 	}
 
 	let finishSaveState = $state<SaveState>('idle');
@@ -322,15 +335,17 @@
 			await setListeningCompleted(round.id);
 			finishSaveState = 'saved';
 			finished = true;
+			await revealFlowStep(FLOW_ANCHOR);
 		} catch {
 			finishSaveState = 'error';
 		}
 	}
 
-	function editSection(target: Step, index = 0) {
+	async function editSection(target: Step, index = 0) {
 		returnToSummary = target === 'deepen';
 		step = target;
 		deepenIndex = index;
+		await revealFlowStep(FLOW_ANCHOR);
 	}
 
 	function causeLabel(code: string, optionCode: string): string {
@@ -357,7 +372,11 @@
 		<p class="mt-2 text-sm text-ink-500">Esta escucha no está abierta todavía.</p>
 	{:else}
 		<!-- Progreso -->
-		<ol class="mt-3 flex flex-wrap gap-1.5 text-xs" aria-label="Progreso de tu participación">
+		<ol
+			data-vivienda-listening-progress
+			class="mt-3 flex scroll-mt-20 flex-wrap gap-1.5 text-xs"
+			aria-label="Progreso de tu participación"
+		>
 			{#each [{ id: 'priorities', label: '1. Prioriza' }, { id: 'deepen', label: '2. Profundiza' }, { id: 'context', label: '3. Contexto' }, { id: 'summary', label: '4. Resumen' }] as s, i (s.id)}
 				<li
 					class="flex items-center gap-1 rounded-full border px-2.5 py-1 font-medium {step === s.id
@@ -657,7 +676,7 @@
 				<div class="mt-4 flex flex-wrap items-center gap-2">
 					<button
 						type="button"
-						onclick={() => (step = 'deepen')}
+						onclick={backToDeepen}
 						class="flex items-center gap-1.5 rounded-full border border-ink-200 px-3.5 py-2 text-sm font-medium text-ink-700 hover:bg-ink-50"
 					>
 						<ArrowLeft class="size-3.5" /> Atrás

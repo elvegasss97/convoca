@@ -2,7 +2,6 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { tick } from 'svelte';
 	import {
 		LogIn,
 		Loader2,
@@ -37,6 +36,7 @@
 	} from '$lib/services/listeningSurveyService';
 	import { authState } from '$lib/auth/session.svelte';
 	import SanidadListeningResults from './SanidadListeningResults.svelte';
+	import { revealFlowStep } from '$lib/utils/flowNavigation';
 	import {
 		SANIDAD_LISTENING_AREA_TYPES,
 		SANIDAD_LISTENING_DRAFT_VERSION,
@@ -64,6 +64,7 @@
 	// antiguo que quedara en el navegador de alguien simplemente no valida
 	// y se ignora, no se intenta migrar.
 	const DRAFT_KEY = 'convoca:escucha-sanidad:draft:v2';
+	const FLOW_ANCHOR = '[data-sanidad-listening-progress]';
 	const AREA_TYPES = SANIDAD_LISTENING_AREA_TYPES;
 	const PROBLEMS_MAX = SANIDAD_LISTENING_PROBLEMS_MAX;
 	const MEASURES_MAX = SANIDAD_LISTENING_MEASURES_MAX;
@@ -261,27 +262,7 @@
 	let showPortadaResults = $state(false);
 
 	async function revealCurrentStep() {
-		if (!browser) return;
-
-		const activeElement = document.activeElement;
-		if (activeElement instanceof HTMLElement) activeElement.blur();
-
-		// Espera a que Svelte haya sustituido el contenido del paso anterior.
-		await tick();
-
-		// Dos frames dejan que el teclado móvil termine de ceder espacio al viewport
-		// antes de recolocar la pregunta nueva. Evita quedarse visualmente en el
-		// fondo del formulario con un botón deshabilitado y pensar que se ha bloqueado.
-		requestAnimationFrame(() => {
-			requestAnimationFrame(() => {
-				const progress = document.querySelector<HTMLElement>('[data-sanidad-listening-progress]');
-				if (!progress) return;
-				progress.scrollIntoView({
-					behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-					block: 'start'
-				});
-			});
-		});
+		await revealFlowStep(FLOW_ANCHOR);
 	}
 
 	async function discardDraft() {
@@ -687,7 +668,7 @@
 	<!-- Progreso -->
 	<ol
 		data-sanidad-listening-progress
-		class="scroll-mt-20 flex flex-wrap gap-1.5 text-xs"
+		class="flex scroll-mt-20 flex-wrap gap-1.5 text-xs"
 		aria-label="Progreso de la escucha"
 	>
 		{#each STEP_LABELS as label, i (label)}
