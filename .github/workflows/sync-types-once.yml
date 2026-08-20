@@ -1,16 +1,15 @@
 name: Sync Supabase Types Once
 
 on:
-  push:
-    branches:
-      - feat/municipal-radar-ingestion-0058
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: write
 
 jobs:
   sync-types:
-    if: github.repository == 'elvegasss97/convoca' && github.actor == 'elvegasss97' && !contains(github.event.head_commit.message, '[types-sync]')
+    if: github.repository == 'elvegasss97/convoca' && github.event.pull_request.head.repo.full_name == github.repository && github.actor == 'elvegasss97'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -43,8 +42,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/lib/supabase/database.types.ts .github/workflows/sync-types-once.yml
-          if git diff --cached --quiet; then
-            echo "No type changes detected; removing one-shot workflow still requires a cleanup commit."
-          fi
           git commit -m "chore(types): regenerate schema through 0059 [types-sync]" -m "Security-Baseline-Override: security-definer:review_municipal_issue" -m "Security-Baseline-Override: security-definer:guard_municipal_staff_map_resolution_server" -m "Security-Baseline-Override: service-role:review-municipal-issue"
           git push origin HEAD:feat/municipal-radar-ingestion-0058
