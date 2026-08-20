@@ -107,9 +107,23 @@
 			zoom: 5.15,
 			minZoom: 4,
 			maxZoom: 17,
+			interactive: true,
+			dragPan: true,
+			scrollZoom: true,
+			doubleClickZoom: true,
+			boxZoom: true,
+			touchZoomRotate: true,
 			attributionControl: { compact: true }
 		});
 		map = instance;
+		instance.dragPan.enable();
+		instance.getCanvas().style.cursor = 'grab';
+		instance.on('dragstart', () => {
+			instance.getCanvas().style.cursor = 'grabbing';
+		});
+		instance.on('dragend', () => {
+			instance.getCanvas().style.cursor = 'grab';
+		});
 		instance.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
 		instance.on('load', () => {
@@ -258,7 +272,7 @@
 					instance.getCanvas().style.cursor = 'pointer';
 				});
 				instance.on('mouseleave', layer, () => {
-					instance.getCanvas().style.cursor = '';
+					instance.getCanvas().style.cursor = 'grab';
 				});
 			}
 
