@@ -5,20 +5,14 @@
 --
 -- Objetivos:
 --   1. La posición del municipio deja de confiar en lat/lng enviados por el navegador.
---      La creación pública pasa por una Edge Function que resuelve una ubicación oficial
---      con CartoCiudad/CNIG, la cachea y llama a una RPC interna exclusiva de service_role.
 --   2. Una petición vinculada a un problema debe pertenecer al MISMO municipio.
---   3. Crear una petición ya no puede bloquear la supresión posterior de la cuenta:
---      created_by se anonimiza con ON DELETE SET NULL.
---   4. Cada nuevo apoyo almacena la evidencia del consentimiento explícito específico
---      para el tratamiento de esa relación cuenta<->petición; la retirada lo elimina.
---   5. Se añade reporte reactivo de peticiones (sin premoderación obligatoria), privado
---      para moderación y limitado por rate-limit.
---
--- La Edge Function correspondiente es supabase/functions/create-municipal-petition/.
+--   3. created_by se anonimiza con ON DELETE SET NULL al borrar la cuenta.
+--   4. Cada apoyo almacena consentimiento específico y puede retirarse incluso si la petición se cierra.
+--   5. Se añade reporte reactivo de peticiones y moderación auditada.
+--   6. Las RPC privilegiadas usan search_path con pg_catalog primero y grants mínimos explícitos.
 
 -- ---------------------------------------------------------------------------
--- 1. Ubicación municipal canónica cacheada (fuente geográfica oficial)
+-- 1. Ubicación municipal canónica cacheada
 -- ---------------------------------------------------------------------------
 
 create table public.municipal_map_points (
@@ -48,19 +42,12 @@ create policy "municipal_map_points_staff_read"
 	using (public.is_moderator_or_admin());
 
 comment on table public.municipal_map_points is
-	'Caché interna de puntos municipales resueltos por la Edge Function desde el Geocoder oficial CartoCiudad/CNIG. No acepta escritura del navegador y no es necesaria para la API pública.';
-comment on column public.municipal_map_points.municipality_ine_code is
-	'Código INE autoritativo del municipio. La Edge Function valida que el resultado geográfico devuelto corresponde al mismo código antes de cachearlo.';
+	'Caché interna de puntos municipales resueltos por la Edge Function desde CartoCiudad/CNIG. Sin escritura desde navegador.';
 
--- Un problema `detected` puede existir como borrador antes de tener ubicación
--- canónica. En el instante de publicarlo, la BD exige código INE + punto
--- verificado y sustituye nombre/provincia/coordenadas por los valores
--- autoritativos. Así el Muro público tampoco puede iluminar el municipio
--- equivocado por un error del agente o del panel de staff.
 create or replace function public.normalize_public_municipal_issue_location()
 returns trigger
 language plpgsql
-set search_path = public
+set search_path = pg_catalog, public
 as $$
 declare
 	v_municipality public.ine_municipalities%rowtype;
@@ -100,9 +87,6 @@ create trigger municipal_issues_public_location_guard
 	on public.municipal_issues
 	for each row execute function public.normalize_public_municipal_issue_location();
 
--- El rate-limit de creación final ya existía. Añadimos un bucket separado
--- para proteger al proveedor geográfico ANTES de hacer una consulta externa
--- cuando el municipio aún no está cacheado, y el bucket de reportes de §5.
 alter table public.write_rate_limits drop constraint write_rate_limits_action_check;
 alter table public.write_rate_limits add constraint write_rate_limits_action_check
 	check (action in (
@@ -111,24 +95,22 @@ alter table public.write_rate_limits add constraint write_rate_limits_action_che
 	));
 
 -- ---------------------------------------------------------------------------
--- 2. El contenido sobrevive a la baja de cuenta sin conservar created_by
+-- 2. Supresión de cuenta sin borrar la iniciativa pública
 -- ---------------------------------------------------------------------------
 
 alter table public.municipal_petitions
 	drop constraint if exists municipal_petitions_created_by_fkey;
-
 alter table public.municipal_petitions
 	alter column created_by drop not null;
-
 alter table public.municipal_petitions
 	add constraint municipal_petitions_created_by_fkey
 	foreign key (created_by) references auth.users (id) on delete set null;
 
 comment on column public.municipal_petitions.created_by is
-	'Cuenta que abrió la recogida. Nunca se expone públicamente. Se pone a NULL al eliminar la cuenta para conservar la iniciativa y su trazabilidad pública sin bloquear el derecho de supresión.';
+	'Cuenta que abrió la recogida. No se expone públicamente y se anonimiza con SET NULL al eliminar la cuenta.';
 
 -- ---------------------------------------------------------------------------
--- 3. Retirar la RPC antigua: el cliente ya no puede elegir coordenadas
+-- 3. Creación server-side con geografía canónica
 -- ---------------------------------------------------------------------------
 
 revoke all on function public.create_municipal_petition(text, text, text, text, double precision, double precision, uuid) from public, anon, authenticated;
@@ -145,7 +127,7 @@ create or replace function public.create_municipal_petition_server(
 returns uuid
 language plpgsql
 security definer
-set search_path = public
+set search_path = pg_catalog, public
 as $$
 declare
 	v_municipality public.ine_municipalities%rowtype;
@@ -156,8 +138,7 @@ declare
 	v_short_count integer;
 	v_day_count integer;
 begin
-	-- Esta función NO usa auth.uid(): solo la Edge Function privilegiada puede
-	-- ejecutarla y pasa aquí el UUID obtenido de un JWT validado por Auth.
+	-- Solo puede invocarla service_role. p_user_id procede de un JWT validado por la Edge Function.
 	if p_user_id is null or not exists (select 1 from auth.users where id = p_user_id) then
 		raise exception 'La cuenta autenticada no es válida.';
 	end if;
@@ -171,6 +152,7 @@ begin
 	if char_length(btrim(coalesce(p_target_name, ''))) not between 2 and 200 then
 		raise exception 'Indica a quién va dirigida la petición.';
 	end if;
+
 	select * into v_municipality
 	from public.ine_municipalities
 	where ine_code = p_municipality_ine_code;
@@ -178,10 +160,6 @@ begin
 		raise exception 'El municipio seleccionado no existe en el catálogo INE.';
 	end if;
 
-	-- La UI hace el mismo gate, pero la regla vive también en servidor para
-	-- que una llamada manual a la Edge Function no pueda saltarse la aceptación.
-	-- Si cambian estas versiones legales, deben actualizarse mediante una nueva
-	-- migración junto con src/lib/legal/versions.ts.
 	if not exists (
 		select 1
 		from public.organizer_private_profiles opp
@@ -258,19 +236,15 @@ revoke all on function public.create_municipal_petition_server(uuid, text, text,
 grant execute on function public.create_municipal_petition_server(uuid, text, text, text, text, uuid) to service_role;
 
 comment on function public.create_municipal_petition_server(uuid, text, text, text, text, uuid) is
-	'RPC interna: solo service_role. El navegador crea peticiones exclusivamente mediante la Edge Function create-municipal-petition. La RPC toma lat/lng únicamente de municipal_map_points, nunca de parámetros del cliente o de la Edge Function.';
+	'RPC interna service_role-only. Lat/lng salen exclusivamente de municipal_map_points.';
 
--- Protección adicional del servicio geográfico oficial. Solo se invoca en
--- cache miss y ANTES de salir a CartoCiudad. Así una persona autenticada no
--- puede utilizar errores posteriores (p. ej. condiciones sin aceptar) para
--- convertir la Edge Function en un proxy de consultas geográficas sin límite.
 create or replace function public.guard_municipal_map_resolution_server(
 	p_user_id uuid
 )
 returns boolean
 language plpgsql
 security definer
-set search_path = public
+set search_path = pg_catalog, public
 as $$
 declare
 	v_short_count integer;
@@ -324,10 +298,10 @@ revoke all on function public.guard_municipal_map_resolution_server(uuid) from p
 grant execute on function public.guard_municipal_map_resolution_server(uuid) to service_role;
 
 comment on function public.guard_municipal_map_resolution_server(uuid) is
-	'RPC interna service_role-only. Protege CartoCiudad con rate-limit y gate legal antes de resolver un municipio no cacheado.';
+	'RPC interna service_role-only. Gate legal y rate-limit antes de resolver municipios no cacheados.';
 
 -- ---------------------------------------------------------------------------
--- 4. Consentimiento explícito y demostrable para cada nuevo apoyo
+-- 4. Consentimiento específico para apoyos
 -- ---------------------------------------------------------------------------
 
 alter table public.municipal_petition_supports
@@ -335,14 +309,11 @@ alter table public.municipal_petition_supports
 	add column consented_at timestamptz;
 
 comment on column public.municipal_petition_supports.consent_version is
-	'Versión del aviso específico de privacidad aceptado explícitamente al registrar el apoyo. Desde 0056 es obligatoria para todo apoyo activo.';
+	'Versión del aviso específico aceptado al registrar el apoyo.';
 comment on column public.municipal_petition_supports.consented_at is
-	'Fecha de consentimiento explícito específico para vincular internamente cuenta y petición. Se elimina junto con la fila cuando se retira el apoyo.';
+	'Fecha del consentimiento explícito específico. Se elimina al retirar el apoyo.';
 
--- No existe una forma lícita de inventar retrospectivamente un consentimiento
--- que la UI anterior nunca pidió. Al estar aún en fase pre-lanzamiento, se
--- eliminan los apoyos históricos sin evidencia específica y se obliga a que
--- cualquier apoyo activo posterior tenga prueba de consentimiento.
+-- No se inventa consentimiento retrospectivo para los apoyos de prueba pre-0056.
 delete from public.municipal_petition_supports
 where consent_version is null or consented_at is null;
 
@@ -362,7 +333,7 @@ create or replace function public.set_municipal_petition_support(
 returns boolean
 language plpgsql
 security definer
-set search_path = public
+set search_path = pg_catalog, public
 as $$
 declare
 	v_user_id uuid := auth.uid();
@@ -371,17 +342,36 @@ begin
 		raise exception 'Debes iniciar sesión para apoyar una petición.';
 	end if;
 
-	if not exists (
-		select 1 from public.municipal_petitions
-		where id = p_petition_id and status = 'open'
-	) then
-		raise exception 'Esta recogida no está abierta.';
-	end if;
-
 	if p_supported then
+		-- Añadir un apoyo sí exige que la petición esté abierta. Retirarlo no:
+		-- el derecho a retirar consentimiento no depende del estado posterior de la campaña.
+		if not exists (
+			select 1 from public.municipal_petitions
+			where id = p_petition_id and status = 'open'
+		) then
+			raise exception 'Esta recogida no está abierta.';
+		end if;
+
+		-- Defense in depth: igual que la creación, firmar exige las versiones legales vigentes
+		-- también en servidor, no solo el checkbox específico del apoyo.
+		if not exists (
+			select 1
+			from public.organizer_private_profiles opp
+			where opp.user_id = v_user_id
+			  and opp.accepted_terms_at is not null
+			  and opp.accepted_privacy_at is not null
+			  and opp.accepted_peaceful_use_at is not null
+			  and opp.accepted_terms_version = '2026-08-20'
+			  and opp.accepted_privacy_version = '2026-08-20'
+			  and opp.accepted_peaceful_use_version = '2026-08-01'
+		) then
+			raise exception 'Debes aceptar las condiciones y la política de privacidad vigentes.';
+		end if;
+
 		if p_explicit_consent is not true or btrim(coalesce(p_consent_version, '')) <> '2026-08-20' then
 			raise exception 'Necesitamos tu consentimiento explícito para registrar este apoyo.';
 		end if;
+
 		insert into public.municipal_petition_supports (
 			petition_id, user_id, consent_version, consented_at
 		)
@@ -390,6 +380,7 @@ begin
 		set consent_version = excluded.consent_version,
 			consented_at = excluded.consented_at;
 	else
+		-- Idempotente y deliberadamente permitido aunque la petición esté cerrada/resuelta.
 		delete from public.municipal_petition_supports
 		where petition_id = p_petition_id and user_id = v_user_id;
 	end if;
@@ -402,7 +393,7 @@ revoke all on function public.set_municipal_petition_support(uuid, boolean, bool
 grant execute on function public.set_municipal_petition_support(uuid, boolean, boolean, text) to authenticated;
 
 -- ---------------------------------------------------------------------------
--- 5. Reportes reactivos de peticiones (sin premoderación obligatoria)
+-- 5. Reportes reactivos de peticiones
 -- ---------------------------------------------------------------------------
 
 create table public.municipal_petition_reports (
@@ -445,7 +436,7 @@ create or replace function public.report_municipal_petition(
 returns uuid
 language plpgsql
 security definer
-set search_path = public
+set search_path = pg_catalog, public
 as $$
 declare
 	v_user_id uuid := auth.uid();
@@ -510,11 +501,8 @@ revoke all on function public.report_municipal_petition(uuid, text, text) from p
 grant execute on function public.report_municipal_petition(uuid, text, text) to authenticated;
 
 comment on table public.municipal_petition_reports is
-	'Reportes privados sobre recogidas municipales. Publicar una petición sigue siendo inmediato; esta tabla habilita moderación reactiva y no constituye preaprobación.';
+	'Reportes privados sobre recogidas municipales. Publicación inmediata con moderación reactiva.';
 
--- El Centro de Operaciones ya dispone de audit_trail genérico. Se amplía su
--- catálogo cerrado para que ocultar una recogida o descartar un reporte deje
--- una huella inmutable, sin copiar texto ciudadano ni identidad del reportante.
 alter table public.audit_trail drop constraint audit_trail_target_type_check;
 alter table public.audit_trail add constraint audit_trail_target_type_check
 	check (target_type in ('open_voice_contribution', 'verification_document', 'municipal_petition'));
@@ -536,7 +524,7 @@ create or replace function public.review_municipal_petition_report(
 returns boolean
 language plpgsql
 security definer
-set search_path = public
+set search_path = pg_catalog, public
 as $$
 declare
 	v_actor_id uuid := auth.uid();
@@ -569,6 +557,12 @@ begin
 		set status = 'hidden'
 		where id = v_petition_id and status in ('open', 'closed', 'resolved');
 
+		-- Una petición ocultada deja de necesitar relaciones cuenta↔apoyo activas.
+		-- Se eliminan para minimizar datos potencialmente sensibles y evitar dejar
+		-- consentimientos que ya no pueden gestionarse desde una ficha pública.
+		delete from public.municipal_petition_supports
+		where petition_id = v_petition_id;
+
 		update public.municipal_petition_reports
 		set status = 'actioned', reviewed_at = now(), reviewed_by = v_actor_id
 		where petition_id = v_petition_id and status = 'open';
@@ -584,8 +578,7 @@ $$;
 revoke all on function public.review_municipal_petition_report(uuid, text) from public, anon;
 grant execute on function public.review_municipal_petition_report(uuid, text) to authenticated;
 
--- Defense in depth: los defaults de algunos proyectos Supabase pueden dar
--- EXECUTE a anon para funciones nuevas; se revoca de forma explícita.
+-- Defense in depth ante defaults de EXECUTE de Supabase.
 revoke all on function public.set_municipal_petition_support(uuid, boolean, boolean, text) from anon;
 revoke all on function public.report_municipal_petition(uuid, text, text) from anon;
 revoke all on function public.create_municipal_petition_server(uuid, text, text, text, text, uuid) from anon, authenticated;
