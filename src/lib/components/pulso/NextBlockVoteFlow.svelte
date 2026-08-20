@@ -33,6 +33,7 @@
 		isValidNextBlockVoteDraftPayload,
 		type NextBlockVoteDraftPayload
 	} from '$lib/utils/nextBlockVoteDraft';
+	import { revealFlowStep } from '$lib/utils/flowNavigation';
 	import { setNextBlockVote } from '$lib/services/nextBlockVoteService';
 	import { authState } from '$lib/auth/session.svelte';
 
@@ -46,6 +47,7 @@
 	let { round, myVote, total, results }: Props = $props();
 
 	const DRAFT_KEY = 'convoca:proximo-bloque:draft:v1';
+	const FLOW_ANCHOR = '[data-next-block-vote-flow]';
 
 	const OPTION_ICONS: Record<NextBlockVoteOptionCode, typeof Briefcase> = {
 		empleo_salarios: Briefcase,
@@ -182,15 +184,17 @@
 		}
 	});
 
-	function chooseOption(code: NextBlockVoteOptionCode) {
+	async function chooseOption(code: NextBlockVoteOptionCode) {
 		selectedOption = code;
 		phase = 'preconfirm';
 		saveError = null;
+		await revealFlowStep(FLOW_ANCHOR);
 	}
 
-	function changeSelection() {
+	async function changeSelection() {
 		phase = 'select';
 		saveError = null;
+		await revealFlowStep(FLOW_ANCHOR);
 	}
 
 	async function confirmVote() {
@@ -209,6 +213,7 @@
 			confirmedOption = selectedOption;
 			phase = 'confirmed';
 			clearDraft();
+			await revealFlowStep(FLOW_ANCHOR);
 		} catch (err) {
 			// Si falla el envío, se conserva la selección: no se resetea ni
 			// selectedOption ni phase.
@@ -250,7 +255,10 @@
 	}
 </script>
 
-<div class="rounded-2xl border border-ink-100 bg-white p-4 sm:p-6">
+<div
+	data-next-block-vote-flow
+	class="scroll-mt-20 rounded-2xl border border-ink-100 bg-white p-4 sm:p-6"
+>
 	{#if !round}
 		<p class="text-sm text-ink-500">Todavía no hay ninguna votación configurada.</p>
 	{:else}
