@@ -24,6 +24,7 @@ import {
 } from '$lib/services/openVoiceService';
 import { listRecentAuditTrail } from '$lib/services/auditTrailService';
 import { listReportedMunicipalPetitions } from '$lib/services/municipalService';
+import { listDetectedMunicipalIssuesForModeration } from '$lib/services/municipalRadarModerationService';
 
 /**
  * Forzado a CSR: `authService.getSession()` lee la sesión de Supabase desde
@@ -40,25 +41,11 @@ export const ssr = false;
 export const load: PageLoad = async () => {
 	const session = await authService.getSession();
 
-	// Ruta separada del panel del organizador a propósito: ni comparte rutas
-	// ni permisos. Un organizador normal no puede entrar aquí.
-	//
-	// Estado "not-staff" explícito (sin sesión, o con sesión pero rol no
-	// staff): antes redirigía a /login, la pantalla de Google para
-	// ciudadanía — un destino que nunca concede acceso aquí, así que quien
-	// llegara sin sesión de staff quedaba en un callejón sin salida real
-	// (hallazgo B1, revisión PR #27). /acceso-interno es la única pantalla
-	// que sí puede llevar hasta aquí.
 	if (!session || !isStaffRole(session.user.role)) {
 		redirect(303, '/acceso-interno');
 	}
 
-	// Comprobación de UX: la barrera real es RLS — is_moderator_or_admin()
-	// (supabase/migrations/0052_staff_mfa_required.sql) ya exige aal2 para
-	// cualquier lectura de esta página, esto solo evita mostrar errores de
-	// permiso crudos y lleva a la pantalla correcta (configurar MFA por
-	// primera vez, o verificar si ya hay un factor pero la sesión sigue en
-	// aal1).
+	// La barrera real es RLS: is_moderator_or_admin() exige rol staff + aal2.
 	const accessStep = await currentStaffAccessStep();
 	if (accessStep === 'change-password') redirect(303, '/acceso-interno/cambiar-contrasena');
 	if (accessStep === 'enroll') redirect(303, '/acceso-interno/configurar-mfa');
@@ -78,7 +65,8 @@ export const load: PageLoad = async () => {
 		pendingAlternatives,
 		nextBlockVoteRounds,
 		pendingOpenVoiceContributions,
-		reportedMunicipalPetitions
+		reportedMunicipalPetitions,
+		detectedMunicipalIssues
 	] = await Promise.all([
 		listPendingReview(),
 		listReportedEvents(),
@@ -93,18 +81,10 @@ export const load: PageLoad = async () => {
 		listPendingMeasureAlternatives(),
 		listNextBlockVoteRounds(),
 		listPendingOpenVoiceContributionsForModeration(),
-		listReportedMunicipalPetitions()
+		listReportedMunicipalPetitions(),
+		listDetectedMunicipalIssuesForModeration()
 	]);
 
-	/**
-	 * Datos exclusivos de la pestaña "Resumen": aparte del `Promise.all`
-	 * crítico de arriba (si esas consultas fallan, ninguna otra pestaña
-	 * puede funcionar, así que un fallo ahí debe seguir rompiendo la
-	 * carga entera) porque un fallo aquí no debe impedir usar el resto del
-	 * panel — cada resultado se degrada a `null` (interpretado como "error
-	 * al calcular este indicador", nunca como 0) en vez de tirar abajo la
-	 * página completa.
-	 */
 	const [participantCountResult, openVoiceTotalResult, recentAuditTrailResult] =
 		await Promise.allSettled([
 			getPulsoParticipantCount(),
@@ -118,9 +98,6 @@ export const load: PageLoad = async () => {
 	const recentAuditTrail =
 		recentAuditTrailResult.status === 'fulfilled' ? recentAuditTrailResult.value : null;
 
-	// Total de votos de la ronda de "Tú eliges el próximo bloque" ACTIVA, si
-	// hay alguna — total exacto, nunca desglose por opción (mismo criterio
-	// de privacidad de 0043: el desglose sí necesita umbral, el total no).
 	const activeVoteRound = nextBlockVoteRounds.find((r) => r.status === 'open');
 	let activeVoteTotal: number | null = null;
 	if (activeVoteRound) {
@@ -147,6 +124,7 @@ export const load: PageLoad = async () => {
 		nextBlockVoteRounds,
 		pendingOpenVoiceContributions,
 		reportedMunicipalPetitions,
+		detectedMunicipalIssues,
 		participantCount,
 		openVoiceTotal,
 		recentAuditTrail,
