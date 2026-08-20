@@ -4,6 +4,21 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="text-scale" content="scale" />
+		<style>
+			html,
+			body {
+				width: 100%;
+				max-width: 100%;
+				overflow-x: clip;
+			}
+
+			@supports not (overflow: clip) {
+				html,
+				body {
+					overflow-x: hidden;
+				}
+			}
+		</style>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
