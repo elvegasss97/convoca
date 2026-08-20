@@ -1,0 +1,113 @@
+name: Patch Ceuta mobile overflow once
+
+on:
+  push:
+    branches:
+      - fix/ceuta-mobile-overflow
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v5
+        with:
+          ref: fix/ceuta-mobile-overflow
+          fetch-depth: 0
+
+      - name: Patch shared calendar responsive labels
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          calendario = Path('src/lib/components/pulso/CalendarioVisual.svelte')
+          text = calendario.read_text()
+
+          old = '''\tfunction phaseShortLabel(phase: TopicTimelinePhase): string {
+          \tif (/100\\s*d[ií]as/i.test(phase.title)) return '100 días';
+          \tconst years = [...phase.title.matchAll(/\\b(20\\d{2})\\b/g)].map((m) => m[1]);
+          \tif (years.length >= 2) {
+          \t\tconst first = years[0];
+          \t\tconst last = years[years.length - 1];
+          \t\treturn `${first}–${last.slice(-2)}`;
+          \t}
+          \tif (years.length === 1) return years[0];
+          \treturn phase.title;
+          }
+          '''
+          new = '''\tfunction phaseShortLabel(phase: TopicTimelinePhase): string {
+          \tif (/100\\s*d[ií]as/i.test(phase.title)) return '100 días';
+
+          \tconst dayRange = phase.title.match(/\\bd[ií]as\\s+(\\d+)\\s+a\\s+(\\d+)\\b/i);
+          \tif (dayRange) return `${dayRange[1]}–${dayRange[2]} días`;
+
+          \tconst monthRange = phase.title.match(/\\bmeses\\s+(\\d+)\\s+a\\s+(\\d+)\\b/i);
+          \tif (monthRange) return `${monthRange[1]}–${monthRange[2]} meses`;
+
+          \tconst firstHours = phase.title.match(/\\bprimer(?:as|os)\\s+(\\d+)\\s+horas\\b/i);
+          \tif (firstHours) return `${firstHours[1]} h`;
+
+          \tconst firstDays = phase.title.match(/\\bprimer(?:as|os)\\s+(\\d+)\\s+d[ií]as\\b/i);
+          \tif (firstDays) return `${firstDays[1]} días`;
+
+          \tconst years = [...phase.title.matchAll(/\\b(20\\d{2})\\b/g)].map((m) => m[1]);
+          \tif (years.length >= 2) {
+          \t\tconst first = years[0];
+          \t\tconst last = years[years.length - 1];
+          \t\treturn `${first}–${last.slice(-2)}`;
+          \t}
+          \tif (years.length === 1) return years[0];
+          \treturn phase.title;
+          }
+          '''
+          if old not in text:
+              raise SystemExit('phaseShortLabel snippet not found')
+          text = text.replace(old, new, 1)
+          text = text.replace(
+              'style="grid-template-columns: repeat({phases.length}, 1fr);"',
+              'style="grid-template-columns: repeat({phases.length}, minmax(0, 1fr));"',
+              1,
+          )
+          text = text.replace(
+              'class="flex flex-col items-center gap-2 focus-visible:outline-none"',
+              'class="flex min-w-0 flex-col items-center gap-2 focus-visible:outline-none"',
+              1,
+          )
+          text = text.replace(
+              'class="text-center text-xs font-bold whitespace-nowrap"',
+              'class="min-w-0 text-center text-[10px] leading-tight font-bold break-words sm:text-xs"',
+              1,
+          )
+          calendario.write_text(text)
+
+          distribution = Path('src/lib/components/pulso/PhaseStatusDistribution.svelte')
+          text = distribution.read_text()
+          text = text.replace(
+              'style="grid-template-columns: repeat({phases.length}, 1fr);"',
+              'style="grid-template-columns: repeat({phases.length}, minmax(0, 1fr));"',
+              1,
+          )
+          text = text.replace(
+              'class="group text-center"',
+              'class="group min-w-0 text-center"',
+              1,
+          )
+          text = text.replace(
+              'class="mb-2 text-xs font-bold"',
+              'class="mb-2 break-words text-xs leading-tight font-bold"',
+              1,
+          )
+          distribution.write_text(text)
+          PY
+
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/lib/components/pulso/CalendarioVisual.svelte src/lib/components/pulso/PhaseStatusDistribution.svelte
+          git commit -m "fix(ceuta): prevent mobile calendar overflow"
+          git push origin HEAD:fix/ceuta-mobile-overflow
