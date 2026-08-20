@@ -1,29 +1,14 @@
 # Auditoría B independiente — PR #34 (`feat/municipal-radar-ingestion-0058`)
 
-Fecha: 2026-08-20. Auditor: sesión independiente de Claude Code, sin participación en la implementación de 0058/0059/0060. Alcance de este documento: un único hallazgo CRITICAL en `0060_municipal_issue_review_path_guard.sql` y su corrección (`0061`). El resto de la auditoría (RLS, Edge Function, mapa/UX, tipos, quality gates) se reportó por otro canal y no se repite aquí.
+Fecha: 2026-08-20. Auditor B: sesión independiente de Claude Code. Revisión C y promoción a staging: ChatGPT. Alcance: bypass CRITICAL encontrado en `0060_municipal_issue_review_path_guard.sql`, corrección `0061` y verificación posterior.
 
-## Hallazgo
+## Hallazgo CRITICAL de Auditor B
 
-`enforce_municipal_issue_review_path()` (0060) compara un GUC de transacción:
+`0060` comparaba un GUC transaccional construido con `auth.uid():issue_id:publish|dismiss`. Los tres componentes son conocidos por el propio staff y `set_config()` sobre un custom GUC no registrado no exige privilegio especial.
 
-```sql
-v_expected_context := coalesce(v_actor_id::text, '') || ':' || new.id::text || ':' || 'publish'|'dismiss';
-...
-if v_context is distinct from v_expected_context then raise exception ...;
-```
+Un staff+AAL2 podía por tanto fijar el mismo valor y ejecutar directamente `detected -> verified/dismissed` sin pasar por `review_municipal_issue()`, saltándose fuente y `audit_trail`.
 
-Los tres componentes de `v_expected_context` son conocidos por el propio staff (su `auth.uid()`, el `id` del issue que ya puede leer, y el literal `publish`/`dismiss`). `set_config()` sobre un GUC con formato `namespace.variable` no registrado por ningún módulo no exige ningún privilegio en PostgreSQL — lo puede ejecutar cualquier rol, incluido `authenticated`.
-
-Consecuencia: un miembro de staff con rol y AAL2 legítimos puede construir ese mismo string él mismo, **sin llamar nunca a `review_municipal_issue()`**, y hacer un `UPDATE` directo que:
-
-- pasa `detected -> verified` (o `dismissed`) saltándose el guard;
-- **no exige fuente** (`municipal_issue_sources`);
-- **no exige punto municipal canónico** más allá de lo que ya deje pasar el trigger de 0056;
-- **no deja fila en `audit_trail`**.
-
-Esto reabre exactamente el bypass que 0060 dice cerrar (staff con `UPDATE` directo saltándose la RPC auditada), solo que sustituyendo "cualquier `UPDATE` directo" por "cualquier `UPDATE` directo con una línea extra de `set_config`".
-
-Reproducido contra staging (`hapxitzmmifuddvbfphc`) dentro de `BEGIN`/`ROLLBACK`, sin persistir cambios ni tocar los hallazgos reales:
+El ataque fue reproducido contra staging dentro de `BEGIN/ROLLBACK`, sin persistir datos:
 
 ```sql
 select set_config('convoca.municipal_issue_review_context',
@@ -31,46 +16,78 @@ select set_config('convoca.municipal_issue_review_context',
 update municipal_issues set status = 'verified', published_at = now() where id = issue_id;
 ```
 
-Resultado observado: `status` pasa a `verified`, `sources` asociadas = 0, `audit_trail` para ese issue = 0.
+Resultado antes del fix: el issue podía pasar a `verified` sin fuente y sin auditoría.
 
-## Corrección (0061, no toca 0058/0059/0060)
+## Corrección 0061
 
-Se sustituye el GUC adivinable por una fila de autorización de un solo uso en una tabla nueva, sin ningún `GRANT` para `anon`/`authenticated` y sin `policy` de RLS. La autorización queda restringida al dueño de la tabla y a la función `SECURITY DEFINER` de revisión, que se ejecuta como ese mismo dueño.
+`0061_municipal_issue_review_context_unforgeable.sql` no modifica 0058/0059/0060. Sustituye el GUC adivinable por una autorización de un solo uso:
 
+```text
+public._municipal_issue_review_authorizations
+(issue_id, action, actor_id, txid, created_at)
 ```
-public._municipal_issue_review_authorizations (issue_id, action, actor_id, txid, created_at)
-```
 
-- `review_municipal_issue()` inserta la fila **después** de todas las comprobaciones de elegibilidad de publicación (INE, fuente, punto canónico) y **antes** del `UPDATE`; la borra inmediatamente después de auditar. Si cualquier comprobación previa falla, nunca llega a insertarse — no hay forma de dejar una autorización huérfana.
-- `enforce_municipal_issue_review_path()` ya no lee ningún GUC: exige `exists(... where issue_id=new.id and action=<publish|dismiss> and actor_id=auth.uid() and txid=txid_current())`.
-- La autorización queda además atada a `txid_current()`: ni siquiera copiar la fila entre transacciones distintas serviría (aunque fuera legible, que no lo es).
+`review_municipal_issue()` crea la autorización después de validar MFA/rol y, para publish, INE + fuente + punto canónico. El trigger exige una fila ligada al actor, issue, acción y `txid_current()`. Tras el UPDATE y el `audit_trail`, la autorización se elimina. Un fallo previo a la autorización no deja fila residual y un rollback revierte toda la operación.
 
-## Verificación (clean-room local, Docker, migraciones 0001→0061)
+## Revisión C
 
-Todo dentro de transacciones con `ROLLBACK`, usando fixtures temporales (nunca los issues reales):
+Se comprobó en staging que los default privileges de Supabase conceden DML a `service_role` sobre tablas nuevas. Como la Edge usa `service_role` solo para catálogo/caché CartoCiudad y ejecuta la decisión humana final con el JWT original del moderador, `service_role` no necesita acceso a la autorización ni EXECUTE sobre `review_municipal_issue`.
 
-- `set_config` forjado con el string exacto `actor:issue:publish` → bloqueado; el trigger de 0061 ya no lee ese GUC.
-- `INSERT`/`SELECT` directo de `authenticated` contra `_municipal_issue_review_authorizations` → `permission denied` en ambos casos.
-- `review_municipal_issue(..., 'publish')` con fuente + punto canónico, y `review_municipal_issue(..., 'dismiss')` → funcionan igual que antes de 0061, dejan fila en `audit_trail` con actor/acción correctos.
-- Filas en `_municipal_issue_review_authorizations` tras un publish/dismiss exitoso: **0** (consumida). Tras un intento de publish fallido (sin fuente): **0** (nunca se creó). Tras el `ROLLBACK` completo de la sesión de prueba: **0**.
-- Contexto de un issue no reutilizable para otro (`leftover authorization from A cannot publish B`): bloqueado.
-- Resto de la matriz de 0060 (AAL1 bloqueado, `verified→in_action→resolved`, `resolved/dismissed→detected` bloqueado, `INSERT` obligado a `detected`, `guard_municipal_staff_map_resolution_server` inalcanzable desde `authenticated`): sigue en verde.
-- `pnpm security:baseline` completo: 13/13 `ok` con 0061 presente en el árbol de migraciones.
+La versión final de 0061:
 
-## Revisión C de la corrección
+- revoca DML sobre `_municipal_issue_review_authorizations` a `public`, `anon`, `authenticated` y `service_role`;
+- mantiene RLS activa y deliberadamente cero policies;
+- revoca EXECUTE de `review_municipal_issue` a `anon` y `service_role`, dejando únicamente `authenticated` como rol API invocador;
+- exige `SECURITY DEFINER` y mismo owner entre RPC y tabla interna;
+- mantiene `search_path = pg_catalog, public`;
+- conserva fuente, punto canónico y `audit_trail`;
+- añade regresión automática que impide volver al GUC adivinable.
 
-Antes de promover 0061 se comprobó el comportamiento real de los default privileges de Supabase staging. Las tablas nuevas en `public` reciben DML para `service_role` por defecto, por lo que revocar únicamente `anon` y `authenticated` no hacía literalmente cierta la invariante “solo el dueño puede escribir”. La Edge `review-municipal-issue` usa `service_role` únicamente para catálogo/caché CartoCiudad y ejecuta la decisión final con el JWT original del moderador, así que `service_role` no necesita esta capacidad.
+## Validación de staging — 0061
 
-La versión revisada de 0061 por tanto:
+Staging `hapxitzmmifuddvbfphc` fue promovido de 0060 a **0061** tras superar PR Quality, Security Baseline y Preview sobre el código revisado.
 
-- revoca también `service_role` sobre `_municipal_issue_review_authorizations`;
-- revoca `EXECUTE` de `review_municipal_issue` a `service_role`;
-- exige en postflight RLS activo, cero policies, cero DML para `anon`/`authenticated`/`service_role`, RPC `SECURITY DEFINER` y mismo owner entre tabla y RPC;
-- añade una regresión automática en `municipalReviewPathGuard.test.ts` para fijar estas invariantes y la eliminación del GUC adivinable.
+Postflight estructural:
 
-## Estado en staging
+- RLS activa y cero policies en la tabla interna;
+- cero SELECT/INSERT/UPDATE/DELETE para `anon`, `authenticated` y `service_role`;
+- tabla y RPC comparten owner;
+- RPC sigue siendo `SECURITY DEFINER`;
+- `anon` y `service_role` sin EXECUTE de la decisión humana;
+- `authenticated` conserva EXECUTE;
+- trigger ya no contiene `convoca.municipal_issue_review_context`;
+- 7 `detected`, 0 `dismissed`, 0 públicos y 0 autorizaciones sobrantes.
 
-**0061 no se ha aplicado a staging en el momento de esta revisión documental.** Staging permanece en 0060, con los mismos 7 `detected` / 0 `dismissed` / 0 públicos de antes de esta auditoría. La promoción de 0061 requiere que el HEAD final vuelva a superar PR Quality y Security Baseline antes del preflight de staging.
+Matriz funcional dentro de `BEGIN/ROLLBACK`:
+
+- AAL1 publish por RPC: bloqueado;
+- staff+AAL2 + GUC antiguo forjado + UPDATE directo: bloqueado;
+- autorización de issue A reutilizada sobre issue B: bloqueada;
+- publish por RPC con fuente + punto canónico: funciona, canonicaliza y audita;
+- publish sin fuente: bloqueado antes de crear autorización;
+- dismiss por RPC: funciona y audita;
+- autorizaciones sobrantes tras publish/dismiss/fallo: 0;
+- `verified -> in_action -> resolved`: permitido;
+- `resolved -> detected`: bloqueado;
+- `dismissed -> detected`: bloqueado;
+- `service_role` sin DML de autorización y sin EXECUTE de review RPC.
+
+Se repitió además con **`SET LOCAL ROLE authenticated` real** y JWT AAL2 de un perfil staff de staging: el GUC puede seguir fijándose, pero no autoriza el UPDATE; el rol no puede leer la tabla interna y la RPC legítima sí publica y audita.
+
+Tras todos los rollbacks: 0 fixtures, 0 puntos de mapa de test, 0 autorizaciones, y los 7 hallazgos reales permanecen intactos en `detected`.
+
+## Tipos y advisors
+
+`database.types.ts` se regeneró y formateó mecánicamente desde una Supabase local desechable reconstruida con migraciones 0001→0061. El esquema generado incluye `_municipal_issue_review_authorizations` y conserva las firmas municipales actuales.
+
+El Security Advisor de staging solo marca la nueva tabla con `rls_enabled_no_policy` (INFO), comportamiento deliberado para esta tabla owner-only. `review_municipal_issue` aparece únicamente en el aviso de SECURITY DEFINER ejecutable por `authenticated`, que es intencional porque la función valida staff+AAL2 internamente. No apareció exposición anónima nueva para esta RPC.
+
+## Estado final de este checkpoint
+
+- Staging: **0061**.
+- Datos reales Radar en staging: 7 `detected`, 0 `dismissed`, 0 públicos.
+- Producción: permanece en **0057**; no ha sido tocada por 0058–0061.
+- PR #34 continúa draft y sin merge hasta autorización explícita de producción.
 
 Security-Baseline-Override: security-definer:review_municipal_issue
 Security-Baseline-Override: security-definer:guard_municipal_staff_map_resolution_server
