@@ -113,19 +113,29 @@
 		--ceuta-green: #3e7a5e;
 		--ceuta-red-soft: #f6e3e0;
 		--ceuta-red: #b8392f;
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
 	}
 
+	/* En móvil los seis tramos ya no forman una fila intrínseca de ~800 px.
+	   Ese ancho mínimo estaba ensanchando el viewport de toda la ruta en PWA
+	   y hacía que incluso la navegación fija inferior apareciera a media escala.
+	   Dos columnas mantienen cada opción legible sin sacar ancho del documento. */
 	.reloj-72 {
-		display: flex;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
 		align-items: stretch;
 		gap: 6px;
 		margin-bottom: 20px;
-		overflow-x: auto;
 		padding-bottom: 6px;
 	}
 	.tramo-boton {
-		flex: 1;
-		min-width: 128px;
+		width: 100%;
+		min-width: 0;
 		background: #fff;
 		border: 1px solid var(--ceuta-line);
 		border-radius: 12px;
@@ -133,6 +143,18 @@
 		text-align: left;
 		cursor: pointer;
 		transition: background 0.2s ease;
+	}
+	@media (min-width: 640px) {
+		.reloj-72 {
+			display: flex;
+			overflow-x: auto;
+			overscroll-behavior-x: contain;
+			-webkit-overflow-scrolling: touch;
+		}
+		.tramo-boton {
+			flex: 0 0 128px;
+			width: auto;
+		}
 	}
 	.tramo-boton .rango {
 		font-family: var(--font-sans);
@@ -147,6 +169,7 @@
 		font-weight: 700;
 		color: var(--ceuta-night);
 		line-height: 1.25;
+		overflow-wrap: anywhere;
 	}
 	.tramo-boton[aria-selected='true'] {
 		background: var(--ceuta-deep);
@@ -164,6 +187,8 @@
 	}
 
 	.tramo-panel {
+		min-width: 0;
+		max-width: 100%;
 		background: #fff;
 		border: 1px solid var(--ceuta-line);
 		border-radius: 20px;
@@ -178,6 +203,7 @@
 		font-size: 1.25rem;
 		margin: 0 0 4px;
 		color: var(--ceuta-night);
+		overflow-wrap: anywhere;
 	}
 	.subrango {
 		font-size: 0.78rem;
@@ -190,10 +216,14 @@
 		grid-template-columns: 1.3fr 1fr;
 		gap: 24px;
 		margin-top: 16px;
+		min-width: 0;
+	}
+	.tramo-grid > div {
+		min-width: 0;
 	}
 	@media (max-width: 800px) {
 		.tramo-grid {
-			grid-template-columns: 1fr;
+			grid-template-columns: minmax(0, 1fr);
 		}
 	}
 	.tramo-panel h4 {
@@ -213,10 +243,12 @@
 	.tramo-panel li {
 		margin-bottom: 6px;
 		font-size: 0.92rem;
+		overflow-wrap: anywhere;
 	}
 	.tramo-panel p {
 		margin: 0;
 		font-size: 0.92rem;
+		overflow-wrap: anywhere;
 	}
 	.caja-garantia {
 		background: var(--ceuta-green-soft);
