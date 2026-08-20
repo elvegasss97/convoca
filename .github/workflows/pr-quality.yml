@@ -17,6 +17,14 @@ jobs:
     name: check-lint-test
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      PUBLIC_SUPABASE_URL: https://tu-proyecto-ficticio.supabase.co
+      PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_valor_ficticio_de_ejemplo
+      PUBLIC_APP_ENV: test
+      PUBLIC_AUTH_GOOGLE_ENABLED: 'false'
+      PUBLIC_AUTH_PASSWORD_ENABLED: 'true'
+      PUBLIC_ENABLE_DEMO_DATA: 'false'
+      PUBLIC_ENABLE_DEV_TOOLS: 'false'
     steps:
       - name: Checkout
         uses: actions/checkout@v5
