@@ -41,7 +41,7 @@ Se añadieron prueba de regresión y `0060_preflight.sql` / `0060_postflight.sql
 
 ## Tipos
 
-`src/lib/supabase/database.types.ts` fue regenerado mecánicamente desde una base Supabase local desechable reconstruida con todas las migraciones del repositorio hasta `0060`. El workflow temporal de regeneración se eliminó en el mismo commit de generación.
+`src/lib/supabase/database.types.ts` fue regenerado mecánicamente desde una base Supabase local desechable reconstruida con todas las migraciones del repositorio hasta `0060`. El workflow temporal de regeneración se eliminó en el mismo commit de generación. El archivo generado y la regresión específica de `0060` fueron después formateados mecánicamente con la misma configuración de Prettier del repositorio.
 
 ## Quality gate
 
