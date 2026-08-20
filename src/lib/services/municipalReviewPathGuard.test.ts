@@ -18,7 +18,9 @@ const reviewFunction =
 
 describe('Radar municipal — camino único de revisión', () => {
 	it('las fuentes almacenadas solo admiten HTTPS', () => {
-		expect(base).toMatch(/municipal_issue_sources[\s\S]*?url text not null check \(url ~ '\^https:\/\/'\)/i);
+		expect(base).toMatch(
+			/municipal_issue_sources[\s\S]*?url text not null check \(url ~ '\^https:\/\/'\)/i
+		);
 	});
 
 	it('ningún INSERT puede crear directamente un hallazgo público', () => {
@@ -39,7 +41,9 @@ describe('Radar municipal — camino único de revisión', () => {
 		const updatePosition = reviewFunction.indexOf('update public.municipal_issues');
 		expect(contextPosition).toBeGreaterThanOrEqual(0);
 		expect(updatePosition).toBeGreaterThan(contextPosition);
-		expect(reviewFunction).toMatch(/v_actor_id::text \|\| ':' \|\| p_issue_id::text \|\| ':' \|\| p_action/i);
+		expect(reviewFunction).toMatch(
+			/v_actor_id::text \|\| ':' \|\| p_issue_id::text \|\| ':' \|\| p_action/i
+		);
 		expect(reviewFunction).toMatch(/set_config\([\s\S]*?true\s*\)/i);
 	});
 
