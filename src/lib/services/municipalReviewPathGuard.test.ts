@@ -40,8 +40,8 @@ describe('Radar municipal — camino único de revisión', () => {
 
 	it('la tabla de autorización revoca explícitamente todos los roles API', () => {
 		expect(reviewPath).toMatch(
-		/revoke all on public\._municipal_issue_review_authorizations from public, anon, authenticated, service_role;/i
-	);
+			/revoke all on public\._municipal_issue_review_authorizations from public, anon, authenticated, service_role;/i
+		);
 		expect(reviewPath).not.toMatch(/create policy[\s\S]*?_municipal_issue_review_authorizations/i);
 	});
 
@@ -61,11 +61,11 @@ describe('Radar municipal — camino único de revisión', () => {
 
 	it('la decisión humana no concede EXECUTE a service_role', () => {
 		expect(reviewPath).toMatch(
-		/revoke all on function public\.review_municipal_issue\(uuid, text\) from public, anon, service_role;/i
-	);
+			/revoke all on function public\.review_municipal_issue\(uuid, text\) from public, anon, service_role;/i
+		);
 		expect(reviewPath).toMatch(
-		/grant execute on function public\.review_municipal_issue\(uuid, text\) to authenticated;/i
-	);
+			/grant execute on function public\.review_municipal_issue\(uuid, text\) to authenticated;/i
+		);
 	});
 
 	it('la RPC mantiene fuente, punto canónico y audit trail como requisitos', () => {
