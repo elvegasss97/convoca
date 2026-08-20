@@ -28,6 +28,7 @@ export interface ModerationQueueCounts {
 	openVoicePending: number;
 	eventsReported: number;
 	channelsReported: number;
+	municipalPetitionsReported: number;
 	eventsPending: number;
 	documentsPending: number;
 	proposalsPending: number;
@@ -68,6 +69,14 @@ export function buildAttentionItems(counts: ModerationQueueCounts): AttentionIte
 			key: 'reportadas',
 			label: `${counts.channelsReported} canal${plural(counts.channelsReported, '', 'es')} de comunicación reportado${plural(counts.channelsReported, '', 's')}`,
 			count: counts.channelsReported,
+			tone: 'critical'
+		});
+	}
+	if (counts.municipalPetitionsReported > 0) {
+		items.push({
+			key: 'reportadas',
+			label: `${counts.municipalPetitionsReported} recogida${plural(counts.municipalPetitionsReported, '', 's')} municipal${plural(counts.municipalPetitionsReported, '', 'es')} con reportes abiertos`,
+			count: counts.municipalPetitionsReported,
 			tone: 'critical'
 		});
 	}

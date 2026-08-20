@@ -102,3 +102,9 @@ La migración NO siembra noticias ni reclamaciones reales automáticamente. Los 
 ## Correcciones posteriores
 
 - **`0055_fix_municipal_petition_anon_execute_grant.sql`**: hallazgo confirmado empíricamente contra staging tras aplicar 0054. `revoke all on function ... from public` no retira el `EXECUTE` que este proyecto de Supabase concede por defecto a `anon`/`authenticated` en cada función nueva de `public` — hace falta revocar de `anon` explícitamente, aparte de `public` (mismo patrón que `0042_security_hardening_review3.sql` ya estableció para `set_concern_listening_priorities` y funciones hermanas, que 0054 no replicó). Sin 0055, una llamada anónima a `create_municipal_petition`/`set_municipal_petition_support` llegaba a ejecutar el cuerpo de la función (aunque el `auth.uid() is null` interno seguía bloqueando cualquier efecto real). **Al escribir nuevas funciones `SECURITY DEFINER` de solo-`authenticated` en este proyecto, revocar siempre de `public` Y `anon` por separado, nunca solo de `public`.**
+
+## Hardening posterior antes de carga real
+
+Antes de sembrar el Muro con contenido real se añadió `0056_municipal_integrity_privacy_hardening.sql`. La fuente operativa de verdad para estos cambios es `docs/MUNICIPAL_HARDENING_0056.md`.
+
+0056 elimina la confianza en coordenadas del navegador, exige coherencia problema↔municipio, permite anonimizar al creador al borrar su cuenta, exige consentimiento específico para apoyos, incorpora reportes con moderación auditada y refuerza el Security Baseline para Secret API Keys nombradas.

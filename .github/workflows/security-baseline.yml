@@ -64,9 +64,6 @@ jobs:
       - name: pnpm install --frozen-lockfile (B4/B5, GARANTÍA VERIFICADA)
         run: pnpm install --frozen-lockfile
       - name: pnpm build
-        # Credenciales deliberadamente ficticias (.env.example) — el build
-        # nunca debe necesitar un proyecto Supabase real (prerender=false
-        # en la raíz de rutas, verificado en seguridad/30_...md).
         env:
           PUBLIC_SUPABASE_URL: https://tu-proyecto-ficticio.supabase.co
           PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_valor_ficticio_de_ejemplo
@@ -82,12 +79,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BASE_REF: ${{ needs.resolve-base-ref.outputs.base_ref }}
-      # Ver scripts/security/lib/override.mjs: en pull_request, actions/checkout
-      # resuelve por defecto el commit de merge sintético de GitHub, no la punta
-      # real del PR — su mensaje nunca contiene los trailers
-      # Security-Baseline-Override escritos por quien abre el PR. Se fija aquí
-      # el SHA real para que el mecanismo de override lea SU mensaje, no el del
-      # merge sintético. Vacío en push/schedule a propósito (no aplica).
       SECURITY_BASELINE_OVERRIDE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || '' }}
     steps:
       - uses: actions/checkout@v5
@@ -113,15 +104,6 @@ jobs:
         run: node scripts/security/check-cleanroom.mjs
 
   migrations-rls:
-    # En job separado de migrations-cleanroom deliberadamente: ambos
-    # levantan su propio shadow completo (Postgres+storage-api+gotrue vía
-    # Docker) para aplicar las 42 migraciones. Ejecutarlos uno detrás de
-    # otro en el mismo runner agotó recursos del runner (el proceso del
-    # segundo terminaba sin error explícito, a mitad de generar el diff)
-    # — confirmado al ejecutar este workflow de verdad sobre este PR
-    # antes de fusionarlo. Runners separados = recursos frescos para cada
-    # shadow, a costa de aplicar las migraciones dos veces en total (ver
-    # limitación ya declarada en seguridad/30_..._implementacion.md §5).
     needs: resolve-base-ref
     runs-on: ubuntu-latest
     steps:
@@ -138,9 +120,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BASE_REF: ${{ needs.resolve-base-ref.outputs.base_ref }}
-      # Ver scripts/security/lib/override.mjs: mismo motivo que en
-      # migrations-structure — SHA real del PR para leer los trailers
-      # Security-Baseline-Override del commit correcto, no del merge sintético.
       SECURITY_BASELINE_OVERRIDE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || '' }}
     steps:
       - uses: actions/checkout@v5
@@ -156,8 +135,10 @@ jobs:
         run: node scripts/security/check-using-true.mjs
       - name: Arquitectura de sesión (G-SSR)
         run: node scripts/security/check-session-architecture.mjs
-      - name: Edge Functions con service_role (G-SR)
+      - name: Edge Functions con credenciales privilegiadas (G-SR)
         run: node scripts/security/check-edge-functions.mjs
+      - name: Integridad Muro Municipal + Firmas
+        run: node scripts/security/check-municipal-integrity.mjs
       - name: Storage (G-STORAGE)
         run: node scripts/security/check-storage.mjs
 

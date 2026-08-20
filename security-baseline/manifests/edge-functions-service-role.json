@@ -1,4 +1,15 @@
 {
-	"$comment": "Inventario de Edge Functions que usan SUPABASE_SERVICE_ROLE_KEY, ya auditadas (seguridad/19_security_baseline_v1_diseno.md, control G-SR). Una función nueva con service_role, o una existente que empiece a usarlo, falla el check y exige el checklist de 8 puntos de G-SR antes de mergear. delete-account fue el único caso y dejó de usar SUPABASE_SERVICE_ROLE_KEY tras el incidente de exposición de la service_role legacy de producción (2026-08-16): ahora usa la Secret API Key nombrada \"delete_account\" del sistema Publishable + Secret Keys, ya no aplica el control G-SR.",
-	"functions": []
+	"$comment": "Inventario de Edge Functions con credenciales privilegiadas de Supabase (service_role legacy o Secret API Keys nombradas). El gate G-SR exige revisar autenticación previa, identidad derivada del JWT, alcance mínimo, errores, CORS, rate limits, tests y no exposición de secretos. El nombre histórico del archivo/check se conserva para no romper el baseline.",
+	"functions": [
+		{
+			"function": "delete-account",
+			"path": "supabase/functions/delete-account/index.ts",
+			"privilege": "named-secret:delete_account"
+		},
+		{
+			"function": "create-municipal-petition",
+			"path": "supabase/functions/create-municipal-petition/index.ts",
+			"privilege": "named-secret:municipal_write"
+		}
+	]
 }

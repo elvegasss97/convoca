@@ -12,7 +12,7 @@
  * página. Sustitúyelo/revísalo antes de un lanzamiento público real.
  */
 export const LEGAL_VERSIONS = {
-	terms: '2026-08-01',
-	privacy: '2026-08-01',
+	terms: '2026-08-20',
+	privacy: '2026-08-20',
 	peacefulUse: '2026-08-01'
 } as const;

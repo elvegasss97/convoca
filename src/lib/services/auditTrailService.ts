@@ -4,7 +4,7 @@
  * reciente" del Centro de Operaciones. Solo lectura: la tabla no tiene
  * política ni GRANT de INSERT/UPDATE/DELETE para `authenticated` —
  * escribir en ella solo ocurre automáticamente desde los triggers/RPCs
- * `SECURITY DEFINER` de 0050/0051, nunca desde este archivo.
+ * `SECURITY DEFINER` de 0050/0051/0056, nunca desde este archivo.
  *
  * `audit_trail_select_staff` (0049) ya exige `is_moderator_or_admin()`
  * (rol + aal2 desde 0052) — las comprobaciones de aquí son solo
