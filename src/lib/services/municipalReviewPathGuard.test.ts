@@ -27,16 +27,19 @@ describe('Radar municipal — camino único de revisión', () => {
 		expect(guardFunction).toMatch(/if tg_op = 'INSERT'[\s\S]*?new\.status <> 'detected'/i);
 	});
 
-	it('detected solo puede salir con autorización owner-only ligada a actor, issue, acción y txid', () => {
-		expect(guardFunction).toMatch(/old\.status = 'detected' and new\.status = 'verified'/i);
-		expect(guardFunction).toMatch(/old\.status = 'detected' and new\.status = 'dismissed'/i);
-		expect(guardFunction).toMatch(/_municipal_issue_review_authorizations/i);
-		expect(guardFunction).toMatch(/a\.issue_id = new\.id/i);
-		expect(guardFunction).toMatch(/a\.actor_id = v_actor_id/i);
-		expect(guardFunction).toMatch(/a\.txid = txid_current\(\)/i);
-		expect(guardFunction).toMatch(/is_moderator_or_admin\(\)/i);
-		expect(guardFunction).not.toMatch(/municipal_issue_review_context/i);
-	});
+	it(
+		'detected solo puede salir con autorización owner-only ligada a actor, issue, acción y txid',
+		() => {
+			expect(guardFunction).toMatch(/old\.status = 'detected' and new\.status = 'verified'/i);
+			expect(guardFunction).toMatch(/old\.status = 'detected' and new\.status = 'dismissed'/i);
+			expect(guardFunction).toMatch(/_municipal_issue_review_authorizations/i);
+			expect(guardFunction).toMatch(/a\.issue_id = new\.id/i);
+			expect(guardFunction).toMatch(/a\.actor_id = v_actor_id/i);
+			expect(guardFunction).toMatch(/a\.txid = txid_current\(\)/i);
+			expect(guardFunction).toMatch(/is_moderator_or_admin\(\)/i);
+			expect(guardFunction).not.toMatch(/municipal_issue_review_context/i);
+		}
+	);
 
 	it('la tabla de autorización revoca explícitamente todos los roles API', () => {
 		expect(reviewPath).toMatch(
