@@ -39,6 +39,19 @@
 	// de los dos patrones, se usa tal cual.
 	function phaseShortLabel(phase: TopicTimelinePhase): string {
 		if (/100\s*d[ií]as/i.test(phase.title)) return '100 días';
+
+		const dayRange = phase.title.match(/\bd[ií]as\s+(\d+)\s+a\s+(\d+)\b/i);
+		if (dayRange) return `${dayRange[1]}–${dayRange[2]} días`;
+
+		const monthRange = phase.title.match(/\bmeses\s+(\d+)\s+a\s+(\d+)\b/i);
+		if (monthRange) return `${monthRange[1]}–${monthRange[2]} meses`;
+
+		const firstHours = phase.title.match(/\bprimer(?:as|os)\s+(\d+)\s+horas\b/i);
+		if (firstHours) return `${firstHours[1]} h`;
+
+		const firstDays = phase.title.match(/\bprimer(?:as|os)\s+(\d+)\s+d[ií]as\b/i);
+		if (firstDays) return `${firstDays[1]} días`;
+
 		const years = [...phase.title.matchAll(/\b(20\d{2})\b/g)].map((m) => m[1]);
 		if (years.length >= 2) {
 			const first = years[0];
@@ -129,7 +142,7 @@
 			<div class="absolute top-5 right-0 left-0 h-0.5 bg-ink-100" aria-hidden="true"></div>
 			<div
 				class="relative grid gap-1 sm:gap-2"
-				style="grid-template-columns: repeat({phases.length}, 1fr);"
+				style="grid-template-columns: repeat({phases.length}, minmax(0, 1fr));"
 			>
 				{#each phases as phase, i (phase.id)}
 					{@const active = activePhaseId === phase.id}
@@ -137,7 +150,7 @@
 						type="button"
 						onclick={() => (activePhaseId = phase.id)}
 						aria-current={active ? 'step' : undefined}
-						class="flex flex-col items-center gap-2 focus-visible:outline-none"
+						class="flex min-w-0 flex-col items-center gap-2 focus-visible:outline-none"
 					>
 						<span
 							class={`z-10 flex size-10 items-center justify-center rounded-full border-4 text-sm font-bold transition-transform duration-200 ${active ? 'scale-110' : ''}`}
@@ -148,7 +161,7 @@
 							{i + 1}
 						</span>
 						<span
-							class="text-center text-xs font-bold whitespace-nowrap"
+							class="min-w-0 text-center text-[10px] leading-tight font-bold break-words sm:text-xs"
 							style={`color:${active ? 'var(--color-brand-700)' : 'var(--color-ink-700)'}`}
 						>
 							{phaseShortLabel(phase)}
