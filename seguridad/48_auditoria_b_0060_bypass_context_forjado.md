@@ -35,7 +35,7 @@ Resultado observado: `status` pasa a `verified`, `sources` asociadas = 0, `audit
 
 ## Corrección (0061, no toca 0058/0059/0060)
 
-Se sustituye el GUC adivinable por una fila de autorización de un solo uso en una tabla nueva, sin ningún `GRANT` para `anon`/`authenticated` y sin `policy` de RLS — igual patrón que ya usa este repo para `audit_trail` (0049) y `municipal_map_points` (0056): con RLS activada y cero policies, solo el dueño de la tabla puede leerla o escribirla, y las funciones `SECURITY DEFINER` se ejecutan como ese dueño.
+Se sustituye el GUC adivinable por una fila de autorización de un solo uso en una tabla nueva, sin ningún `GRANT` para `anon`/`authenticated` y sin `policy` de RLS. La autorización queda restringida al dueño de la tabla y a la función `SECURITY DEFINER` de revisión, que se ejecuta como ese mismo dueño.
 
 ```
 public._municipal_issue_review_authorizations (issue_id, action, actor_id, txid, created_at)
@@ -49,7 +49,7 @@ public._municipal_issue_review_authorizations (issue_id, action, actor_id, txid,
 
 Todo dentro de transacciones con `ROLLBACK`, usando fixtures temporales (nunca los issues reales):
 
-- `set_config` forjado con el string exacto `actor:issue:publish` → `permission denied for table _municipal_issue_review_authorizations` (el trigger ya no lee ese GUC, y el intento de forjar la fila de autorización nueva directamente también falla por grants).
+- `set_config` forjado con el string exacto `actor:issue:publish` → bloqueado; el trigger de 0061 ya no lee ese GUC.
 - `INSERT`/`SELECT` directo de `authenticated` contra `_municipal_issue_review_authorizations` → `permission denied` en ambos casos.
 - `review_municipal_issue(..., 'publish')` con fuente + punto canónico, y `review_municipal_issue(..., 'dismiss')` → funcionan igual que antes de 0061, dejan fila en `audit_trail` con actor/acción correctos.
 - Filas en `_municipal_issue_review_authorizations` tras un publish/dismiss exitoso: **0** (consumida). Tras un intento de publish fallido (sin fuente): **0** (nunca se creó). Tras el `ROLLBACK` completo de la sesión de prueba: **0**.
@@ -57,9 +57,20 @@ Todo dentro de transacciones con `ROLLBACK`, usando fixtures temporales (nunca l
 - Resto de la matriz de 0060 (AAL1 bloqueado, `verified→in_action→resolved`, `resolved/dismissed→detected` bloqueado, `INSERT` obligado a `detected`, `guard_municipal_staff_map_resolution_server` inalcanzable desde `authenticated`): sigue en verde.
 - `pnpm security:baseline` completo: 13/13 `ok` con 0061 presente en el árbol de migraciones.
 
+## Revisión C de la corrección
+
+Antes de promover 0061 se comprobó el comportamiento real de los default privileges de Supabase staging. Las tablas nuevas en `public` reciben DML para `service_role` por defecto, por lo que revocar únicamente `anon` y `authenticated` no hacía literalmente cierta la invariante “solo el dueño puede escribir”. La Edge `review-municipal-issue` usa `service_role` únicamente para catálogo/caché CartoCiudad y ejecuta la decisión final con el JWT original del moderador, así que `service_role` no necesita esta capacidad.
+
+La versión revisada de 0061 por tanto:
+
+- revoca también `service_role` sobre `_municipal_issue_review_authorizations`;
+- revoca `EXECUTE` de `review_municipal_issue` a `service_role`;
+- exige en postflight RLS activo, cero policies, cero DML para `anon`/`authenticated`/`service_role`, RPC `SECURITY DEFINER` y mismo owner entre tabla y RPC;
+- añade una regresión automática en `municipalReviewPathGuard.test.ts` para fijar estas invariantes y la eliminación del GUC adivinable.
+
 ## Estado en staging
 
-**0061 no se ha aplicado a staging.** Staging permanece en 0060, con los mismos 7 `detected` / 0 `dismissed` / 0 públicos de antes de esta auditoría, verificados sin residuos tras las pruebas. La promoción de 0061 a staging/producción queda pendiente de revisión y decisión explícita.
+**0061 no se ha aplicado a staging en el momento de esta revisión documental.** Staging permanece en 0060, con los mismos 7 `detected` / 0 `dismissed` / 0 públicos de antes de esta auditoría. La promoción de 0061 requiere que el HEAD final vuelva a superar PR Quality y Security Baseline antes del preflight de staging.
 
 Security-Baseline-Override: security-definer:review_municipal_issue
 Security-Baseline-Override: security-definer:guard_municipal_staff_map_resolution_server
