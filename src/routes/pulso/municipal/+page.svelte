@@ -437,26 +437,34 @@
 							<p class="text-xs font-semibold text-brand-900">Confirmar apoyo</p>
 							<button
 								type="button"
-								onclick={() => { consentPetitionId = null; supportConsentChecked = false; }}
+								onclick={() => {
+									consentPetitionId = null;
+									supportConsentChecked = false;
+								}}
 								class="rounded-full p-1 text-ink-400 hover:bg-white hover:text-ink-700"
 								aria-label="Cancelar"
 							>
 								<X class="size-4" />
 							</button>
 						</div>
-						<label class="mt-2 flex cursor-pointer items-start gap-2.5 text-[11px] leading-relaxed text-ink-600">
+						<label
+							class="mt-2 flex cursor-pointer items-start gap-2.5 text-[11px] leading-relaxed text-ink-600"
+						>
 							<input
 								type="checkbox"
 								bind:checked={supportConsentChecked}
 								class="mt-0.5 rounded border-ink-300 text-brand-700 focus:ring-brand-500"
 							/>
 							<span>
-								Doy mi <strong class="font-semibold text-ink-800">consentimiento explícito</strong> para que
-								CONVOCA vincule internamente este apoyo a mi cuenta con el fin de impedir duplicados,
-								permitirme retirarlo y mostrar únicamente el recuento agregado. Según el tema, el apoyo
-								puede revelar información especialmente sensible, incluida una opinión política. Mi identidad
-								no se publica. Puedo retirar el apoyo en
-								cualquier momento. <a href="/legal/privacidad" class="font-semibold text-brand-700 hover:underline">Privacidad</a>.
+								Doy mi <strong class="font-semibold text-ink-800">consentimiento explícito</strong>
+								para que CONVOCA vincule internamente este apoyo a mi cuenta con el fin de impedir
+								duplicados, permitirme retirarlo y mostrar únicamente el recuento agregado. Según el
+								tema, el apoyo puede revelar información especialmente sensible, incluida una
+								opinión política. Mi identidad no se publica. Puedo retirar el apoyo en cualquier
+								momento.
+								<a href="/legal/privacidad" class="font-semibold text-brand-700 hover:underline"
+									>Privacidad</a
+								>.
 							</span>
 						</label>
 						<button
@@ -495,9 +503,20 @@
 					<div class="mt-3 rounded-2xl border border-ink-200 bg-white p-3.5 shadow-sm">
 						<div class="flex items-center justify-between gap-2">
 							<p class="text-xs font-semibold text-ink-800">Reportar a moderación</p>
-							<button type="button" onclick={() => { reportingPetitionId = null; reportError = null; }} class="rounded-full p-1 text-ink-400 hover:bg-ink-50" aria-label="Cerrar reporte"><X class="size-4" /></button>
+							<button
+								type="button"
+								onclick={() => {
+									reportingPetitionId = null;
+									reportError = null;
+								}}
+								class="rounded-full p-1 text-ink-400 hover:bg-ink-50"
+								aria-label="Cerrar reporte"><X class="size-4" /></button
+							>
 						</div>
-						<select bind:value={reportReason} class="mt-2 w-full rounded-xl border-ink-200 text-xs focus:border-brand-500 focus:ring-brand-500">
+						<select
+							bind:value={reportReason}
+							class="mt-2 w-full rounded-xl border-ink-200 text-xs focus:border-brand-500 focus:ring-brand-500"
+						>
 							<option value="spam">Spam o duplicado abusivo</option>
 							<option value="abuse">Insultos, acoso o abuso</option>
 							<option value="personal_data">Datos personales expuestos</option>
@@ -512,10 +531,13 @@
 							placeholder="Detalle opcional (mínimo 3 caracteres si lo completas)"
 							class="mt-2 w-full rounded-xl border-ink-200 text-xs focus:border-brand-500 focus:ring-brand-500"
 						></textarea>
-						{#if reportError}<p class="mt-1.5 text-xs font-medium text-critical-700">{reportError}</p>{/if}
+						{#if reportError}<p class="mt-1.5 text-xs font-medium text-critical-700">
+								{reportError}
+							</p>{/if}
 						<button
 							type="button"
-							disabled={reportSubmitting || (reportDetails.trim().length > 0 && reportDetails.trim().length < 3)}
+							disabled={reportSubmitting ||
+								(reportDetails.trim().length > 0 && reportDetails.trim().length < 3)}
 							onclick={() => selectedPetition && submitReport(selectedPetition)}
 							class="mt-2 w-full rounded-full bg-ink-800 px-4 py-2 text-xs font-semibold text-white hover:bg-ink-900 disabled:opacity-50"
 						>
@@ -528,7 +550,12 @@
 	</div>
 	<p class="mt-2 text-right text-[10px] text-ink-400">
 		Ubicación municipal verificada con datos/servicios de
-		<a href="https://www.cartociudad.es" target="_blank" rel="noopener noreferrer" class="font-medium hover:text-brand-700 hover:underline">CartoCiudad · CNIG/IGN</a>.
+		<a
+			href="https://www.cartociudad.es"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="font-medium hover:text-brand-700 hover:underline">CartoCiudad · CNIG/IGN</a
+		>.
 	</p>
 
 	<section class="mt-8">

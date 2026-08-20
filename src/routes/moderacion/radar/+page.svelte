@@ -8,17 +8,25 @@
 	let items = $state(data.items);
 </script>
 
-<Seo title="Radar municipal — Centro de Operaciones" description="Cola interna de revisión municipal." noindex />
+<Seo
+	title="Radar municipal — Centro de Operaciones"
+	description="Cola interna de revisión municipal."
+	noindex
+/>
 
 <div class="min-h-dvh bg-ink-50">
 	<header class="border-b border-ink-100 bg-white">
 		<div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
 			<div class="flex min-w-0 items-center gap-3">
-				<div class="grid size-10 shrink-0 place-items-center rounded-2xl bg-brand-100 text-brand-700">
+				<div
+					class="grid size-10 shrink-0 place-items-center rounded-2xl bg-brand-100 text-brand-700"
+				>
 					<Radar class="size-5" />
 				</div>
 				<div class="min-w-0">
-					<p class="text-xs font-semibold tracking-wide text-brand-700 uppercase">Centro de Operaciones</p>
+					<p class="text-xs font-semibold tracking-wide text-brand-700 uppercase">
+						Centro de Operaciones
+					</p>
 					<h1 class="truncate font-display text-xl font-semibold text-ink-900">Radar municipal</h1>
 				</div>
 			</div>

@@ -66,18 +66,20 @@ export async function listDetectedMunicipalIssuesForModeration(): Promise<
 	if (!issueRows?.length) return [];
 
 	const issueIds = issueRows.map((row) => row.id);
-	const [{ data: sourceRows, error: sourceError }, { data: suggestionRows, error: suggestionError }] =
-		await Promise.all([
-			supabase
-				.from('municipal_issue_sources')
-				.select('id, issue_id, title, url, publisher, kind, published_at')
-				.in('issue_id', issueIds),
-			supabase
-				.from('municipal_issue_suggestions')
-				.select('id, issue_id, position, suggestion_text, author_kind')
-				.in('issue_id', issueIds)
-				.order('position', { ascending: true })
-		]);
+	const [
+		{ data: sourceRows, error: sourceError },
+		{ data: suggestionRows, error: suggestionError }
+	] = await Promise.all([
+		supabase
+			.from('municipal_issue_sources')
+			.select('id, issue_id, title, url, publisher, kind, published_at')
+			.in('issue_id', issueIds),
+		supabase
+			.from('municipal_issue_suggestions')
+			.select('id, issue_id, position, suggestion_text, author_kind')
+			.in('issue_id', issueIds)
+			.order('position', { ascending: true })
+	]);
 	if (sourceError) throw sourceError;
 	if (suggestionError) throw suggestionError;
 

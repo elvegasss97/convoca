@@ -171,9 +171,7 @@ export async function listMunicipalPetitions(): Promise<MunicipalPetition[]> {
 	}));
 }
 
-export async function getMyMunicipalPetitionSupports(
-	petitionIds: string[]
-): Promise<Set<string>> {
+export async function getMyMunicipalPetitionSupports(petitionIds: string[]): Promise<Set<string>> {
 	if (petitionIds.length === 0) return new Set();
 	const { data: sessionData } = await supabase.auth.getSession();
 	const session = sessionData.session;
@@ -266,12 +264,7 @@ export async function setMunicipalPetitionSupport(
 }
 
 export type MunicipalPetitionReportReason =
-	| 'spam'
-	| 'abuse'
-	| 'personal_data'
-	| 'misleading'
-	| 'illegal'
-	| 'other';
+	'spam' | 'abuse' | 'personal_data' | 'misleading' | 'illegal' | 'other';
 
 export async function reportMunicipalPetition(
 	petitionId: string,
@@ -309,9 +302,7 @@ export interface ReportedMunicipalPetitionGroup {
 	reports: MunicipalPetitionReportForModeration[];
 }
 
-export async function listReportedMunicipalPetitions(): Promise<
-	ReportedMunicipalPetitionGroup[]
-> {
+export async function listReportedMunicipalPetitions(): Promise<ReportedMunicipalPetitionGroup[]> {
 	const { data: reportRows, error: reportError } = await supabase
 		.from('municipal_petition_reports')
 		.select('id, petition_id, reason, details, status, created_at, updated_at, reviewed_at')

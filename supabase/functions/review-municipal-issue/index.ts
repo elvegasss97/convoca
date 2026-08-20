@@ -117,7 +117,8 @@ Deno.serve(async (req: Request) => {
 
 	const supabaseUrl = Deno.env.get('SUPABASE_URL');
 	const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
-	if (!supabaseUrl || !anonKey) return json({ error: 'No se ha podido procesar la solicitud.' }, 500);
+	if (!supabaseUrl || !anonKey)
+		return json({ error: 'No se ha podido procesar la solicitud.' }, 500);
 
 	const callerClient = createClient(supabaseUrl, anonKey, {
 		global: { headers: { Authorization: authHeader } }
@@ -127,7 +128,8 @@ Deno.serve(async (req: Request) => {
 
 	// Esta RPC usa el JWT del caller y por tanto exige rol staff + aal2 en BD.
 	const { data: isStaff, error: staffError } = await callerClient.rpc('is_moderator_or_admin');
-	if (staffError || isStaff !== true) return json({ error: 'Acceso restringido a moderación.' }, 403);
+	if (staffError || isStaff !== true)
+		return json({ error: 'Acceso restringido a moderación.' }, 403);
 
 	let body: ReviewIssueBody;
 	try {
@@ -178,7 +180,8 @@ Deno.serve(async (req: Request) => {
 		.limit(1)
 		.maybeSingle();
 	if (sourceError) return json({ error: 'No se han podido comprobar las fuentes.' }, 500);
-	if (!sourceRow) return json({ error: 'Añade al menos una fuente verificable antes de publicar.' }, 400);
+	if (!sourceRow)
+		return json({ error: 'Añade al menos una fuente verificable antes de publicar.' }, 400);
 
 	const secretKey = resolvePrivilegedSecret();
 	if (!secretKey) return json({ error: 'No se ha podido procesar la solicitud.' }, 500);

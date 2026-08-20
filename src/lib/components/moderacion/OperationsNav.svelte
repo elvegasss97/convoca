@@ -75,7 +75,8 @@
 				<item.icon class="size-4 shrink-0" />
 				<span class="min-w-0 flex-1 leading-tight">{item.label}</span>
 				{#if item.badge}
-					<span class="shrink-0 rounded-full {badgeClasses(item.badgeTone)} px-1.5 text-xs font-bold"
+					<span
+						class="shrink-0 rounded-full {badgeClasses(item.badgeTone)} px-1.5 text-xs font-bold"
 						>{item.badge}</span
 					>
 				{/if}
@@ -129,7 +130,8 @@
 
 {#if mobileOpen}
 	<div class="fixed inset-0 z-50 lg:hidden">
-		<button class="absolute inset-0 bg-ink-950/40" aria-label="Cerrar menú" onclick={closeDrawer}></button>
+		<button class="absolute inset-0 bg-ink-950/40" aria-label="Cerrar menú" onclick={closeDrawer}
+		></button>
 		<div
 			id="operations-nav-drawer"
 			role="dialog"
@@ -154,7 +156,9 @@
 			<div class="mt-3 space-y-5">
 				{#each groups as group (group.label)}
 					<div>
-						<p class="px-1 text-xs font-semibold tracking-wide text-ink-400 uppercase">{group.label}</p>
+						<p class="px-1 text-xs font-semibold tracking-wide text-ink-400 uppercase">
+							{group.label}
+						</p>
 						{@render navList(group.items, select)}
 					</div>
 				{/each}
