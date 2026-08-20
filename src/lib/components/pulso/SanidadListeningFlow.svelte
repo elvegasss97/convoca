@@ -668,7 +668,7 @@
 	<!-- Progreso -->
 	<ol
 		data-sanidad-listening-progress
-		class="scroll-mt-20 flex flex-wrap gap-1.5 text-xs"
+		class="flex scroll-mt-20 flex-wrap gap-1.5 text-xs"
 		aria-label="Progreso de la escucha"
 	>
 		{#each STEP_LABELS as label, i (label)}

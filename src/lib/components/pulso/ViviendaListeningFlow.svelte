@@ -374,7 +374,7 @@
 		<!-- Progreso -->
 		<ol
 			data-vivienda-listening-progress
-			class="mt-3 scroll-mt-20 flex flex-wrap gap-1.5 text-xs"
+			class="mt-3 flex scroll-mt-20 flex-wrap gap-1.5 text-xs"
 			aria-label="Progreso de tu participación"
 		>
 			{#each [{ id: 'priorities', label: '1. Prioriza' }, { id: 'deepen', label: '2. Profundiza' }, { id: 'context', label: '3. Contexto' }, { id: 'summary', label: '4. Resumen' }] as s, i (s.id)}
