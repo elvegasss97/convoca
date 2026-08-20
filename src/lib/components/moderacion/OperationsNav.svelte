@@ -84,10 +84,10 @@
 	</div>
 {/snippet}
 
-{#snippet radarLink(extraClass = '')}
+{#snippet radarLink()}
 	<a
 		href="/moderacion/radar"
-		class="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-900 {extraClass}"
+		class="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-ink-600 transition hover:bg-ink-50 hover:text-ink-900"
 	>
 		<Radar class="size-4 shrink-0" />
 		<span class="min-w-0 flex-1 leading-tight">Radar municipal</span>
