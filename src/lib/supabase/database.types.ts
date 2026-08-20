@@ -1,20 +1,40 @@
-/**
- * Tipos generados automáticamente a partir del esquema remoto real con
- * `supabase gen types typescript --project-id <tu-project-ref>`.
- * No editar a mano: si el esquema cambia, añade una migración nueva y
- * vuelve a generar este archivo.
- */
-
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
-	// Allows to automatically instantiate createClient with right options
-	// instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-	__InternalSupabase: {
-		PostgrestVersion: '14.15';
-	};
 	public: {
 		Tables: {
+			_municipal_issue_review_authorizations: {
+				Row: {
+					action: string;
+					actor_id: string;
+					created_at: string;
+					issue_id: string;
+					txid: number;
+				};
+				Insert: {
+					action: string;
+					actor_id: string;
+					created_at?: string;
+					issue_id: string;
+					txid?: number;
+				};
+				Update: {
+					action?: string;
+					actor_id?: string;
+					created_at?: string;
+					issue_id?: string;
+					txid?: number;
+				};
+				Relationships: [
+					{
+						foreignKeyName: '_municipal_issue_review_authorizations_issue_id_fkey';
+						columns: ['issue_id'];
+						isOneToOne: false;
+						referencedRelation: 'municipal_issues';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			attendance_rate_limits: {
 				Row: {
 					called_at: string;
@@ -852,260 +872,6 @@ export type Database = {
 				};
 				Relationships: [];
 			};
-			municipal_issue_sources: {
-				Row: {
-					created_at: string;
-					id: string;
-					issue_id: string;
-					kind: string;
-					published_at: string | null;
-					publisher: string | null;
-					title: string;
-					url: string;
-				};
-				Insert: {
-					created_at?: string;
-					id?: string;
-					issue_id: string;
-					kind?: string;
-					published_at?: string | null;
-					publisher?: string | null;
-					title: string;
-					url: string;
-				};
-				Update: {
-					created_at?: string;
-					id?: string;
-					issue_id?: string;
-					kind?: string;
-					published_at?: string | null;
-					publisher?: string | null;
-					title?: string;
-					url?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'municipal_issue_sources_issue_id_fkey';
-						columns: ['issue_id'];
-						isOneToOne: false;
-						referencedRelation: 'municipal_issues';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			municipal_issue_suggestions: {
-				Row: {
-					author_kind: string;
-					created_at: string;
-					id: string;
-					issue_id: string;
-					position: number;
-					suggestion_text: string;
-				};
-				Insert: {
-					author_kind?: string;
-					created_at?: string;
-					id?: string;
-					issue_id: string;
-					position: number;
-					suggestion_text: string;
-				};
-				Update: {
-					author_kind?: string;
-					created_at?: string;
-					id?: string;
-					issue_id?: string;
-					position?: number;
-					suggestion_text?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'municipal_issue_suggestions_issue_id_fkey';
-						columns: ['issue_id'];
-						isOneToOne: false;
-						referencedRelation: 'municipal_issues';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			municipal_issues: {
-				Row: {
-					category: string;
-					competence_label: string | null;
-					created_at: string;
-					created_by: string | null;
-					detected_at: string;
-					evidence_level: string;
-					id: string;
-					lat: number;
-					lng: number;
-					municipality_ine_code: string | null;
-					municipality_name: string;
-					origin: string;
-					province_code: string;
-					published_at: string | null;
-					resolved_at: string | null;
-					slug: string;
-					status: string;
-					summary: string;
-					title: string;
-					updated_at: string;
-				};
-				Insert: {
-					category: string;
-					competence_label?: string | null;
-					created_at?: string;
-					created_by?: string | null;
-					detected_at?: string;
-					evidence_level?: string;
-					id?: string;
-					lat: number;
-					lng: number;
-					municipality_ine_code?: string | null;
-					municipality_name: string;
-					origin?: string;
-					province_code: string;
-					published_at?: string | null;
-					resolved_at?: string | null;
-					slug: string;
-					status?: string;
-					summary: string;
-					title: string;
-					updated_at?: string;
-				};
-				Update: {
-					category?: string;
-					competence_label?: string | null;
-					created_at?: string;
-					created_by?: string | null;
-					detected_at?: string;
-					evidence_level?: string;
-					id?: string;
-					lat?: number;
-					lng?: number;
-					municipality_ine_code?: string | null;
-					municipality_name?: string;
-					origin?: string;
-					province_code?: string;
-					published_at?: string | null;
-					resolved_at?: string | null;
-					slug?: string;
-					status?: string;
-					summary?: string;
-					title?: string;
-					updated_at?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'municipal_issues_municipality_ine_code_fkey';
-						columns: ['municipality_ine_code'];
-						isOneToOne: false;
-						referencedRelation: 'ine_municipalities';
-						referencedColumns: ['ine_code'];
-					}
-				];
-			};
-			municipal_petition_supports: {
-				Row: {
-					created_at: string;
-					petition_id: string;
-					user_id: string;
-				};
-				Insert: {
-					created_at?: string;
-					petition_id: string;
-					user_id: string;
-				};
-				Update: {
-					created_at?: string;
-					petition_id?: string;
-					user_id?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'municipal_petition_supports_petition_id_fkey';
-						columns: ['petition_id'];
-						isOneToOne: false;
-						referencedRelation: 'municipal_petitions';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			municipal_petitions: {
-				Row: {
-					created_at: string;
-					created_by: string;
-					id: string;
-					issue_id: string | null;
-					lat: number;
-					lng: number;
-					municipality_ine_code: string;
-					municipality_name: string;
-					origin: string;
-					province_code: string;
-					published_at: string;
-					request_text: string;
-					slug: string;
-					status: string;
-					target_name: string;
-					title: string;
-					updated_at: string;
-				};
-				Insert: {
-					created_at?: string;
-					created_by: string;
-					id?: string;
-					issue_id?: string | null;
-					lat: number;
-					lng: number;
-					municipality_ine_code: string;
-					municipality_name: string;
-					origin?: string;
-					province_code: string;
-					published_at?: string;
-					request_text: string;
-					slug: string;
-					status?: string;
-					target_name: string;
-					title: string;
-					updated_at?: string;
-				};
-				Update: {
-					created_at?: string;
-					created_by?: string;
-					id?: string;
-					issue_id?: string | null;
-					lat?: number;
-					lng?: number;
-					municipality_ine_code?: string;
-					municipality_name?: string;
-					origin?: string;
-					province_code?: string;
-					published_at?: string;
-					request_text?: string;
-					slug?: string;
-					status?: string;
-					target_name?: string;
-					title?: string;
-					updated_at?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'municipal_petitions_issue_id_fkey';
-						columns: ['issue_id'];
-						isOneToOne: false;
-						referencedRelation: 'municipal_issues';
-						referencedColumns: ['id'];
-					},
-					{
-						foreignKeyName: 'municipal_petitions_municipality_ine_code_fkey';
-						columns: ['municipality_ine_code'];
-						isOneToOne: false;
-						referencedRelation: 'ine_municipalities';
-						referencedColumns: ['ine_code'];
-					}
-				];
-			};
 			measure_participation_responses: {
 				Row: {
 					comment: string | null;
@@ -1201,6 +967,354 @@ export type Database = {
 						isOneToOne: false;
 						referencedRelation: 'topic_measures';
 						referencedColumns: ['id'];
+					}
+				];
+			};
+			municipal_issue_sources: {
+				Row: {
+					created_at: string;
+					id: string;
+					issue_id: string;
+					kind: string;
+					published_at: string | null;
+					publisher: string | null;
+					title: string;
+					url: string;
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					issue_id: string;
+					kind?: string;
+					published_at?: string | null;
+					publisher?: string | null;
+					title: string;
+					url: string;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					issue_id?: string;
+					kind?: string;
+					published_at?: string | null;
+					publisher?: string | null;
+					title?: string;
+					url?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'municipal_issue_sources_issue_id_fkey';
+						columns: ['issue_id'];
+						isOneToOne: false;
+						referencedRelation: 'municipal_issues';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			municipal_issue_suggestions: {
+				Row: {
+					author_kind: string;
+					created_at: string;
+					id: string;
+					issue_id: string;
+					position: number;
+					suggestion_text: string;
+				};
+				Insert: {
+					author_kind?: string;
+					created_at?: string;
+					id?: string;
+					issue_id: string;
+					position: number;
+					suggestion_text: string;
+				};
+				Update: {
+					author_kind?: string;
+					created_at?: string;
+					id?: string;
+					issue_id?: string;
+					position?: number;
+					suggestion_text?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'municipal_issue_suggestions_issue_id_fkey';
+						columns: ['issue_id'];
+						isOneToOne: false;
+						referencedRelation: 'municipal_issues';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			municipal_issues: {
+				Row: {
+					category: string;
+					competence_label: string | null;
+					created_at: string;
+					created_by: string | null;
+					detected_at: string;
+					evidence_level: string;
+					id: string;
+					lat: number | null;
+					lng: number | null;
+					municipality_ine_code: string | null;
+					municipality_name: string;
+					origin: string;
+					province_code: string;
+					published_at: string | null;
+					resolved_at: string | null;
+					slug: string;
+					status: string;
+					summary: string;
+					title: string;
+					updated_at: string;
+				};
+				Insert: {
+					category: string;
+					competence_label?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					detected_at?: string;
+					evidence_level?: string;
+					id?: string;
+					lat?: number | null;
+					lng?: number | null;
+					municipality_ine_code?: string | null;
+					municipality_name: string;
+					origin?: string;
+					province_code: string;
+					published_at?: string | null;
+					resolved_at?: string | null;
+					slug: string;
+					status?: string;
+					summary: string;
+					title: string;
+					updated_at?: string;
+				};
+				Update: {
+					category?: string;
+					competence_label?: string | null;
+					created_at?: string;
+					created_by?: string | null;
+					detected_at?: string;
+					evidence_level?: string;
+					id?: string;
+					lat?: number | null;
+					lng?: number | null;
+					municipality_ine_code?: string | null;
+					municipality_name?: string;
+					origin?: string;
+					province_code?: string;
+					published_at?: string | null;
+					resolved_at?: string | null;
+					slug?: string;
+					status?: string;
+					summary?: string;
+					title?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'municipal_issues_municipality_ine_code_fkey';
+						columns: ['municipality_ine_code'];
+						isOneToOne: false;
+						referencedRelation: 'ine_municipalities';
+						referencedColumns: ['ine_code'];
+					}
+				];
+			};
+			municipal_map_points: {
+				Row: {
+					created_at: string;
+					lat: number;
+					lng: number;
+					municipality_ine_code: string;
+					source_checked_at: string;
+					source_entity_id: string | null;
+					source_provider: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					lat: number;
+					lng: number;
+					municipality_ine_code: string;
+					source_checked_at?: string;
+					source_entity_id?: string | null;
+					source_provider?: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					lat?: number;
+					lng?: number;
+					municipality_ine_code?: string;
+					source_checked_at?: string;
+					source_entity_id?: string | null;
+					source_provider?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'municipal_map_points_municipality_ine_code_fkey';
+						columns: ['municipality_ine_code'];
+						isOneToOne: true;
+						referencedRelation: 'ine_municipalities';
+						referencedColumns: ['ine_code'];
+					}
+				];
+			};
+			municipal_petition_reports: {
+				Row: {
+					created_at: string;
+					details: string | null;
+					id: string;
+					petition_id: string;
+					reason: string;
+					reporter_id: string | null;
+					reviewed_at: string | null;
+					reviewed_by: string | null;
+					status: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					details?: string | null;
+					id?: string;
+					petition_id: string;
+					reason: string;
+					reporter_id?: string | null;
+					reviewed_at?: string | null;
+					reviewed_by?: string | null;
+					status?: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					details?: string | null;
+					id?: string;
+					petition_id?: string;
+					reason?: string;
+					reporter_id?: string | null;
+					reviewed_at?: string | null;
+					reviewed_by?: string | null;
+					status?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'municipal_petition_reports_petition_id_fkey';
+						columns: ['petition_id'];
+						isOneToOne: false;
+						referencedRelation: 'municipal_petitions';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			municipal_petition_supports: {
+				Row: {
+					consent_version: string;
+					consented_at: string;
+					created_at: string;
+					petition_id: string;
+					user_id: string;
+				};
+				Insert: {
+					consent_version: string;
+					consented_at: string;
+					created_at?: string;
+					petition_id: string;
+					user_id: string;
+				};
+				Update: {
+					consent_version?: string;
+					consented_at?: string;
+					created_at?: string;
+					petition_id?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'municipal_petition_supports_petition_id_fkey';
+						columns: ['petition_id'];
+						isOneToOne: false;
+						referencedRelation: 'municipal_petitions';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			municipal_petitions: {
+				Row: {
+					created_at: string;
+					created_by: string | null;
+					id: string;
+					issue_id: string | null;
+					lat: number;
+					lng: number;
+					municipality_ine_code: string;
+					municipality_name: string;
+					origin: string;
+					province_code: string;
+					published_at: string;
+					request_text: string;
+					slug: string;
+					status: string;
+					target_name: string;
+					title: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					created_by?: string | null;
+					id?: string;
+					issue_id?: string | null;
+					lat: number;
+					lng: number;
+					municipality_ine_code: string;
+					municipality_name: string;
+					origin?: string;
+					province_code: string;
+					published_at?: string;
+					request_text: string;
+					slug: string;
+					status?: string;
+					target_name: string;
+					title: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					created_by?: string | null;
+					id?: string;
+					issue_id?: string | null;
+					lat?: number;
+					lng?: number;
+					municipality_ine_code?: string;
+					municipality_name?: string;
+					origin?: string;
+					province_code?: string;
+					published_at?: string;
+					request_text?: string;
+					slug?: string;
+					status?: string;
+					target_name?: string;
+					title?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'municipal_petitions_issue_id_fkey';
+						columns: ['issue_id'];
+						isOneToOne: false;
+						referencedRelation: 'municipal_issues';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'municipal_petitions_municipality_ine_code_fkey';
+						columns: ['municipality_ine_code'];
+						isOneToOne: false;
+						referencedRelation: 'ine_municipalities';
+						referencedColumns: ['ine_code'];
 					}
 				];
 			};
@@ -2646,6 +2760,17 @@ export type Database = {
 			};
 		};
 		Functions: {
+			create_municipal_petition_server: {
+				Args: {
+					p_issue_id?: string;
+					p_municipality_ine_code: string;
+					p_request_text: string;
+					p_target_name: string;
+					p_title: string;
+					p_user_id: string;
+				};
+				Returns: string;
+			};
 			get_attendance_counts: {
 				Args: { p_event_ids?: string[] };
 				Returns: {
@@ -2721,18 +2846,6 @@ export type Database = {
 					urgency: string;
 				}[];
 			};
-			create_municipal_petition: {
-				Args: {
-					p_issue_id?: string | null;
-					p_lat: number;
-					p_lng: number;
-					p_municipality_ine_code: string;
-					p_request_text: string;
-					p_target_name: string;
-					p_title: string;
-				};
-				Returns: string;
-			};
 			get_municipal_petition_counts: {
 				Args: { p_petition_ids: string[] };
 				Returns: {
@@ -2780,14 +2893,34 @@ export type Database = {
 				}[];
 			};
 			get_pulso_participant_count: { Args: never; Returns: number };
+			guard_municipal_map_resolution_server: {
+				Args: { p_user_id: string };
+				Returns: boolean;
+			};
+			guard_municipal_staff_map_resolution_server: {
+				Args: { p_user_id: string };
+				Returns: boolean;
+			};
 			is_moderator_or_admin: { Args: never; Returns: boolean };
 			log_verification_document_view: {
 				Args: { p_document_id: string };
-				Returns: undefined;
+				Returns: string;
 			};
 			purge_old_attendance_rate_limits: { Args: never; Returns: undefined };
 			purge_old_attendance_responses: { Args: never; Returns: undefined };
 			purge_old_write_rate_limits: { Args: never; Returns: undefined };
+			report_municipal_petition: {
+				Args: { p_details?: string; p_petition_id: string; p_reason: string };
+				Returns: string;
+			};
+			review_municipal_issue: {
+				Args: { p_action: string; p_issue_id: string };
+				Returns: boolean;
+			};
+			review_municipal_petition_report: {
+				Args: { p_action: string; p_report_id: string };
+				Returns: boolean;
+			};
 			set_attendance: {
 				Args: { p_dedup_token: string; p_event_id: string; p_response?: string };
 				Returns: undefined;
@@ -2869,7 +3002,12 @@ export type Database = {
 				Returns: undefined;
 			};
 			set_municipal_petition_support: {
-				Args: { p_petition_id: string; p_supported: boolean };
+				Args: {
+					p_consent_version?: string;
+					p_explicit_consent?: boolean;
+					p_petition_id: string;
+					p_supported: boolean;
+				};
 				Returns: boolean;
 			};
 			set_next_block_vote: {

@@ -1,0 +1,83 @@
+name: PR Quality
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: check-lint-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PUBLIC_SUPABASE_URL: https://tu-proyecto-ficticio.supabase.co
+      PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_valor_ficticio_de_ejemplo
+      PUBLIC_APP_ENV: test
+      PUBLIC_AUTH_GOOGLE_ENABLED: 'false'
+      PUBLIC_AUTH_PASSWORD_ENABLED: 'true'
+      PUBLIC_ENABLE_DEMO_DATA: 'false'
+      PUBLIC_ENABLE_DEV_TOOLS: 'false'
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type and Svelte check
+        run: pnpm check
+
+      - name: Prettier and ESLint on PR diff
+        shell: bash
+        run: |
+          base_ref="${GITHUB_BASE_REF:-main}"
+          git fetch origin "$base_ref" --quiet
+          mapfile -t changed < <(git diff --name-only --diff-filter=ACMR "origin/$base_ref...HEAD")
+
+          format_files=()
+          eslint_files=()
+          for file in "${changed[@]}"; do
+            case "$file" in
+              *.ts|*.svelte|*.mjs|*.js|*.jsx|*.json|*.yml|*.yaml|*.md|*.css|*.html)
+                format_files+=("$file")
+                ;;
+            esac
+            case "$file" in
+              *.ts|*.svelte|*.mjs|*.js|*.jsx)
+                eslint_files+=("$file")
+                ;;
+            esac
+          done
+
+          if ((${#format_files[@]})); then
+            pnpm exec prettier --check -- "${format_files[@]}"
+          fi
+          if ((${#eslint_files[@]})); then
+            pnpm exec eslint -- "${eslint_files[@]}"
+          fi
+
+      - name: Unit tests
+        run: pnpm test
