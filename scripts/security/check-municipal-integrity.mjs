@@ -39,6 +39,8 @@ const privilegedFunctionBlocks = [
 	staffMapGuardFunction
 ];
 
+const secretInvocation = 'const secretKey = resolvePrivilegedSecret();';
+
 const checks = [
 	['created_by se anonimiza al borrar cuenta', /municipal_petitions_created_by_fkey[\s\S]*?on delete set null/i.test(migration)],
 	['RPC pública antigua con coordenadas queda eliminada', /drop function public\.create_municipal_petition\(text, text, text, text, double precision, double precision, uuid\)/i.test(migration)],
@@ -60,8 +62,8 @@ const checks = [
 	['funciones privilegiadas priorizan pg_catalog en search_path', privilegedFunctionBlocks.every((block) => block.length > 0 && /set search_path = pg_catalog, public/i.test(block))],
 	['Edge de petición usa Secret nombrada y JWT validado', /SUPABASE_SECRET_KEYS/.test(edge) && /callerClient\.auth\.getUser\(\)/.test(edge)],
 	['rate-limit ciudadano ocurre antes de CartoCiudad en cache miss', /guard_municipal_map_resolution_server/.test(edge) && edge.indexOf('guard_municipal_map_resolution_server') < edge.indexOf('resolveCartoCiudadPoint(municipality.name')],
-	['Edge de revisión valida JWT + staff MFA antes de resolver Secret', /callerClient\.auth\.getUser\(\)/.test(reviewEdge) && /callerClient\.rpc\('is_moderator_or_admin'\)/.test(reviewEdge) && reviewEdge.indexOf("rpc('is_moderator_or_admin')") < reviewEdge.indexOf('resolvePrivilegedSecret()')],
-	['Edge de revisión exige fuente antes de privilegio/geocoder', /municipal_issue_sources/.test(reviewEdge) && reviewEdge.indexOf("from('municipal_issue_sources')") < reviewEdge.indexOf('resolvePrivilegedSecret()')],
+	['Edge de revisión valida JWT + staff MFA antes de resolver Secret', /callerClient\.auth\.getUser\(\)/.test(reviewEdge) && /callerClient\.rpc\('is_moderator_or_admin'\)/.test(reviewEdge) && reviewEdge.indexOf("rpc('is_moderator_or_admin')") < reviewEdge.indexOf(secretInvocation)],
+	['Edge de revisión exige fuente antes de privilegio/geocoder', /municipal_issue_sources/.test(reviewEdge) && reviewEdge.indexOf("from('municipal_issue_sources')") < reviewEdge.indexOf(secretInvocation)],
 	['rate-limit staff ocurre antes de CartoCiudad en cache miss', /guard_municipal_staff_map_resolution_server/.test(reviewEdge) && reviewEdge.indexOf('guard_municipal_staff_map_resolution_server') < reviewEdge.indexOf('resolveCartoCiudadPoint(municipality.name') && /municipal_staff_map_resolutions/.test(reviewMigration)],
 	['decisión final de Radar vuelve a usar JWT del caller', /callerClient\.rpc\('review_municipal_issue'/.test(reviewEdge) && !/adminClient\.rpc\('review_municipal_issue'/.test(reviewEdge)],
 	['body público de creación no define lat/lng', !(/interface CreatePetitionBody \{[\s\S]*?\n\}/.exec(edge)?.[0] ?? '').match(/\b(?:lat|lng|point)\??\s*:/)],
