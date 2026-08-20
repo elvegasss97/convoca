@@ -10,6 +10,11 @@
 			"function": "create-municipal-petition",
 			"path": "supabase/functions/create-municipal-petition/index.ts",
 			"privilege": "named-secret:municipal_write"
+		},
+		{
+			"function": "review-municipal-issue",
+			"path": "supabase/functions/review-municipal-issue/index.ts",
+			"privilege": "named-secret:municipal_write"
 		}
 	]
 }
