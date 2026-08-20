@@ -23,14 +23,12 @@
 --   -- audit_trail para ese issue.
 --
 -- Corrección (acotada, sin tocar 0058/0059/0060): sustituir la cadena
--- adivinable por una autorización que NINGÚN rol de cliente puede escribir.
--- Se usa el mismo patrón ya empleado en este proyecto para `audit_trail`
--- (0049) y `municipal_map_points` (0056): una tabla sin ningún grant para
--- `anon`/`authenticated` y sin policies de RLS, escribible solo por el
--- dueño de la tabla (las funciones SECURITY DEFINER se ejecutan como ese
--- dueño y no dependen de GRANT/RLS). La comprobación además ata la
--- autorización a la transacción concreta (`txid_current()`), así que ni
--- siquiera copiar la fila entre pestañas/backends distintos sirve.
+-- adivinable por una autorización que ningún rol API pueda escribir.
+-- La tabla revoca explícitamente a anon, authenticated Y service_role porque
+-- los default privileges de Supabase conceden DML a esos roles al crear una
+-- tabla. Solo el dueño de la tabla, compartido con la RPC SECURITY DEFINER,
+-- conserva la vía de escritura. La autorización queda además ligada a la
+-- transacción concreta (`txid_current()`).
 
 create table public._municipal_issue_review_authorizations (
   issue_id uuid not null references public.municipal_issues (id) on delete cascade,
@@ -42,13 +40,14 @@ create table public._municipal_issue_review_authorizations (
 );
 
 alter table public._municipal_issue_review_authorizations enable row level security;
-revoke all on public._municipal_issue_review_authorizations from public, anon, authenticated;
+revoke all on public._municipal_issue_review_authorizations from public, anon, authenticated, service_role;
 -- Deliberadamente sin `create policy`: con RLS activo y cero policies,
--- ningún rol de cliente puede leer ni escribir ni una fila. Solo el dueño
--- de la tabla (las funciones SECURITY DEFINER de abajo) tiene acceso.
+-- ningún rol API puede leer ni escribir una fila. Solo el dueño de la tabla
+-- (la misma identidad efectiva de review_municipal_issue SECURITY DEFINER)
+-- conserva acceso.
 
 comment on table public._municipal_issue_review_authorizations is
-  'Autorización de un solo uso, no legible/escribible por anon/authenticated, que enforce_municipal_issue_review_path() exige para dejar pasar detected->verified/dismissed. Sustituye al contexto por GUC de 0060 (adivinable: set_config() sobre un custom GUC no requiere privilegio alguno). Solo review_municipal_issue() puede crearla.';
+  'Autorización de un solo uso, no legible/escribible por anon/authenticated/service_role, que enforce_municipal_issue_review_path() exige para detected->verified/dismissed. Sustituye al GUC adivinable de 0060. Solo la RPC SECURITY DEFINER dueña puede crearla.';
 
 -- ---------------------------------------------------------------------------
 -- 1. Guard de transición: exige la autorización de solo-dueño, no un GUC
@@ -113,14 +112,14 @@ begin
 end;
 $$;
 
-revoke all on function public.enforce_municipal_issue_review_path() from public, anon, authenticated;
+revoke all on function public.enforce_municipal_issue_review_path() from public, anon, authenticated, service_role;
 
 comment on function public.enforce_municipal_issue_review_path() is
-  'Trigger invoker: impide publicar/descartar/reabrir municipal_issues por UPDATE directo. detected->verified/dismissed exige una fila en public._municipal_issue_review_authorizations (solo escribible por el dueño de la tabla, ver 0061) para el actor+issue+acción+transacción actuales.';
+  'Trigger invoker: impide publicar/descartar/reabrir municipal_issues por UPDATE directo. detected->verified/dismissed exige una fila de autorización owner-only para actor+issue+acción+transacción.';
 
 -- El trigger ya existe desde 0060 (mismo nombre, antes alfabéticamente que
--- municipal_issues_public_location_guard de 0056); no hace falta recrearlo,
--- CREATE OR REPLACE FUNCTION ya actualiza su comportamiento.
+-- municipal_issues_public_location_guard de 0056); CREATE OR REPLACE FUNCTION
+-- actualiza su comportamiento sin recrearlo.
 
 -- ---------------------------------------------------------------------------
 -- 2. La RPC auditada escribe la autorización de solo-dueño, no un GUC
@@ -175,10 +174,6 @@ begin
     end if;
   end if;
 
-  -- Autorización de un solo uso: solo el dueño de la tabla puede escribir
-  -- aquí (sin GRANT para anon/authenticated, sin policies de RLS), así que
-  -- ningún cliente puede fabricarla por su cuenta como sí podía con el GUC
-  -- de 0060. Atada además a esta transacción concreta (txid_current()).
   insert into public._municipal_issue_review_authorizations (issue_id, action, actor_id)
   values (p_issue_id, p_action, v_actor_id);
 
@@ -206,17 +201,21 @@ begin
     );
   end if;
 
-  -- Consumida: no deja crecer la tabla sin límite ni permite reutilizarla
-  -- (el `txid` ya la ataba a esta transacción; esto es solo higiene).
+  -- Consumida: no deja crecer la tabla ni permite reutilizar la autorización.
   delete from public._municipal_issue_review_authorizations
-  where issue_id = p_issue_id and action = p_action and txid = txid_current();
+  where issue_id = p_issue_id
+    and action = p_action
+    and actor_id = v_actor_id
+    and txid = txid_current();
 
   return true;
 end;
 $$;
 
-revoke all on function public.review_municipal_issue(uuid, text) from public, anon;
+-- La Edge toma la decisión final con el JWT original del moderador. El cliente
+-- service_role solo resuelve/cachea CartoCiudad y NO necesita ejecutar esta RPC.
+revoke all on function public.review_municipal_issue(uuid, text) from public, anon, service_role;
 grant execute on function public.review_municipal_issue(uuid, text) to authenticated;
 
 comment on function public.review_municipal_issue(uuid, text) is
-  'Única vía para sacar un hallazgo de detected: staff MFA/AAL2, publish|dismiss, autorización de un solo uso en _municipal_issue_review_authorizations (no fabricable por el cliente), fuente+punto canónico al publicar y audit_trail.';
+  'Única vía para sacar un hallazgo de detected: staff MFA/AAL2, publish|dismiss, autorización owner-only de un solo uso y ligada a la transacción, fuente+punto canónico al publicar y audit_trail.';
