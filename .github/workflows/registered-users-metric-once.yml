@@ -1,0 +1,63 @@
+name: Apply registered users metric once
+
+on:
+  push:
+    branches: [feat/registered-users-metric]
+    paths:
+      - .github/workflows/registered-users-metric-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: feat/registered-users-metric
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+          run_install: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22.x
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Add metric card to Centro de Operaciones
+        shell: python
+        run: |
+          from pathlib import Path
+          path = Path('src/routes/moderacion/+page.svelte')
+          text = path.read_text()
+
+          old_state = "\tconst participantCount = data.participantCount;\n"
+          new_state = "\tconst registeredUserCount = data.registeredUserCount;\n\tconst participantCount = data.participantCount;\n"
+          if old_state not in text:
+              raise SystemExit('No se encontró el punto de inserción del estado')
+          text = text.replace(old_state, new_state, 1)
+
+          old_cards = "\tconst summaryCards = $derived<SummaryCard[]>([\n\t\t{ label: 'Personas participantes únicas', value: participantCount },\n"
+          new_cards = "\tconst summaryCards = $derived<SummaryCard[]>([\n\t\t{ label: 'Usuarios registrados', value: registeredUserCount },\n\t\t{ label: 'Personas participantes únicas', value: participantCount },\n"
+          if old_cards not in text:
+              raise SystemExit('No se encontró el punto de inserción de la tarjeta')
+          text = text.replace(old_cards, new_cards, 1)
+          path.write_text(text)
+      - name: Format touched files
+        run: pnpm exec prettier --write src/lib/services/staffMetricsService.ts src/lib/services/staffMetricsService.test.ts src/routes/moderacion/+page.ts src/routes/moderacion/+page.svelte
+      - name: Type check
+        run: pnpm check
+      - name: Unit tests
+        run: pnpm test -- src/lib/services/staffMetricsService.test.ts src/routes/moderacion/pageLoad.test.ts
+      - name: Remove one-shot workflow and commit
+        shell: bash
+        run: |
+          rm .github/workflows/registered-users-metric-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/lib/services/staffMetricsService.ts src/lib/services/staffMetricsService.test.ts src/routes/moderacion/+page.ts src/routes/moderacion/+page.svelte .github/workflows/registered-users-metric-once.yml
+          git commit -m "feat(moderacion): show registered users metric"
+          git push origin HEAD:feat/registered-users-metric
