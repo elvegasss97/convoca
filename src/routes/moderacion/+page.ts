@@ -9,6 +9,7 @@ import {
 	listAllAuditLogs
 } from '$lib/services/moderationService';
 import { getPendingDocuments, listOrganizers } from '$lib/services/organizersService';
+import { getRegisteredUserCount } from '$lib/services/staffMetricsService';
 import { listReportedChannels } from '$lib/services/channelsService';
 import { listPublicEvents } from '$lib/services/eventsService';
 import {
@@ -81,12 +82,19 @@ export const load: PageLoad = async () => {
 		listReportedMunicipalPetitions()
 	]);
 
-	const [participantCountResult, openVoiceTotalResult, recentAuditTrailResult] =
-		await Promise.allSettled([
-			getPulsoParticipantCount(),
-			countActiveOpenVoiceContributions(),
-			listRecentAuditTrail(8)
-		]);
+	const [
+		registeredUserCountResult,
+		participantCountResult,
+		openVoiceTotalResult,
+		recentAuditTrailResult
+	] = await Promise.allSettled([
+		getRegisteredUserCount(),
+		getPulsoParticipantCount(),
+		countActiveOpenVoiceContributions(),
+		listRecentAuditTrail(8)
+	]);
+	const registeredUserCount =
+		registeredUserCountResult.status === 'fulfilled' ? registeredUserCountResult.value : null;
 	const participantCount =
 		participantCountResult.status === 'fulfilled' ? participantCountResult.value : null;
 	const openVoiceTotal =
@@ -120,6 +128,7 @@ export const load: PageLoad = async () => {
 		nextBlockVoteRounds,
 		pendingOpenVoiceContributions,
 		reportedMunicipalPetitions,
+		registeredUserCount,
 		participantCount,
 		openVoiceTotal,
 		recentAuditTrail,
