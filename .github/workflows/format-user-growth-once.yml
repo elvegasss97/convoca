@@ -1,0 +1,41 @@
+name: Format user growth metric once
+
+on:
+  push:
+    branches:
+      - feat/user-growth-metrics
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.event.head_commit.message == 'chore(ci): format user growth metric once'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: feat/user-growth-metrics
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22.x
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prettier --write src/lib/components/moderacion/OperationsNav.svelte src/lib/services/staffMetricsService.ts
+
+      - name: Commit formatting and remove workflow
+        shell: bash
+        run: |
+          rm .github/workflows/format-user-growth-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/lib/components/moderacion/OperationsNav.svelte src/lib/services/staffMetricsService.ts .github/workflows/format-user-growth-once.yml
+          git commit -m "style(moderacion): format user growth metric"
+          git push origin HEAD:feat/user-growth-metrics
