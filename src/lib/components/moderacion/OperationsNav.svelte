@@ -1,6 +1,7 @@
 <script lang="ts">
-	import type { Component } from 'svelte';
-	import { Menu, Radar, X as XIcon } from '@lucide/svelte';
+	import { onMount, type Component } from 'svelte';
+	import { Menu, Radar, Users, X as XIcon } from '@lucide/svelte';
+	import { supabase } from '$lib/supabase/client';
 
 	export interface OperationsNavItem {
 		key: string;
@@ -26,6 +27,17 @@
 	let mobileOpen = $state(false);
 	let triggerEl = $state<HTMLButtonElement | undefined>(undefined);
 	let closeButtonEl = $state<HTMLButtonElement | undefined>(undefined);
+	let registeredUsers = $state<number | null>(null);
+	let registeredUsersLoaded = $state(false);
+
+	onMount(async () => {
+		const { count, error } = await supabase
+			.from('profiles')
+			.select('id', { count: 'exact', head: true });
+
+		if (!error) registeredUsers = count ?? 0;
+		registeredUsersLoaded = true;
+	});
 
 	function select(key: string) {
 		activeKey = key;
@@ -85,6 +97,22 @@
 	</div>
 {/snippet}
 
+{#snippet registeredUsersCard()}
+	<div class="rounded-2xl border border-ink-100 bg-white p-4">
+		<div class="flex items-center gap-2 text-ink-500">
+			<Users class="size-4 text-brand-700" />
+			<p class="text-xs font-medium">Usuarios registrados</p>
+		</div>
+		{#if !registeredUsersLoaded}
+			<p class="mt-1 font-display text-2xl font-semibold text-ink-300">—</p>
+		{:else if registeredUsers === null}
+			<p class="mt-1 text-sm text-ink-400">Sin datos</p>
+		{:else}
+			<p class="mt-1 font-display text-2xl font-semibold text-ink-900">{registeredUsers}</p>
+		{/if}
+	</div>
+{/snippet}
+
 {#snippet radarLink()}
 	<a
 		href="/moderacion/radar"
@@ -97,6 +125,7 @@
 
 <nav aria-label="Secciones del Centro de Operaciones" class="hidden w-60 shrink-0 lg:block">
 	<div class="sticky top-4 space-y-5">
+		{@render registeredUsersCard()}
 		{#each groups as group (group.label)}
 			<div>
 				<p class="px-3 text-xs font-semibold tracking-wide text-ink-400 uppercase">{group.label}</p>
@@ -110,7 +139,8 @@
 	</div>
 </nav>
 
-<div class="lg:hidden">
+<div class="space-y-3 lg:hidden">
+	{@render registeredUsersCard()}
 	<button
 		bind:this={triggerEl}
 		type="button"
