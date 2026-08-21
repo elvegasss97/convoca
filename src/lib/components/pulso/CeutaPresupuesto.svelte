@@ -533,6 +533,11 @@
 			grid-template-columns: repeat(2, 1fr);
 		}
 	}
+	@media (max-width: 480px) {
+		.kpi-grid {
+			grid-template-columns: 1fr;
+		}
+	}
 	.kpi-tarjeta {
 		border: 1px solid var(--ceuta-line);
 		border-radius: 16px;
@@ -738,8 +743,22 @@
 		margin: -1px;
 		overflow: hidden;
 		clip: rect(0, 0, 0, 0);
-		white-space: nowrap;
 		border: 0;
+		/* Esta clase se aplica a dos <table> (alternativa accesible al
+		   gráfico de barras) que llevan un <caption> con una frase larga.
+		   `white-space: nowrap` aquí se hereda al <caption>, que fuerza esa
+		   frase entera a una sola línea sin saltos — y ese es el ancho
+		   mínimo real de la caja completa tabla+caption (~830px y ~436px
+		   medidos), pese a `width: 1px`. Al ser position:absolute, esa caja
+		   invisible sigue contando para el scrollWidth del documento =>
+		   scroll lateral / "hay que hacer zoom out" en móvil, sin que se vea
+		   nada raro porque queda clip-eada. `table-layout: fixed` por sí solo
+		   NO arregla esto (el spec de tablas hace que el ancho efectivo sea
+		   el máximo entre el especificado y el que pide el contenido/caption);
+		   lo que corta el problema es quitar el nowrap para que la frase
+		   pueda envolver en líneas dentro de la caja de 1px. Confirmado
+		   midiendo getComputedStyle(...).width antes/después. */
+		table-layout: fixed;
 	}
 	.formula-cie {
 		background: var(--ceuta-night);
