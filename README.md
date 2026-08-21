@@ -53,6 +53,9 @@ definitivamente estable, revisa el historial de `supabase/migrations/` y
   pequeños en los resultados agregados.
 - **Próximo bloque**: votación sobre qué tema abordar a continuación,
   cerrada mientras la votación está abierta.
+- **Gasto público**: expedientes visuales que separan planificación,
+  asignación, pago y justificación, con acceso a las fuentes primarias y
+  huecos de información explícitos.
 - **Moderación**: revisión de convocatorias y reportes por parte de
   personal autorizado, sin acceso innecesario a quién reportó qué.
 - **Privacidad por diseño**: los resultados agregados nunca exponen una

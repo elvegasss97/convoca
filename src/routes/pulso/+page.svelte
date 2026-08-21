@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { Activity, Ear, FileEdit, ArrowRight, Users, Vote, MapPinned } from '@lucide/svelte';
+	import {
+		Activity,
+		Ear,
+		FileEdit,
+		ArrowRight,
+		Users,
+		Vote,
+		MapPinned,
+		Landmark
+	} from '@lucide/svelte';
 	import type { PageData } from './$types';
 	import Seo from '$lib/components/Seo.svelte';
 
@@ -21,7 +30,7 @@
 
 <Seo
 	title="Pulso ciudadano"
-	description="El espacio donde Convoca escucha qué está fallando, investiga los problemas y presenta propuestas que la ciudadanía puede revisar."
+	description="El espacio donde Convoca escucha qué está fallando, investiga los problemas, sigue el gasto público y presenta propuestas que la ciudadanía puede revisar."
 />
 
 <div class="mx-auto max-w-5xl px-4 pt-4 pb-16 sm:px-6">
@@ -31,8 +40,8 @@
 			<h1 class="font-display text-2xl font-semibold text-ink-900 sm:text-3xl">Pulso ciudadano</h1>
 		</div>
 		<p class="mx-auto mt-1.5 max-w-2xl text-sm text-ink-600 sm:mx-0 sm:text-base">
-			El espacio donde Convoca escucha qué está fallando, investiga los problemas y presenta
-			propuestas que la ciudadanía puede revisar.
+			El espacio donde Convoca escucha qué está fallando, investiga los problemas, sigue el gasto
+			público y presenta propuestas que la ciudadanía puede revisar.
 		</p>
 		{#if data.participantCount > 0}
 			<div
@@ -81,7 +90,7 @@
 		</p>
 	</a>
 
-	<div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+	<div class="grid grid-cols-1 gap-5 md:grid-cols-2">
 		<a
 			href="/pulso/escucha"
 			class="group flex flex-col gap-3 rounded-2xl border border-ink-100 bg-white p-5 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover sm:p-6"
@@ -160,10 +169,37 @@
 				Explorar el mapa municipal <ArrowRight class="size-3.5" />
 			</p>
 		</a>
+
+		<a
+			href="/pulso/gasto-publico"
+			class="group flex flex-col gap-3 rounded-2xl border border-ink-100 bg-white p-5 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover sm:p-6"
+		>
+			<span
+				class="flex size-11 items-center justify-center rounded-full bg-accent-100 text-accent-700"
+			>
+				<Landmark class="size-5" strokeWidth={2.25} />
+			</span>
+			<div class="flex flex-wrap items-center gap-2">
+				<h2 class="font-display text-lg font-semibold text-ink-900">Gasto público</h2>
+				<span class="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-semibold text-brand-700">
+					Nuevo
+				</span>
+			</div>
+			<p class="text-sm leading-relaxed text-ink-600">
+				Sigue el dinero desde la planificación hasta el pago, descubre quién lo gestiona y abre cada
+				cifra hasta su fuente original.
+			</p>
+			<p
+				class="mt-auto flex items-center gap-1 text-sm font-semibold text-brand-700 group-hover:underline"
+			>
+				Abrir El rastro del dinero <ArrowRight class="size-3.5" />
+			</p>
+		</a>
 	</div>
 
 	<p class="mt-8 text-center text-xs leading-relaxed text-ink-400 sm:text-left">
-		Escucha ciudadana, Propuestas y Muro municipal forman parte del mismo recorrido: la ciudadanía
-		señala, CONVOCA documenta y propone, la ciudadanía revisa y puede movilizar apoyos.
+		Escucha ciudadana, Propuestas, Muro municipal y Gasto público forman parte del mismo recorrido:
+		la ciudadanía señala, CONVOCA documenta y propone, la ciudadanía revisa y puede movilizar
+		apoyos.
 	</p>
 </div>

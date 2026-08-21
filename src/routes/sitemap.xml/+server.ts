@@ -17,6 +17,7 @@ const STATIC_PATHS = [
 	{ path: '/pulso', changefreq: 'daily', priority: '0.8' },
 	{ path: '/pulso/escucha', changefreq: 'daily', priority: '0.7' },
 	{ path: '/pulso/soluciones', changefreq: 'daily', priority: '0.7' },
+	{ path: '/pulso/gasto-publico', changefreq: 'weekly', priority: '0.7' },
 	{ path: '/legal/aviso-legal', changefreq: 'yearly', priority: '0.2' },
 	{ path: '/legal/privacidad', changefreq: 'yearly', priority: '0.2' },
 	{ path: '/legal/terminos', changefreq: 'yearly', priority: '0.2' },
