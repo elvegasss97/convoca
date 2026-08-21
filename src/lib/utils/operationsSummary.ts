@@ -14,6 +14,7 @@ export type OperationsTabKey =
 	| 'documentacion'
 	| 'pulso'
 	| 'vozAbierta'
+	| 'gastoPublico'
 	| 'temas'
 	| 'registro';
 
@@ -26,6 +27,7 @@ export interface AttentionItem {
 
 export interface ModerationQueueCounts {
 	openVoicePending: number;
+	publicSpendingPending: number;
 	eventsReported: number;
 	channelsReported: number;
 	municipalPetitionsReported: number;
@@ -42,7 +44,7 @@ function plural(count: number, singular: string, pluralForm: string): string {
 /**
  * Una entrada por cola con al menos un elemento pendiente, en el mismo
  * orden en que aparecen las secciones en la navegación (Escucha ciudadana
- * → Convocatorias → Planificación). Vacío = nada requiere atención ahora
+ * → Investigación → Convocatorias → Planificación). Vacío = nada requiere atención ahora
  * mismo (la interfaz debe mostrar un estado positivo, no un hueco).
  */
 export function buildAttentionItems(counts: ModerationQueueCounts): AttentionItem[] {
@@ -53,6 +55,14 @@ export function buildAttentionItems(counts: ModerationQueueCounts): AttentionIte
 			key: 'vozAbierta',
 			label: `${counts.openVoicePending} aportación${plural(counts.openVoicePending, '', 'es')} de Voz abierta pendiente${plural(counts.openVoicePending, '', 's')} de revisión`,
 			count: counts.openVoicePending,
+			tone: 'warning'
+		});
+	}
+	if (counts.publicSpendingPending > 0) {
+		items.push({
+			key: 'gastoPublico',
+			label: `${counts.publicSpendingPending} pista${plural(counts.publicSpendingPending, '', 's')} de gasto público activa${plural(counts.publicSpendingPending, '', 's')}`,
+			count: counts.publicSpendingPending,
 			tone: 'warning'
 		});
 	}
@@ -122,6 +132,7 @@ export function totalPendingModerationItems(counts: ModerationQueueCounts): numb
 		counts.eventsPending +
 		counts.documentsPending +
 		counts.openVoicePending +
+		counts.publicSpendingPending +
 		counts.proposalsPending +
 		counts.alternativesPending
 	);

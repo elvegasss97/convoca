@@ -20,6 +20,13 @@ import { isOverridden } from './lib/override.mjs';
 
 const MIGRATIONS_DIR = 'supabase/migrations';
 const HISTORICAL_LAST_VERSION = 42; // 0001-0042 ya reconciliadas y aplicadas (Bloque B).
+// Esta migración fue creada por Supabase CLI antes de que el repositorio
+// adoptara su secuencia NNNN. Ya está en producción y no forma parte de la
+// secuencia local: se reconoce de forma nominal (no se relaja el patrón para
+// migraciones futuras).
+const LEGACY_TIMESTAMPED_MIGRATIONS = new Set([
+	'20260821073030_municipal_issue_precise_locations.sql'
+]);
 
 let failed = false;
 const findings = [];
@@ -41,6 +48,7 @@ const files = readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith('.sql'));
 const versionRe = /^(\d{4})_([a-z0-9_]+)\.sql$/;
 const versions = [];
 for (const f of files) {
+	if (LEGACY_TIMESTAMPED_MIGRATIONS.has(f)) continue;
 	const m = f.match(versionRe);
 	if (!m) {
 		fail(`B3: "${f}" no cumple el formato NNNN_descripcion.sql`);

@@ -458,6 +458,31 @@ export interface ConcernProposal {
 }
 
 // ---------------------------------------------------------------------------
+// Pulso ciudadano — pistas privadas sobre gasto público
+// ---------------------------------------------------------------------------
+
+export type PublicSpendingSubmissionStatus =
+	'received' | 'triage' | 'researching' | 'published' | 'dismissed';
+
+export interface PublicSpendingSubmission {
+	id: string;
+	submitterUserId: string;
+	title: string;
+	details: string;
+	amountText?: string;
+	managingOrganization?: string;
+	territory?: string;
+	sourceUrls: string[];
+	status: PublicSpendingSubmissionStatus;
+	reviewerNote?: string;
+	reviewedBy?: string;
+	reviewedAt?: string;
+	resultingCaseSlug?: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+// ---------------------------------------------------------------------------
 // Pulso ciudadano — Voz abierta (Escucha ciudadana)
 // ---------------------------------------------------------------------------
 

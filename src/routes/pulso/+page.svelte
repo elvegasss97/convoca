@@ -182,17 +182,17 @@
 			<div class="flex flex-wrap items-center gap-2">
 				<h2 class="font-display text-lg font-semibold text-ink-900">Gasto público</h2>
 				<span class="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-semibold text-brand-700">
-					Nuevo
+					7 investigaciones
 				</span>
 			</div>
 			<p class="text-sm leading-relaxed text-ink-600">
-				Sigue el dinero desde la planificación hasta el pago, descubre quién lo gestiona y abre cada
-				cifra hasta su fuente original.
+				Explora expedientes recientes, compara su estado real, descubre a dónde va el dinero y abre
+				cada cifra hasta su fuente original.
 			</p>
 			<p
 				class="mt-auto flex items-center gap-1 text-sm font-semibold text-brand-700 group-hover:underline"
 			>
-				Abrir El rastro del dinero <ArrowRight class="size-3.5" />
+				Abrir el muro del gasto público <ArrowRight class="size-3.5" />
 			</p>
 		</a>
 	</div>

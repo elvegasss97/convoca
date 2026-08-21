@@ -168,7 +168,7 @@ export const publicSpendingSources: PublicSpendingSource[] = [
 		organization: 'Secretaría de Estado de Migraciones',
 		title: 'Resolución de 4 de junio de 2026 sobre precios de referencia',
 		date: '4 de junio de 2026',
-		url: 'https://sede.inclusion.gob.es/documents/387478/1674612/Resoluci%C3%B3n%2Bde%2BPrecios.pdf/11a405e7-b982-51bc-81bd-df5cd04085bc?t=1731649919424',
+		url: 'https://sede.inclusion.gob.es/documents/387478/1674612/Resoluci%C3%B3n%2BSEM%2BPrecios_ACPI2026.pdf/11a405e7-b982-51bc-81bd-df5cd04085bc?t=1780578012700',
 		whatItProves:
 			'Los 150 € son un precio de referencia por plaza y día para vulnerabilidad reforzada y sirven para calcular anticipos y la retribución máxima de la entidad.',
 		status: 'Fuente primaria'
@@ -181,6 +181,16 @@ export const publicSpendingSources: PublicSpendingSource[] = [
 		url: 'https://sede.inclusion.gob.es/w/accion-concertada-proteccion-internacional',
 		whatItProves:
 			'Las entidades y la localización geográfica se concretan después mediante comunicaciones de asignación.',
+		status: 'Fuente primaria'
+	},
+	{
+		id: 'instrucciones-justificacion',
+		organization: 'Secretaría de Estado de Migraciones',
+		title: 'Instrucciones de gestión, seguimiento y justificación de la acción concertada',
+		date: 'Consulta: 22 de agosto de 2026',
+		url: 'https://sede.inclusion.gob.es/documents/387478/1674612/Instrucciones%2BGesti%C3%B3n%2C%2BSeguimiento%2By%2BJustificaci%C3%B3n%2BAC.pdf/24da74d2-0eee-7896-c176-f2ecff7de22f?t=1783593750640',
+		whatItProves:
+			'La retribución final depende de costes efectivos, seguimiento y documentación justificativa; la planificación no equivale al pago final.',
 		status: 'Fuente primaria'
 	}
 ];
