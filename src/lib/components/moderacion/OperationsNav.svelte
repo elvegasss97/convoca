@@ -125,20 +125,12 @@
 			</p>
 			<div class="mt-2 grid grid-cols-2 gap-2 border-t border-ink-100 pt-2">
 				<div>
-					<p class="text-[10px] font-medium tracking-wide text-ink-400 uppercase">
-						Últimas 24 h
-					</p>
-					<p class="mt-0.5 text-sm font-semibold text-ink-800">
-						+{registeredUserStats.last24h}
-					</p>
+					<p class="text-[10px] font-medium tracking-wide text-ink-400 uppercase">Últimas 24 h</p>
+					<p class="mt-0.5 text-sm font-semibold text-ink-800">+{registeredUserStats.last24h}</p>
 				</div>
 				<div>
-					<p class="text-[10px] font-medium tracking-wide text-ink-400 uppercase">
-						Últimos 7 días
-					</p>
-					<p class="mt-0.5 text-sm font-semibold text-ink-800">
-						+{registeredUserStats.last7d}
-					</p>
+					<p class="text-[10px] font-medium tracking-wide text-ink-400 uppercase">Últimos 7 días</p>
+					<p class="mt-0.5 text-sm font-semibold text-ink-800">+{registeredUserStats.last7d}</p>
 				</div>
 			</div>
 		{/if}
