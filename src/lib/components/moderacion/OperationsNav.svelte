@@ -1,6 +1,7 @@
 <script lang="ts">
-	import type { Component } from 'svelte';
-	import { Menu, Radar, X as XIcon } from '@lucide/svelte';
+	import { onMount, type Component } from 'svelte';
+	import { Menu, Radar, Users, X as XIcon } from '@lucide/svelte';
+	import { getRegisteredUserCount } from '$lib/services/staffMetricsService';
 
 	export interface OperationsNavItem {
 		key: string;
@@ -26,6 +27,16 @@
 	let mobileOpen = $state(false);
 	let triggerEl = $state<HTMLButtonElement | undefined>(undefined);
 	let closeButtonEl = $state<HTMLButtonElement | undefined>(undefined);
+	let registeredUserCount = $state<number | null>(null);
+	let registeredUserCountFailed = $state(false);
+
+	onMount(async () => {
+		try {
+			registeredUserCount = await getRegisteredUserCount();
+		} catch {
+			registeredUserCountFailed = true;
+		}
+	});
 
 	function select(key: string) {
 		activeKey = key;
@@ -95,6 +106,22 @@
 	</a>
 {/snippet}
 
+{#snippet registeredUsersMetric()}
+	<div class="rounded-2xl border border-ink-100 bg-white px-3 py-3" aria-live="polite">
+		<p class="flex items-center gap-2 text-xs font-medium text-ink-500">
+			<Users class="size-4 shrink-0" />
+			<span>Usuarios registrados</span>
+		</p>
+		{#if registeredUserCountFailed}
+			<p class="mt-1 text-xs text-ink-400">No disponible</p>
+		{:else if registeredUserCount === null}
+			<p class="mt-1 text-xs text-ink-400">Cargando…</p>
+		{:else}
+			<p class="mt-1 font-display text-2xl font-semibold text-ink-900">{registeredUserCount}</p>
+		{/if}
+	</div>
+{/snippet}
+
 <nav aria-label="Secciones del Centro de Operaciones" class="hidden w-60 shrink-0 lg:block">
 	<div class="sticky top-4 space-y-5">
 		{#each groups as group (group.label)}
@@ -107,6 +134,7 @@
 			<p class="px-3 text-xs font-semibold tracking-wide text-ink-400 uppercase">Territorio</p>
 			{@render radarLink()}
 		</div>
+		{@render registeredUsersMetric()}
 	</div>
 </nav>
 
@@ -166,6 +194,7 @@
 					<p class="px-1 text-xs font-semibold tracking-wide text-ink-400 uppercase">Territorio</p>
 					{@render radarLink()}
 				</div>
+				{@render registeredUsersMetric()}
 			</div>
 		</div>
 	</div>
