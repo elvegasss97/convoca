@@ -67,7 +67,7 @@
 		<div
 			class="pointer-events-none absolute -bottom-44 -left-24 -z-10 size-80 rounded-full bg-accent-500/20 blur-3xl"
 		></div>
-		<div class="pointer-events-none absolute inset-0 -z-10 bg-dot-grid opacity-[0.08]"></div>
+		<div class="bg-dot-grid pointer-events-none absolute inset-0 -z-10 opacity-[0.08]"></div>
 
 		<div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
 			<div class="max-w-3xl">
