@@ -98,7 +98,9 @@
 								{:else}
 									<span class="font-semibold text-ink-900">{proposal.actor.name}</span>
 								{/if}
-								<span class="rounded-full bg-ink-100 px-2 py-0.5 text-[11px] font-medium text-ink-600">
+								<span
+									class="rounded-full bg-ink-100 px-2 py-0.5 text-[11px] font-medium text-ink-600"
+								>
 									{ACTOR_LABELS[proposal.actor.actorType]}
 								</span>
 							</div>
@@ -115,13 +117,18 @@
 											{proposal.actor.declaredOrientation}
 										</a>
 									{:else}
-										<span class="font-medium text-ink-700">{proposal.actor.declaredOrientation}</span>
+										<span class="font-medium text-ink-700"
+											>{proposal.actor.declaredOrientation}</span
+										>
 									{/if}
 								</p>
 							{/if}
 						</div>
-						<span class="inline-flex items-center gap-1 rounded-full bg-warning-50 px-2.5 py-1 text-xs font-semibold text-warning-700">
-							<CircleDot class="size-3" /> {STATUS_LABELS[proposal.auditStatus]}
+						<span
+							class="inline-flex items-center gap-1 rounded-full bg-warning-50 px-2.5 py-1 text-xs font-semibold text-warning-700"
+						>
+							<CircleDot class="size-3" />
+							{STATUS_LABELS[proposal.auditStatus]}
 						</span>
 					</div>
 
@@ -131,7 +138,8 @@
 						rel="noopener noreferrer nofollow"
 						class="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:underline"
 					>
-						{proposal.title} <ExternalLink class="size-3.5" />
+						{proposal.title}
+						<ExternalLink class="size-3.5" />
 					</a>
 					{#if proposal.summary}
 						<p class="mt-1.5 text-sm leading-relaxed text-ink-700">{proposal.summary}</p>
@@ -174,8 +182,9 @@
 		</div>
 
 		<p class="mt-3 text-[11px] leading-relaxed text-ink-400">
-			La orientación se muestra únicamente cuando procede de la descripción pública del propio actor.
-			CONVOCA aplica el mismo proceso de contraste con independencia de quién formule la propuesta.
+			La orientación se muestra únicamente cuando procede de la descripción pública del propio
+			actor. CONVOCA aplica el mismo proceso de contraste con independencia de quién formule la
+			propuesta.
 		</p>
 	</section>
 {/if}
