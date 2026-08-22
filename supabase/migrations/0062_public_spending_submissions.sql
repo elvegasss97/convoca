@@ -181,7 +181,7 @@ create or replace function public.enforce_public_spending_submission_rate_limit(
 returns trigger
 language plpgsql
 security definer
-set search_path = pg_catalog, public
+set search_path = pg_catalog
 as $$
 declare
 	v_user_id uuid := auth.uid();
@@ -190,6 +190,14 @@ declare
 begin
 	if v_user_id is null then
 		raise exception 'Debes iniciar sesión.';
+	end if;
+	if tg_op <> 'INSERT'
+		or tg_table_schema <> 'public'
+		or tg_table_name <> 'public_spending_submissions' then
+		raise exception 'Contexto de trigger no válido.';
+	end if;
+	if new.submitter_user_id is distinct from v_user_id then
+		raise exception 'La pista debe pertenecer a la sesión actual.';
 	end if;
 
 	perform pg_advisory_xact_lock(
@@ -220,7 +228,7 @@ begin
 end;
 $$;
 
-revoke execute on function public.enforce_public_spending_submission_rate_limit()
+revoke all on function public.enforce_public_spending_submission_rate_limit()
 	from public, anon, authenticated;
 
 create trigger enforce_public_spending_submissions_rate_limit
