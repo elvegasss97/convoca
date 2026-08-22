@@ -43,7 +43,9 @@
 	);
 	let mapArea: HTMLDivElement;
 	let mapFocusNonce = $state(0);
-	let mapFocusRequest = $state<{ id: string; lat: number; lng: number; nonce: number } | null>(null);
+	let mapFocusRequest = $state<{ id: string; lat: number; lng: number; nonce: number } | null>(
+		null
+	);
 	let signingId = $state<string | null>(null);
 	let signingError = $state<string | null>(null);
 	let consentPetitionId = $state<string | null>(null);
