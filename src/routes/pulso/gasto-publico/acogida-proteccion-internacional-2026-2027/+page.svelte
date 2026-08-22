@@ -13,12 +13,14 @@
 		Info,
 		Landmark,
 		MapPin,
+		Newspaper,
 		Route,
 		ShieldCheck
 	} from '@lucide/svelte';
 	import Seo from '$lib/components/Seo.svelte';
 	import PulsoSectionTabs from '$lib/components/pulso/PulsoSectionTabs.svelte';
 	import {
+		publicSpendingClaimOrigin,
 		publicSpendingPilot,
 		publicSpendingShare,
 		publicSpendingSources,
@@ -156,6 +158,62 @@
 				el dinero.
 			</p>
 		</div>
+
+		<article class="mb-4 overflow-hidden rounded-3xl border border-accent-200 bg-white shadow-card">
+			<div
+				class="flex flex-col gap-4 border-b border-accent-100 bg-accent-50 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6"
+			>
+				<div class="flex min-w-0 gap-3">
+					<span
+						class="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent-100 text-accent-700"
+					>
+						<Newspaper class="size-5" />
+					</span>
+					<div>
+						<p class="text-xs font-semibold tracking-wider text-accent-700 uppercase">
+							La publicación que originó la duda
+						</p>
+						<h3 class="mt-2 max-w-4xl font-display text-lg font-semibold text-ink-900 sm:text-xl">
+							{publicSpendingClaimOrigin.title}
+						</h3>
+						<p class="mt-1 text-xs text-ink-500">
+							{publicSpendingClaimOrigin.organization} · {publicSpendingClaimOrigin.date}
+						</p>
+					</div>
+				</div>
+				<span
+					class="w-fit shrink-0 rounded-full border border-accent-200 bg-white px-3 py-1 text-[11px] font-semibold text-accent-700"
+				>
+					{publicSpendingClaimOrigin.status}
+				</span>
+			</div>
+
+			<div class="grid gap-4 p-5 sm:p-6 lg:grid-cols-2">
+				<div class="rounded-2xl bg-ink-50 p-4">
+					<p class="text-xs font-semibold text-ink-500">Qué afirma</p>
+					<p class="mt-1.5 text-sm leading-relaxed text-ink-700">
+						{publicSpendingClaimOrigin.claimSummary}
+					</p>
+				</div>
+				<div class="rounded-2xl border border-brand-100 bg-brand-50 p-4">
+					<p class="text-xs font-semibold text-brand-700">Cómo la tratamos</p>
+					<p class="mt-1.5 text-sm leading-relaxed text-ink-700">
+						{publicSpendingClaimOrigin.editorialUse}
+					</p>
+				</div>
+			</div>
+
+			<div class="px-5 pb-5 sm:px-6 sm:pb-6">
+				<a
+					href={publicSpendingClaimOrigin.url}
+					target="_blank"
+					rel="noreferrer"
+					class="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:underline"
+				>
+					Leer la publicación original <ExternalLink class="size-3.5" />
+				</a>
+			</div>
+		</article>
 
 		<div class="grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
 			<article class="rounded-3xl border border-critical-100 bg-critical-50 p-5 sm:p-6">
