@@ -6,10 +6,18 @@
 	import type { FeatureCollection, Point as GeoJSONPoint } from 'geojson';
 	import type { MunicipalIssue, MunicipalPetition } from '$lib/types';
 
+	export interface MunicipalMapFocusRequest {
+		id: string;
+		lat: number;
+		lng: number;
+		nonce: number;
+	}
+
 	interface Props {
 		issues: MunicipalIssue[];
 		petitions: MunicipalPetition[];
 		mode: 'issues' | 'petitions';
+		focusRequest?: MunicipalMapFocusRequest | null;
 		onSelectIssue?: (issue: MunicipalIssue) => void;
 		onSelectPetition?: (petition: MunicipalPetition) => void;
 	}
@@ -18,6 +26,7 @@
 		issues,
 		petitions,
 		mode,
+		focusRequest = null,
 		onSelectIssue = () => undefined,
 		onSelectPetition = () => undefined
 	}: Props = $props();
@@ -250,6 +259,21 @@
 				}
 			});
 
+			instance.addLayer({
+				id: 'municipal-point-focus',
+				type: 'circle',
+				source: 'municipal-points',
+				filter: ['==', ['get', 'id'], '__none__'],
+				paint: {
+					'circle-color': '#f97316',
+					'circle-opacity': 0.14,
+					'circle-radius': 17,
+					'circle-stroke-width': 4,
+					'circle-stroke-color': '#f97316',
+					'circle-stroke-opacity': 0.95
+				}
+			});
+
 			instance.on('click', 'municipal-points', (event) => {
 				const feature = event.features?.[0];
 				const id = feature?.properties?.id;
@@ -289,6 +313,28 @@
 		if (!ready || !map) return;
 		const source = map.getSource('municipal-points') as GeoJSONSource | undefined;
 		source?.setData(toGeoJSON());
+	});
+
+	$effect(() => {
+		const request = focusRequest;
+		if (!ready || !map) return;
+
+		if (!request || mode !== 'issues') {
+			map.setFilter('municipal-point-focus', ['==', ['get', 'id'], '__none__']);
+			return;
+		}
+
+		// El nonce permite volver a enfocar el mismo problema si el usuario pulsa
+		// su tarjeta más de una vez. El zoom 14 supera el nivel máximo de clusters,
+		// así que siempre aterrizamos sobre el punto individual documentado.
+		void request.nonce;
+		map.setFilter('municipal-point-focus', ['==', ['get', 'id'], request.id]);
+		map.flyTo({
+			center: [request.lng, request.lat],
+			zoom: Math.max(map.getZoom(), 14),
+			duration: 850,
+			essential: true
+		});
 	});
 
 	onDestroy(() => {

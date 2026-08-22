@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import {
@@ -40,6 +40,11 @@
 	let selectedIssue = $state<MunicipalIssue | null>(null);
 	let selectedPetition = $state<MunicipalPetition | null>(
 		initialPetitionId ? (petitions.find((item) => item.id === initialPetitionId) ?? null) : null
+	);
+	let mapArea: HTMLDivElement;
+	let mapFocusNonce = $state(0);
+	let mapFocusRequest = $state<{ id: string; lat: number; lng: number; nonce: number } | null>(
+		null
 	);
 	let signingId = $state<string | null>(null);
 	let signingError = $state<string | null>(null);
@@ -90,6 +95,20 @@
 		selectedPetition = null;
 	}
 
+	async function focusIssueOnMap(issue: MunicipalIssue) {
+		mode = 'issues';
+		chooseIssue(issue);
+		mapFocusNonce += 1;
+		mapFocusRequest = {
+			id: issue.id,
+			lat: issue.point.lat,
+			lng: issue.point.lng,
+			nonce: mapFocusNonce
+		};
+		await tick();
+		mapArea?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	}
+
 	function choosePetition(petition: MunicipalPetition) {
 		selectedPetition = petition;
 		selectedIssue = null;
@@ -107,6 +126,7 @@
 	function closeSelection() {
 		selectedIssue = null;
 		selectedPetition = null;
+		mapFocusRequest = null;
 		consentPetitionId = null;
 		supportConsentChecked = false;
 		reportingPetitionId = null;
@@ -282,11 +302,12 @@
 		<p class="hidden text-xs text-ink-400 sm:block">Pulsa cualquier luz para abrir su ficha</p>
 	</div>
 
-	<div class="relative">
+	<div class="relative" bind:this={mapArea}>
 		<MunicipalMap
 			{issues}
 			{petitions}
 			{mode}
+			focusRequest={mapFocusRequest}
 			onSelectIssue={chooseIssue}
 			onSelectPetition={choosePetition}
 		/>
@@ -578,7 +599,8 @@
 					{#each issues.slice(0, 9) as issue (issue.id)}
 						<button
 							type="button"
-							onclick={() => chooseIssue(issue)}
+							onclick={() => focusIssueOnMap(issue)}
+							aria-label={`Ver en el mapa: ${issue.title}`}
 							class="group rounded-2xl border border-ink-100 bg-white p-4 text-left shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover"
 						>
 							<div class="flex items-center justify-between gap-2">
