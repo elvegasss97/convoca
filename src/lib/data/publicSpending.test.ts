@@ -27,6 +27,18 @@ const asylumInvestigation: PublicSpendingInvestigation = {
 	manager: 'Administración',
 	recipient: 'Entidades concertadas',
 	summary: 'Resumen',
+	citizenIntro: 'Explicación sencilla del expediente.',
+	fundingOrigin: 'Presupuesto público documentado.',
+	fundingDestination: 'Entidades que prestan el servicio.',
+	citizenTakeaway: 'La cifra principal es una planificación, no un pago.',
+	explainerFigures: [
+		{
+			id: 'total',
+			value: '200 €',
+			question: '¿Cuál es el total?',
+			explanation: 'La suma de las partidas.'
+		}
+	],
 	whyItMatters: 'Importancia',
 	evidenceNote: 'Nota',
 	featuredMetric: '55 plazas',

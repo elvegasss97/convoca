@@ -1725,6 +1725,44 @@ export type Database = {
 					}
 				];
 			};
+			public_spending_explainer_figures: {
+				Row: {
+					created_at: string;
+					display_value: string;
+					explanation: string;
+					figure_id: string;
+					investigation_slug: string;
+					question: string;
+					sort_order: number;
+				};
+				Insert: {
+					created_at?: string;
+					display_value: string;
+					explanation: string;
+					figure_id: string;
+					investigation_slug: string;
+					question: string;
+					sort_order: number;
+				};
+				Update: {
+					created_at?: string;
+					display_value?: string;
+					explanation?: string;
+					figure_id?: string;
+					investigation_slug?: string;
+					question?: string;
+					sort_order?: number;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'public_spending_explainer_figures_investigation_slug_fkey';
+						columns: ['investigation_slug'];
+						isOneToOne: false;
+						referencedRelation: 'public_spending_investigations';
+						referencedColumns: ['slug'];
+					}
+				];
+			};
 			public_spending_investigations: {
 				Row: {
 					accent: string;
@@ -1735,6 +1773,8 @@ export type Database = {
 					breakdown_note: string;
 					breakdown_title: string;
 					category: string;
+					citizen_intro: string;
+					citizen_takeaway: string;
 					created_at: string;
 					detail_description: string | null;
 					detail_variant: string;
@@ -1743,6 +1783,8 @@ export type Database = {
 					eyebrow: string;
 					featured_label: string;
 					featured_metric: string;
+					funding_destination: string;
+					funding_origin: string;
 					known_facts: string[];
 					manager: string;
 					period: string;
@@ -1771,6 +1813,8 @@ export type Database = {
 					breakdown_note: string;
 					breakdown_title: string;
 					category: string;
+					citizen_intro: string;
+					citizen_takeaway: string;
 					created_at?: string;
 					detail_description?: string | null;
 					detail_variant?: string;
@@ -1779,6 +1823,8 @@ export type Database = {
 					eyebrow: string;
 					featured_label: string;
 					featured_metric: string;
+					funding_destination: string;
+					funding_origin: string;
 					known_facts?: string[];
 					manager: string;
 					period: string;
@@ -1807,6 +1853,8 @@ export type Database = {
 					breakdown_note?: string;
 					breakdown_title?: string;
 					category?: string;
+					citizen_intro?: string;
+					citizen_takeaway?: string;
 					created_at?: string;
 					detail_description?: string | null;
 					detail_variant?: string;
@@ -1815,6 +1863,8 @@ export type Database = {
 					eyebrow?: string;
 					featured_label?: string;
 					featured_metric?: string;
+					funding_destination?: string;
+					funding_origin?: string;
 					known_facts?: string[];
 					manager?: string;
 					period?: string;

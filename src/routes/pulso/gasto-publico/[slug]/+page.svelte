@@ -16,6 +16,7 @@
 	} from '@lucide/svelte';
 	import type { PageData } from './$types';
 	import Seo from '$lib/components/Seo.svelte';
+	import PublicSpendingCitizenGuide from '$lib/components/pulso/PublicSpendingCitizenGuide.svelte';
 	import PulsoSectionTabs from '$lib/components/pulso/PulsoSectionTabs.svelte';
 	import {
 		publicSpendingStageLabels,
@@ -125,11 +126,16 @@
 	</section>
 
 	<nav class="no-scrollbar mt-4 flex gap-2 overflow-x-auto pb-1" aria-label="Contenido de la ficha">
+		<a href="#resumen-sencillo" class="section-link">Resumen sencillo</a>
 		<a href="#significado" class="section-link">Qué significa</a>
 		<a href="#destino" class="section-link">A dónde va</a>
 		<a href="#rastro" class="section-link">Seguir el rastro</a>
 		<a href="#fuentes" class="section-link">Fuentes</a>
 	</nav>
+
+	<div class="pt-6">
+		<PublicSpendingCitizenGuide {investigation} />
+	</div>
 
 	<section id="significado" class="scroll-mt-24 pt-10">
 		<div class="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">

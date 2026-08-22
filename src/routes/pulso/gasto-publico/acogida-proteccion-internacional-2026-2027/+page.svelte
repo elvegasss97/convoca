@@ -19,6 +19,7 @@
 	} from '@lucide/svelte';
 	import type { PageData } from './$types';
 	import Seo from '$lib/components/Seo.svelte';
+	import PublicSpendingCitizenGuide from '$lib/components/pulso/PublicSpendingCitizenGuide.svelte';
 	import PulsoSectionTabs from '$lib/components/pulso/PulsoSectionTabs.svelte';
 	import { publicSpendingShare as calculatePublicSpendingShare } from '$lib/data/publicSpending';
 
@@ -137,6 +138,7 @@
 		aria-label="Contenido de El rastro del dinero"
 		class="no-scrollbar mt-4 flex gap-2 overflow-x-auto pb-1"
 	>
+		<a href="#resumen-sencillo" class="section-link">Resumen sencillo</a>
 		<a href="#caso" class="section-link">El caso de los 150 €</a>
 		<a href="#muro" class="section-link">Ver el muro</a>
 		<a href="#rastro" class="section-link">Seguir el dinero</a>
@@ -154,6 +156,10 @@
 		<p class="max-w-2xl text-xs leading-relaxed text-ink-600">
 			{publicSpendingPilot.disclaimer}
 		</p>
+	</div>
+
+	<div class="pt-6">
+		<PublicSpendingCitizenGuide investigation={data.investigation} />
 	</div>
 
 	<section id="caso" class="scroll-mt-24 pt-10">
