@@ -16,20 +16,32 @@
 	import PulsoSectionTabs from '$lib/components/pulso/PulsoSectionTabs.svelte';
 	import PublicSpendingSubmissionForm from '$lib/components/pulso/PublicSpendingSubmissionForm.svelte';
 	import {
-		publicSpendingInvestigations,
 		publicSpendingMaxAmount,
-		publicSpendingSourceCount,
+		publicSpendingPrimarySourceCount,
 		publicSpendingStageLabels,
 		type PublicSpendingStage
-	} from '$lib/data/publicSpendingInvestigations';
+	} from '$lib/data/publicSpending';
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
+	const investigations = $derived(data.investigations);
+	const maxAmount = $derived(publicSpendingMaxAmount(investigations));
+	const primarySourceCount = $derived(publicSpendingPrimarySourceCount(investigations));
+	const latestReview = $derived(
+		investigations.reduce(
+			(latest, investigation) =>
+				investigation.reviewedOn > latest.reviewedOn ? investigation : latest,
+			investigations[0]
+		)?.reviewedAt ?? 'Sin revisiones publicadas'
+	);
 
 	type StageFilter = 'all' | PublicSpendingStage;
 
 	let activeStage = $state<StageFilter>('all');
 	const visibleInvestigations = $derived(
 		activeStage === 'all'
-			? publicSpendingInvestigations
-			: publicSpendingInvestigations.filter((item) => item.stage === activeStage)
+			? investigations
+			: investigations.filter((item) => item.stage === activeStage)
 	);
 
 	const stageFilters: { id: StageFilter; label: string }[] = [
@@ -51,7 +63,7 @@
 	}
 
 	function scaleWidth(amount: number): number {
-		return Math.max(4, (amount / publicSpendingMaxAmount) * 100);
+		return Math.max(4, maxAmount > 0 ? (amount / maxAmount) * 100 : 0);
 	}
 
 	function stageClass(stage: PublicSpendingStage): string {
@@ -114,11 +126,11 @@
 
 			<div class="grid grid-cols-3 gap-2">
 				<div class="hero-stat">
-					<p class="hero-stat__number">{publicSpendingInvestigations.length}</p>
+					<p class="hero-stat__number">{investigations.length}</p>
 					<p class="hero-stat__label">expedientes</p>
 				</div>
 				<div class="hero-stat">
-					<p class="hero-stat__number">{publicSpendingSourceCount}</p>
+					<p class="hero-stat__number">{primarySourceCount}</p>
 					<p class="hero-stat__label">fuentes oficiales</p>
 				</div>
 				<div class="hero-stat">
@@ -129,7 +141,7 @@
 					<p class="text-[11px] font-semibold tracking-wide text-accent-200 uppercase">
 						Última revisión editorial
 					</p>
-					<p class="mt-1 font-display text-lg font-semibold">22 de agosto de 2026</p>
+					<p class="mt-1 font-display text-lg font-semibold">{latestReview}</p>
 				</div>
 			</div>
 		</div>
@@ -174,7 +186,7 @@
 				</p>
 			</div>
 			<p class="shrink-0 text-xs text-ink-500" aria-live="polite">
-				Mostrando {visibleInvestigations.length} de {publicSpendingInvestigations.length}
+				Mostrando {visibleInvestigations.length} de {investigations.length}
 			</p>
 		</div>
 
@@ -189,7 +201,7 @@
 					{filter.label}
 					{#if filter.id !== 'all'}
 						<span class="opacity-60">
-							{publicSpendingInvestigations.filter((item) => item.stage === filter.id).length}
+							{investigations.filter((item) => item.stage === filter.id).length}
 						</span>
 					{/if}
 				</button>

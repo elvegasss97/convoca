@@ -1,5 +1,190 @@
 import { supabase } from '$lib/supabase/client';
+import type { Database } from '$lib/supabase/database.types';
+import type {
+	PublicSpendingBreakdownItem,
+	PublicSpendingDetailVariant,
+	PublicSpendingInvestigation,
+	PublicSpendingInvestigationSource,
+	PublicSpendingSourceKind,
+	PublicSpendingStage,
+	PublicSpendingTraceState,
+	PublicSpendingTraceStep
+} from '$lib/data/publicSpending';
 import type { PublicSpendingSubmission, PublicSpendingSubmissionStatus } from '$lib/types';
+
+type PublicSpendingInvestigationRow =
+	Database['public']['Tables']['public_spending_investigations']['Row'];
+type PublicSpendingBreakdownRow =
+	Database['public']['Tables']['public_spending_breakdown_items']['Row'];
+type PublicSpendingSourceRow = Database['public']['Tables']['public_spending_sources']['Row'];
+type PublicSpendingTraceRow = Database['public']['Tables']['public_spending_trace_steps']['Row'];
+
+const spanishDateFormatter = new Intl.DateTimeFormat('es-ES', {
+	day: 'numeric',
+	month: 'long',
+	year: 'numeric',
+	timeZone: 'UTC'
+});
+
+function formatDatabaseDate(value: string): string {
+	return spanishDateFormatter.format(new Date(`${value}T00:00:00Z`));
+}
+
+function rowToBreakdownItem(row: PublicSpendingBreakdownRow): PublicSpendingBreakdownItem {
+	const hasRect =
+		row.rect_x !== null &&
+		row.rect_y !== null &&
+		row.rect_width !== null &&
+		row.rect_height !== null;
+
+	return {
+		id: row.item_id,
+		label: row.label,
+		amount: row.amount,
+		detail: row.detail,
+		place: row.place ?? undefined,
+		shortLabel: row.short_label ?? undefined,
+		rate: row.rate ?? undefined,
+		unit: row.unit ?? undefined,
+		capacity: row.capacity ?? undefined,
+		description: row.description ?? undefined,
+		fill: row.fill ?? undefined,
+		textColor: row.text_color ?? undefined,
+		rect: hasRect
+			? {
+					x: row.rect_x as number,
+					y: row.rect_y as number,
+					width: row.rect_width as number,
+					height: row.rect_height as number
+				}
+			: undefined,
+		compact: row.compact
+	};
+}
+
+function rowToSource(row: PublicSpendingSourceRow): PublicSpendingInvestigationSource {
+	const kind = row.source_kind as PublicSpendingSourceKind;
+	return {
+		id: row.source_id,
+		kind,
+		organization: row.organization,
+		title: row.title,
+		date: row.source_date_label,
+		url: row.url,
+		status: kind === 'primary' ? 'Fuente primaria' : 'Publicación analizada',
+		whatItProves: row.what_it_proves ?? undefined,
+		claimSummary: row.claim_summary ?? undefined,
+		editorialUse: row.editorial_use ?? undefined
+	};
+}
+
+function rowToTraceStep(row: PublicSpendingTraceRow): PublicSpendingTraceStep {
+	return {
+		label: row.label,
+		detail: row.detail,
+		state: row.state as PublicSpendingTraceState
+	};
+}
+
+export function assemblePublicSpendingInvestigations(
+	investigationRows: PublicSpendingInvestigationRow[],
+	breakdownRows: PublicSpendingBreakdownRow[],
+	sourceRows: PublicSpendingSourceRow[],
+	traceRows: PublicSpendingTraceRow[]
+): PublicSpendingInvestigation[] {
+	return investigationRows
+		.map((row) => ({
+			slug: row.slug,
+			title: row.title,
+			shortTitle: row.short_title,
+			eyebrow: row.eyebrow,
+			stage: row.stage as PublicSpendingStage,
+			amount: row.amount,
+			amountApproximate: row.amount_approximate,
+			amountQualifier: row.amount_qualifier,
+			period: row.period,
+			publishedOn: row.published_on,
+			publishedAt: formatDatabaseDate(row.published_on),
+			reviewedOn: row.reviewed_on,
+			reviewedAt: formatDatabaseDate(row.reviewed_on),
+			category: row.category,
+			territory: row.territory,
+			manager: row.manager,
+			recipient: row.recipient,
+			summary: row.summary,
+			whyItMatters: row.why_it_matters,
+			evidenceNote: row.evidence_note,
+			featuredMetric: row.featured_metric,
+			featuredLabel: row.featured_label,
+			breakdownTitle: row.breakdown_title,
+			breakdownNote: row.breakdown_note,
+			breakdownCoverage: row.breakdown_coverage as 'complete' | 'selected',
+			breakdown: breakdownRows
+				.filter((item) => item.investigation_slug === row.slug)
+				.sort((a, b) => a.sort_order - b.sort_order)
+				.map(rowToBreakdownItem),
+			known: row.known_facts,
+			unknown: row.unknown_facts,
+			trace: traceRows
+				.filter((step) => step.investigation_slug === row.slug)
+				.sort((a, b) => a.sort_order - b.sort_order)
+				.map(rowToTraceStep),
+			sources: sourceRows
+				.filter((source) => source.investigation_slug === row.slug)
+				.sort((a, b) => a.sort_order - b.sort_order)
+				.map(rowToSource),
+			accent: row.accent,
+			detailVariant: row.detail_variant as PublicSpendingDetailVariant,
+			verificationStatus: row.verification_status ?? undefined,
+			detailDescription: row.detail_description ?? undefined,
+			disclaimer: row.disclaimer ?? undefined,
+			sortOrder: row.sort_order,
+			updatedAt: row.updated_at
+		}))
+		.sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+/**
+ * Devuelve el catálogo editorial publicado. RLS oculta cualquier borrador y
+ * los permisos de tabla impiden que el cliente altere el contenido.
+ */
+export async function listPublicSpendingInvestigations(): Promise<PublicSpendingInvestigation[]> {
+	const [investigations, breakdown, sources, trace] = await Promise.all([
+		supabase.from('public_spending_investigations').select('*').order('sort_order'),
+		supabase
+			.from('public_spending_breakdown_items')
+			.select('*')
+			.order('investigation_slug')
+			.order('sort_order'),
+		supabase
+			.from('public_spending_sources')
+			.select('*')
+			.order('investigation_slug')
+			.order('sort_order'),
+		supabase
+			.from('public_spending_trace_steps')
+			.select('*')
+			.order('investigation_slug')
+			.order('sort_order')
+	]);
+
+	const firstError = investigations.error ?? breakdown.error ?? sources.error ?? trace.error;
+	if (firstError) throw firstError;
+
+	return assemblePublicSpendingInvestigations(
+		investigations.data ?? [],
+		breakdown.data ?? [],
+		sources.data ?? [],
+		trace.data ?? []
+	);
+}
+
+export async function getPublicSpendingInvestigation(
+	slug: string
+): Promise<PublicSpendingInvestigation | undefined> {
+	const investigations = await listPublicSpendingInvestigations();
+	return investigations.find((investigation) => investigation.slug === slug);
+}
 
 interface PublicSpendingSubmissionRow {
 	id: string;
