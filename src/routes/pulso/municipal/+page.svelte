@@ -23,6 +23,7 @@
 	import Seo from '$lib/components/Seo.svelte';
 	import PulsoSectionTabs from '$lib/components/pulso/PulsoSectionTabs.svelte';
 	import MunicipalMap from '$lib/components/pulso/MunicipalMap.svelte';
+	import MyMunicipalityPanel from '$lib/components/pulso/MyMunicipalityPanel.svelte';
 	import { authState } from '$lib/auth/session.svelte';
 	import {
 		getMyMunicipalPetitionSupports,
@@ -275,6 +276,13 @@
 			</p>
 		</div>
 	</section>
+
+	<MyMunicipalityPanel
+		{issues}
+		{petitions}
+		onSelectIssue={focusIssueOnMap}
+		onSelectPetition={choosePetition}
+	/>
 
 	<div class="mb-3 flex items-center justify-between gap-3">
 		<div class="inline-flex rounded-full border border-ink-200 bg-white p-1 shadow-sm">
