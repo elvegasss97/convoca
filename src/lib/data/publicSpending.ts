@@ -57,6 +57,13 @@ export interface PublicSpendingTraceStep {
 	state: PublicSpendingTraceState;
 }
 
+export interface PublicSpendingExplainerFigure {
+	id: string;
+	value: string;
+	question: string;
+	explanation: string;
+}
+
 export interface PublicSpendingInvestigation {
 	slug: string;
 	title: string;
@@ -76,6 +83,11 @@ export interface PublicSpendingInvestigation {
 	manager: string;
 	recipient: string;
 	summary: string;
+	citizenIntro: string;
+	fundingOrigin: string;
+	fundingDestination: string;
+	citizenTakeaway: string;
+	explainerFigures: PublicSpendingExplainerFigure[];
 	whyItMatters: string;
 	evidenceNote: string;
 	featuredMetric: string;

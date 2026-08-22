@@ -3,6 +3,7 @@ import type { Database } from '$lib/supabase/database.types';
 import type {
 	PublicSpendingBreakdownItem,
 	PublicSpendingDetailVariant,
+	PublicSpendingExplainerFigure,
 	PublicSpendingInvestigation,
 	PublicSpendingInvestigationSource,
 	PublicSpendingSourceKind,
@@ -18,6 +19,14 @@ type PublicSpendingBreakdownRow =
 	Database['public']['Tables']['public_spending_breakdown_items']['Row'];
 type PublicSpendingSourceRow = Database['public']['Tables']['public_spending_sources']['Row'];
 type PublicSpendingTraceRow = Database['public']['Tables']['public_spending_trace_steps']['Row'];
+type PublicSpendingExplainerFigureRow =
+	Database['public']['Tables']['public_spending_explainer_figures']['Row'];
+
+export interface PublicSpendingNavigationItem {
+	slug: string;
+	shortTitle: string;
+	sortOrder: number;
+}
 
 const spanishDateFormatter = new Intl.DateTimeFormat('es-ES', {
 	day: 'numeric',
@@ -86,11 +95,23 @@ function rowToTraceStep(row: PublicSpendingTraceRow): PublicSpendingTraceStep {
 	};
 }
 
+function rowToExplainerFigure(
+	row: PublicSpendingExplainerFigureRow
+): PublicSpendingExplainerFigure {
+	return {
+		id: row.figure_id,
+		value: row.display_value,
+		question: row.question,
+		explanation: row.explanation
+	};
+}
+
 export function assemblePublicSpendingInvestigations(
 	investigationRows: PublicSpendingInvestigationRow[],
 	breakdownRows: PublicSpendingBreakdownRow[],
 	sourceRows: PublicSpendingSourceRow[],
-	traceRows: PublicSpendingTraceRow[]
+	traceRows: PublicSpendingTraceRow[],
+	explainerFigureRows: PublicSpendingExplainerFigureRow[]
 ): PublicSpendingInvestigation[] {
 	return investigationRows
 		.map((row) => ({
@@ -112,6 +133,14 @@ export function assemblePublicSpendingInvestigations(
 			manager: row.manager,
 			recipient: row.recipient,
 			summary: row.summary,
+			citizenIntro: row.citizen_intro,
+			fundingOrigin: row.funding_origin,
+			fundingDestination: row.funding_destination,
+			citizenTakeaway: row.citizen_takeaway,
+			explainerFigures: explainerFigureRows
+				.filter((figure) => figure.investigation_slug === row.slug)
+				.sort((a, b) => a.sort_order - b.sort_order)
+				.map(rowToExplainerFigure),
 			whyItMatters: row.why_it_matters,
 			evidenceNote: row.evidence_note,
 			featuredMetric: row.featured_metric,
@@ -149,7 +178,7 @@ export function assemblePublicSpendingInvestigations(
  * los permisos de tabla impiden que el cliente altere el contenido.
  */
 export async function listPublicSpendingInvestigations(): Promise<PublicSpendingInvestigation[]> {
-	const [investigations, breakdown, sources, trace] = await Promise.all([
+	const [investigations, breakdown, sources, trace, explainerFigures] = await Promise.all([
 		supabase.from('public_spending_investigations').select('*').order('sort_order'),
 		supabase
 			.from('public_spending_breakdown_items')
@@ -165,25 +194,92 @@ export async function listPublicSpendingInvestigations(): Promise<PublicSpending
 			.from('public_spending_trace_steps')
 			.select('*')
 			.order('investigation_slug')
+			.order('sort_order'),
+		supabase
+			.from('public_spending_explainer_figures')
+			.select('*')
+			.order('investigation_slug')
 			.order('sort_order')
 	]);
 
-	const firstError = investigations.error ?? breakdown.error ?? sources.error ?? trace.error;
+	const firstError =
+		investigations.error ??
+		breakdown.error ??
+		sources.error ??
+		trace.error ??
+		explainerFigures.error;
 	if (firstError) throw firstError;
 
 	return assemblePublicSpendingInvestigations(
 		investigations.data ?? [],
 		breakdown.data ?? [],
 		sources.data ?? [],
-		trace.data ?? []
+		trace.data ?? [],
+		explainerFigures.data ?? []
 	);
 }
 
 export async function getPublicSpendingInvestigation(
 	slug: string
 ): Promise<PublicSpendingInvestigation | undefined> {
-	const investigations = await listPublicSpendingInvestigations();
-	return investigations.find((investigation) => investigation.slug === slug);
+	const [investigations, breakdown, sources, trace, explainerFigures] = await Promise.all([
+		supabase.from('public_spending_investigations').select('*').eq('slug', slug).limit(1),
+		supabase
+			.from('public_spending_breakdown_items')
+			.select('*')
+			.eq('investigation_slug', slug)
+			.order('sort_order'),
+		supabase
+			.from('public_spending_sources')
+			.select('*')
+			.eq('investigation_slug', slug)
+			.order('sort_order'),
+		supabase
+			.from('public_spending_trace_steps')
+			.select('*')
+			.eq('investigation_slug', slug)
+			.order('sort_order'),
+		supabase
+			.from('public_spending_explainer_figures')
+			.select('*')
+			.eq('investigation_slug', slug)
+			.order('sort_order')
+	]);
+
+	const firstError =
+		investigations.error ??
+		breakdown.error ??
+		sources.error ??
+		trace.error ??
+		explainerFigures.error;
+	if (firstError) throw firstError;
+
+	return assemblePublicSpendingInvestigations(
+		investigations.data ?? [],
+		breakdown.data ?? [],
+		sources.data ?? [],
+		trace.data ?? [],
+		explainerFigures.data ?? []
+	)[0];
+}
+
+/**
+ * Carga únicamente lo necesario para enlazar el caso anterior y el siguiente.
+ * Evita descargar el contenido completo de todo el catálogo desde cada ficha.
+ */
+export async function listPublicSpendingNavigationItems(): Promise<PublicSpendingNavigationItem[]> {
+	const { data, error } = await supabase
+		.from('public_spending_investigations')
+		.select('slug, short_title, sort_order')
+		.order('sort_order');
+
+	if (error) throw error;
+
+	return (data ?? []).map((row) => ({
+		slug: row.slug,
+		shortTitle: row.short_title,
+		sortOrder: row.sort_order
+	}));
 }
 
 interface PublicSpendingSubmissionRow {

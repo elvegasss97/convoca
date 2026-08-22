@@ -16,6 +16,7 @@
 	} from '@lucide/svelte';
 	import type { PageData } from './$types';
 	import Seo from '$lib/components/Seo.svelte';
+	import PublicSpendingCitizenGuide from '$lib/components/pulso/PublicSpendingCitizenGuide.svelte';
 	import PulsoSectionTabs from '$lib/components/pulso/PulsoSectionTabs.svelte';
 	import {
 		publicSpendingStageLabels,
@@ -24,7 +25,10 @@
 
 	let { data }: { data: PageData } = $props();
 	const investigation = $derived(data.investigation);
-	const investigations = $derived(data.investigations);
+	const navigationItems = $derived(data.navigationItems);
+	const hasAnalyzedPublication = $derived(
+		investigation.sources.some((source) => source.kind === 'publication_analyzed')
+	);
 	let selectedBreakdownIndex = $state(0);
 
 	const euroFormatter = new Intl.NumberFormat('es-ES', {
@@ -35,10 +39,12 @@
 
 	const selectedBreakdown = $derived(investigation.breakdown[selectedBreakdownIndex]);
 	const breakdownMax = $derived(Math.max(...investigation.breakdown.map((item) => item.amount)));
-	const caseIndex = $derived(investigations.findIndex((item) => item.slug === investigation.slug));
-	const previousCase = $derived(caseIndex > 0 ? investigations[caseIndex - 1] : undefined);
+	const caseIndex = $derived(navigationItems.findIndex((item) => item.slug === investigation.slug));
+	const previousCase = $derived(caseIndex > 0 ? navigationItems[caseIndex - 1] : undefined);
 	const nextCase = $derived(
-		caseIndex < investigations.length - 1 ? investigations[caseIndex + 1] : undefined
+		caseIndex >= 0 && caseIndex < navigationItems.length - 1
+			? navigationItems[caseIndex + 1]
+			: undefined
 	);
 
 	function formatMainAmount(amount: number, approximate = false): string {
@@ -125,11 +131,16 @@
 	</section>
 
 	<nav class="no-scrollbar mt-4 flex gap-2 overflow-x-auto pb-1" aria-label="Contenido de la ficha">
+		<a href="#resumen-sencillo" class="section-link">Resumen sencillo</a>
 		<a href="#significado" class="section-link">Qué significa</a>
 		<a href="#destino" class="section-link">A dónde va</a>
 		<a href="#rastro" class="section-link">Seguir el rastro</a>
 		<a href="#fuentes" class="section-link">Fuentes</a>
 	</nav>
+
+	<div class="pt-6">
+		<PublicSpendingCitizenGuide {investigation} />
+	</div>
 
 	<section id="significado" class="scroll-mt-24 pt-10">
 		<div class="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
@@ -307,19 +318,19 @@
 	<section id="fuentes" class="scroll-mt-24 pt-12">
 		<div class="max-w-3xl">
 			<p class="text-xs font-semibold tracking-wider text-accent-700 uppercase">
-				Fuentes primarias
+				{hasAnalyzedPublication ? 'Fuentes y publicaciones analizadas' : 'Fuentes primarias'}
 			</p>
 			<h2 class="mt-1 font-display text-2xl font-semibold text-ink-900 sm:text-3xl">
-				Compruébalo desde el documento original
+				Comprueba cada dato en su origen
 			</h2>
 			<p class="mt-2 text-sm leading-relaxed text-ink-600 sm:text-base">
-				No solo enlazamos la fuente: explicamos qué acredita y evitamos atribuirle conclusiones que
-				no contiene.
+				Distinguimos los documentos oficiales que acreditan los datos de las publicaciones que
+				originan una comprobación.
 			</p>
 		</div>
 
 		<div class="mt-6 grid gap-4 lg:grid-cols-3">
-			{#each investigation.sources as source, index (source.id)}
+			{#each investigation.sources as source (source.id)}
 				<article class="flex flex-col rounded-3xl border border-ink-200 bg-white p-5 shadow-card">
 					<div class="flex items-start justify-between gap-3">
 						<span
@@ -330,7 +341,7 @@
 						<span
 							class="rounded-full bg-brand-50 px-2.5 py-1 text-[10px] font-semibold text-brand-700"
 						>
-							Fuente {index + 1}
+							{source.status}
 						</span>
 					</div>
 					<p class="mt-4 text-[11px] font-semibold tracking-wider text-ink-400 uppercase">
@@ -339,15 +350,23 @@
 					<h3 class="mt-2 font-display font-semibold text-ink-900">{source.title}</h3>
 					<p class="mt-1 text-xs text-ink-500">{source.date}</p>
 					<div class="my-4 h-px bg-ink-100"></div>
-					<p class="text-xs font-semibold text-ink-500">Qué demuestra</p>
-					<p class="mt-1 text-sm leading-relaxed text-ink-600">{source.whatItProves}</p>
+					{#if source.kind === 'publication_analyzed'}
+						<p class="text-xs font-semibold text-ink-500">Qué afirma la publicación</p>
+						<p class="mt-1 text-sm leading-relaxed text-ink-600">{source.claimSummary}</p>
+						<p class="mt-4 text-xs font-semibold text-ink-500">Cómo se usa aquí</p>
+						<p class="mt-1 text-sm leading-relaxed text-ink-600">{source.editorialUse}</p>
+					{:else}
+						<p class="text-xs font-semibold text-ink-500">Qué acredita</p>
+						<p class="mt-1 text-sm leading-relaxed text-ink-600">{source.whatItProves}</p>
+					{/if}
 					<a
 						href={source.url}
 						target="_blank"
 						rel="noreferrer"
 						class="mt-auto inline-flex items-center gap-1.5 pt-5 text-sm font-semibold text-brand-700 hover:underline"
 					>
-						Abrir fuente oficial <ExternalLink class="size-3.5" />
+						{source.kind === 'primary' ? 'Abrir fuente oficial' : 'Abrir publicación analizada'}
+						<ExternalLink class="size-3.5" />
 					</a>
 				</article>
 			{/each}
