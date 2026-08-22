@@ -53,6 +53,11 @@ definitivamente estable, revisa el historial de `supabase/migrations/` y
   pequeños en los resultados agregados.
 - **Próximo bloque**: votación sobre qué tema abordar a continuación,
   cerrada mientras la votación está abierta.
+- **Gasto público**: un muro de investigaciones visuales que separa
+  regulación, planificación, concesión, adjudicación, pago y
+  justificación. Cada ficha abre beneficiarios, territorio, fuentes
+  primarias y huecos de información; un buzón privado permite aportar
+  nuevas pistas para triaje editorial.
 - **Moderación**: revisión de convocatorias y reportes por parte de
   personal autorizado, sin acceso innecesario a quién reportó qué.
 - **Privacidad por diseño**: los resultados agregados nunca exponen una
@@ -108,9 +113,8 @@ de infraestructura pasa por variables `PUBLIC_*`.
 
 ## Migraciones
 
-`supabase/migrations/` contiene el historial completo de esquema (43
-migraciones al momento de escribir esto), aplicable desde cero a un
-proyecto Supabase propio:
+`supabase/migrations/` contiene el historial completo de esquema,
+aplicable desde cero a un proyecto Supabase propio:
 
 ```sh
 supabase link --project-ref <tu-project-ref>

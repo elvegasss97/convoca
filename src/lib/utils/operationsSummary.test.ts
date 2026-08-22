@@ -3,6 +3,7 @@ import { buildAttentionItems, totalPendingModerationItems } from './operationsSu
 
 const ZERO = {
 	openVoicePending: 0,
+	publicSpendingPending: 0,
 	eventsReported: 0,
 	channelsReported: 0,
 	municipalPetitionsReported: 0,
@@ -21,10 +22,16 @@ describe('buildAttentionItems', () => {
 		const items = buildAttentionItems({
 			...ZERO,
 			openVoicePending: 2,
+			publicSpendingPending: 1,
 			eventsPending: 1,
 			documentsPending: 3
 		});
-		expect(items.map((i) => i.key)).toEqual(['vozAbierta', 'pendientes', 'documentacion']);
+		expect(items.map((i) => i.key)).toEqual([
+			'vozAbierta',
+			'gastoPublico',
+			'pendientes',
+			'documentacion'
+		]);
 	});
 
 	it('singular/plural correcto en el texto', () => {
@@ -74,12 +81,13 @@ describe('totalPendingModerationItems', () => {
 			eventsPending: 2,
 			documentsPending: 1,
 			openVoicePending: 3,
+			publicSpendingPending: 2,
 			proposalsPending: 1,
 			alternativesPending: 1,
 			eventsReported: 10,
 			channelsReported: 10,
 			municipalPetitionsReported: 10
 		});
-		expect(total).toBe(8);
+		expect(total).toBe(10);
 	});
 });

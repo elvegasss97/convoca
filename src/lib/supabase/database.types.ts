@@ -1631,6 +1631,60 @@ export type Database = {
 				};
 				Relationships: [];
 			};
+			public_spending_submissions: {
+				Row: {
+					amount_text: string | null;
+					created_at: string;
+					details: string;
+					id: string;
+					managing_organization: string | null;
+					resulting_case_slug: string | null;
+					reviewed_at: string | null;
+					reviewed_by: string | null;
+					reviewer_note: string | null;
+					source_urls: string[];
+					status: string;
+					submitter_user_id: string;
+					territory: string | null;
+					title: string;
+					updated_at: string;
+				};
+				Insert: {
+					amount_text?: string | null;
+					created_at?: string;
+					details: string;
+					id?: string;
+					managing_organization?: string | null;
+					resulting_case_slug?: string | null;
+					reviewed_at?: string | null;
+					reviewed_by?: string | null;
+					reviewer_note?: string | null;
+					source_urls: string[];
+					status?: string;
+					submitter_user_id: string;
+					territory?: string | null;
+					title: string;
+					updated_at?: string;
+				};
+				Update: {
+					amount_text?: string | null;
+					created_at?: string;
+					details?: string;
+					id?: string;
+					managing_organization?: string | null;
+					resulting_case_slug?: string | null;
+					reviewed_at?: string | null;
+					reviewed_by?: string | null;
+					reviewer_note?: string | null;
+					source_urls?: string[];
+					status?: string;
+					submitter_user_id?: string;
+					territory?: string | null;
+					title?: string;
+					updated_at?: string;
+				};
+				Relationships: [];
+			};
 			reports: {
 				Row: {
 					created_at: string;

@@ -3,6 +3,7 @@ import { listPublicEvents } from '$lib/services/eventsService';
 import { listPublishedConcerns } from '$lib/services/concernsService';
 import { listPublishedTopics } from '$lib/services/topicsService';
 import { SITE_URL } from '$lib/seo';
+import { publicSpendingInvestigations } from '$lib/data/publicSpendingInvestigations';
 
 /**
  * Sitemap generado en cada petición a partir de las convocatorias públicas
@@ -17,6 +18,12 @@ const STATIC_PATHS = [
 	{ path: '/pulso', changefreq: 'daily', priority: '0.8' },
 	{ path: '/pulso/escucha', changefreq: 'daily', priority: '0.7' },
 	{ path: '/pulso/soluciones', changefreq: 'daily', priority: '0.7' },
+	{ path: '/pulso/gasto-publico', changefreq: 'weekly', priority: '0.7' },
+	...publicSpendingInvestigations.map((investigation) => ({
+		path: `/pulso/gasto-publico/${investigation.slug}`,
+		changefreq: 'weekly',
+		priority: '0.6'
+	})),
 	{ path: '/legal/aviso-legal', changefreq: 'yearly', priority: '0.2' },
 	{ path: '/legal/privacidad', changefreq: 'yearly', priority: '0.2' },
 	{ path: '/legal/terminos', changefreq: 'yearly', priority: '0.2' },

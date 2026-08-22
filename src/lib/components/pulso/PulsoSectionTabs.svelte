@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Ear, FileEdit, MapPinned } from '@lucide/svelte';
+	import { Ear, FileEdit, Landmark, MapPinned } from '@lucide/svelte';
 
 	interface Props {
-		active: 'escucha' | 'propuestas' | 'municipal';
+		active: 'escucha' | 'propuestas' | 'municipal' | 'gasto';
 	}
 
 	let { active }: Props = $props();
@@ -40,5 +40,15 @@
 			: 'text-ink-600 hover:bg-ink-50'}"
 	>
 		<MapPinned class="size-4" /> Muro municipal
+	</a>
+	<a
+		href="/pulso/gasto-publico"
+		aria-current={active === 'gasto' ? 'page' : undefined}
+		class="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition {active ===
+		'gasto'
+			? 'bg-brand-700 text-white'
+			: 'text-ink-600 hover:bg-ink-50'}"
+	>
+		<Landmark class="size-4" /> Gasto público
 	</a>
 </div>

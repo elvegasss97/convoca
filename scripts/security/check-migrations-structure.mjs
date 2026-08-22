@@ -14,12 +14,18 @@
 // identificadores citados/con mayúsculas — límite conocido, no oculto.
 
 import { readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
 import { getChangedFiles, getFileNow } from './lib/diff.mjs';
 import { isOverridden } from './lib/override.mjs';
 
 const MIGRATIONS_DIR = 'supabase/migrations';
 const HISTORICAL_LAST_VERSION = 42; // 0001-0042 ya reconciliadas y aplicadas (Bloque B).
+// Esta migración fue creada por Supabase CLI antes de que el repositorio
+// adoptara su secuencia NNNN. Ya está en producción y no forma parte de la
+// secuencia local: se reconoce de forma nominal (no se relaja el patrón para
+// migraciones futuras).
+const LEGACY_TIMESTAMPED_MIGRATIONS = new Set([
+	'20260821073030_municipal_issue_precise_locations.sql'
+]);
 
 let failed = false;
 const findings = [];
@@ -41,6 +47,7 @@ const files = readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith('.sql'));
 const versionRe = /^(\d{4})_([a-z0-9_]+)\.sql$/;
 const versions = [];
 for (const f of files) {
+	if (LEGACY_TIMESTAMPED_MIGRATIONS.has(f)) continue;
 	const m = f.match(versionRe);
 	if (!m) {
 		fail(`B3: "${f}" no cumple el formato NNNN_descripcion.sql`);
@@ -64,13 +71,18 @@ for (let i = 0; i < versions.length; i++) {
 		break; // un solo hueco ya es suficiente señal; evita ruido en cascada
 	}
 }
-if (!failed) ok(`B3: ${versions.length} migraciones, numeración secuencial ${versions[0]?.file} → ${versions.at(-1)?.file}, sin huecos ni duplicados`);
+if (!failed)
+	ok(
+		`B3: ${versions.length} migraciones, numeración secuencial ${versions[0]?.file} → ${versions.at(-1)?.file}, sin huecos ni duplicados`
+	);
 
 // --- Gate de migraciones históricas modificadas (0001-0042) -------------
 
 const { base, added, modified } = getChangedFiles();
 if (base === null) {
-	warn('sin base de comparación (repo de un solo commit) — se omite el gate de históricas y B1/B2 sobre diff');
+	warn(
+		'sin base de comparación (repo de un solo commit) — se omite el gate de históricas y B1/B2 sobre diff'
+	);
 } else {
 	for (const path of modified) {
 		if (!path.startsWith(`${MIGRATIONS_DIR}/`)) continue;
@@ -81,7 +93,9 @@ if (base === null) {
 		if (num <= HISTORICAL_LAST_VERSION) {
 			const versionStr = m[1];
 			if (isOverridden('historical-migration', versionStr)) {
-				warn(`histórica ${fname} modificada — override registrado en el commit (Security-Baseline-Override: historical-migration:${versionStr})`);
+				warn(
+					`histórica ${fname} modificada — override registrado en el commit (Security-Baseline-Override: historical-migration:${versionStr})`
+				);
 			} else {
 				fail(
 					`GATE: "${fname}" es una migración histórica ya aplicada en producción (0001-${String(HISTORICAL_LAST_VERSION).padStart(4, '0')}) y este PR la modifica. ` +
@@ -93,7 +107,9 @@ if (base === null) {
 
 	// --- B1/B2 solo sobre archivos NUEVOS de este PR ---------------------
 
-	const newMigrationFiles = added.filter((p) => p.startsWith(`${MIGRATIONS_DIR}/`) && p.endsWith('.sql'));
+	const newMigrationFiles = added.filter(
+		(p) => p.startsWith(`${MIGRATIONS_DIR}/`) && p.endsWith('.sql')
+	);
 	const createdTables = new Set();
 	const rlsEnabledTables = new Set();
 	let anyDisableRls = false;
@@ -102,12 +118,16 @@ if (base === null) {
 		const content = getFileNow(path) ?? readFileSync(path, 'utf8');
 		if (/disable\s+row\s+level\s+security/i.test(content)) {
 			anyDisableRls = true;
-			fail(`B2: "${path}" contiene "disable row level security" — no hay variante legítima conocida de este literal en este esquema.`);
+			fail(
+				`B2: "${path}" contiene "disable row level security" — no hay variante legítima conocida de este literal en este esquema.`
+			);
 		}
 		for (const m of content.matchAll(/create\s+table\s+public\.(\w+)/gi)) {
 			createdTables.add(m[1].toLowerCase());
 		}
-		for (const m of content.matchAll(/alter\s+table\s+public\.(\w+)\s+enable\s+row\s+level\s+security/gi)) {
+		for (const m of content.matchAll(
+			/alter\s+table\s+public\.(\w+)\s+enable\s+row\s+level\s+security/gi
+		)) {
 			rlsEnabledTables.add(m[1].toLowerCase());
 		}
 	}
@@ -117,7 +137,9 @@ if (base === null) {
 	} else {
 		for (const table of createdTables) {
 			if (!rlsEnabledTables.has(table)) {
-				fail(`B1: la tabla nueva "public.${table}" no tiene "alter table public.${table} enable row level security" en las migraciones añadidas por este PR.`);
+				fail(
+					`B1: la tabla nueva "public.${table}" no tiene "alter table public.${table} enable row level security" en las migraciones añadidas por este PR.`
+				);
 			}
 		}
 		if (createdTables.size > 0 && [...createdTables].every((t) => rlsEnabledTables.has(t))) {
@@ -138,12 +160,18 @@ if (base === null) {
 		const content = getFileNow(path) ?? readFileSync(path, 'utf8');
 
 		if (/create\s+table\s+public\.write_rate_limits/i.test(content)) {
-			if (!/revoke\s+all\s+on\s+public\.write_rate_limits\s+from\s+public\s*,\s*anon\s*,\s*authenticated/i.test(content)) {
+			if (
+				!/revoke\s+all\s+on\s+public\.write_rate_limits\s+from\s+public\s*,\s*anon\s*,\s*authenticated/i.test(
+					content
+				)
+			) {
 				fail(
 					`0044-tripwire: "${path}" crea public.write_rate_limits sin el REVOKE ALL explícito para PUBLIC/anon/authenticated (regresión de seguridad/44_revision_0044_r2.md §2 — antes solo dependía de RLS-sin-políticas).`
 				);
 			} else {
-				ok('0044-tripwire: write_rate_limits mantiene el REVOKE ALL explícito para PUBLIC/anon/authenticated');
+				ok(
+					'0044-tripwire: write_rate_limits mantiene el REVOKE ALL explícito para PUBLIC/anon/authenticated'
+				);
 			}
 		}
 
@@ -157,13 +185,19 @@ if (base === null) {
 			}
 		}
 
-		if (/create\s+(?:or\s+replace\s+)?function\s+public\.set_concern_listening_survey_response/i.test(content)) {
+		if (
+			/create\s+(?:or\s+replace\s+)?function\s+public\.set_concern_listening_survey_response/i.test(
+				content
+			)
+		) {
 			if (!/p_community\s+not\s+in\s*\(/i.test(content)) {
 				fail(
 					`0044-tripwire: "${path}" redefine set_concern_listening_survey_response() sin el catálogo cerrado de p_community — reintroduce el hallazgo de seguridad/44_revision_0044_r2.md §3 (categorías inventadas suprimen el desglose territorial público).`
 				);
 			} else {
-				ok('0044-tripwire: set_concern_listening_survey_response mantiene el catálogo cerrado de p_community');
+				ok(
+					'0044-tripwire: set_concern_listening_survey_response mantiene el catálogo cerrado de p_community'
+				);
 			}
 		}
 
