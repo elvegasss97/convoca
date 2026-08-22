@@ -14,7 +14,6 @@
 // identificadores citados/con mayúsculas — límite conocido, no oculto.
 
 import { readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
 import { getChangedFiles, getFileNow } from './lib/diff.mjs';
 import { isOverridden } from './lib/override.mjs';
 
