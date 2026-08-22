@@ -21,7 +21,10 @@
 	import Seo from '$lib/components/Seo.svelte';
 	import PublicSpendingCitizenGuide from '$lib/components/pulso/PublicSpendingCitizenGuide.svelte';
 	import PulsoSectionTabs from '$lib/components/pulso/PulsoSectionTabs.svelte';
-	import { publicSpendingShare as calculatePublicSpendingShare } from '$lib/data/publicSpending';
+	import {
+		publicSpendingShare as calculatePublicSpendingShare,
+		publicSpendingStageLabels
+	} from '$lib/data/publicSpending';
 
 	let { data }: { data: PageData } = $props();
 	const publicSpendingPilot = $derived({
@@ -115,11 +118,16 @@
 			<div class="grid shrink-0 grid-cols-2 gap-2 sm:min-w-md">
 				<div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur-sm">
 					<p class="text-[11px] font-medium tracking-wide text-brand-200 uppercase">Estado real</p>
-					<p class="mt-1 font-display text-lg font-semibold">Planificado</p>
+					<p class="mt-1 font-display text-lg font-semibold">
+						{publicSpendingStageLabels[data.investigation.stage]}
+					</p>
 				</div>
 				<div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur-sm">
 					<p class="text-[11px] font-medium tracking-wide text-brand-200 uppercase">Fuentes</p>
-					<p class="mt-1 font-display text-lg font-semibold">4 oficiales</p>
+					<p class="mt-1 font-display text-lg font-semibold">
+						{publicSpendingSources.length}
+						{publicSpendingSources.length === 1 ? 'oficial' : 'oficiales'}
+					</p>
 				</div>
 				<div class="col-span-2 rounded-2xl border border-accent-300/25 bg-accent-300/10 px-4 py-3">
 					<p class="text-[11px] font-medium tracking-wide text-accent-200 uppercase">

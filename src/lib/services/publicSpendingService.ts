@@ -22,6 +22,12 @@ type PublicSpendingTraceRow = Database['public']['Tables']['public_spending_trac
 type PublicSpendingExplainerFigureRow =
 	Database['public']['Tables']['public_spending_explainer_figures']['Row'];
 
+export interface PublicSpendingNavigationItem {
+	slug: string;
+	shortTitle: string;
+	sortOrder: number;
+}
+
 const spanishDateFormatter = new Intl.DateTimeFormat('es-ES', {
 	day: 'numeric',
 	month: 'long',
@@ -216,8 +222,64 @@ export async function listPublicSpendingInvestigations(): Promise<PublicSpending
 export async function getPublicSpendingInvestigation(
 	slug: string
 ): Promise<PublicSpendingInvestigation | undefined> {
-	const investigations = await listPublicSpendingInvestigations();
-	return investigations.find((investigation) => investigation.slug === slug);
+	const [investigations, breakdown, sources, trace, explainerFigures] = await Promise.all([
+		supabase.from('public_spending_investigations').select('*').eq('slug', slug).limit(1),
+		supabase
+			.from('public_spending_breakdown_items')
+			.select('*')
+			.eq('investigation_slug', slug)
+			.order('sort_order'),
+		supabase
+			.from('public_spending_sources')
+			.select('*')
+			.eq('investigation_slug', slug)
+			.order('sort_order'),
+		supabase
+			.from('public_spending_trace_steps')
+			.select('*')
+			.eq('investigation_slug', slug)
+			.order('sort_order'),
+		supabase
+			.from('public_spending_explainer_figures')
+			.select('*')
+			.eq('investigation_slug', slug)
+			.order('sort_order')
+	]);
+
+	const firstError =
+		investigations.error ??
+		breakdown.error ??
+		sources.error ??
+		trace.error ??
+		explainerFigures.error;
+	if (firstError) throw firstError;
+
+	return assemblePublicSpendingInvestigations(
+		investigations.data ?? [],
+		breakdown.data ?? [],
+		sources.data ?? [],
+		trace.data ?? [],
+		explainerFigures.data ?? []
+	)[0];
+}
+
+/**
+ * Carga únicamente lo necesario para enlazar el caso anterior y el siguiente.
+ * Evita descargar el contenido completo de todo el catálogo desde cada ficha.
+ */
+export async function listPublicSpendingNavigationItems(): Promise<PublicSpendingNavigationItem[]> {
+	const { data, error } = await supabase
+		.from('public_spending_investigations')
+		.select('slug, short_title, sort_order')
+		.order('sort_order');
+
+	if (error) throw error;
+
+	return (data ?? []).map((row) => ({
+		slug: row.slug,
+		shortTitle: row.short_title,
+		sortOrder: row.sort_order
+	}));
 }
 
 interface PublicSpendingSubmissionRow {

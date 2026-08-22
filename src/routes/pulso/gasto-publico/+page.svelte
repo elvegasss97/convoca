@@ -27,6 +27,9 @@
 	const investigations = $derived(data.investigations);
 	const maxAmount = $derived(publicSpendingMaxAmount(investigations));
 	const primarySourceCount = $derived(publicSpendingPrimarySourceCount(investigations));
+	const representedStageCount = $derived(
+		new Set(investigations.map((investigation) => investigation.stage)).size
+	);
 	const latestReview = $derived(
 		investigations.reduce(
 			(latest, investigation) =>
@@ -134,7 +137,7 @@
 					<p class="hero-stat__label">fuentes oficiales</p>
 				</div>
 				<div class="hero-stat">
-					<p class="hero-stat__number">4</p>
+					<p class="hero-stat__number">{representedStageCount}</p>
 					<p class="hero-stat__label">estados reales</p>
 				</div>
 				<div class="col-span-3 rounded-2xl border border-accent-300/25 bg-accent-300/10 px-4 py-3">
