@@ -1,6 +1,11 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
+	// Allows to automatically instantiate createClient with right options
+	// instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+	__InternalSupabase: {
+		PostgrestVersion: '14.15';
+	};
 	public: {
 		Tables: {
 			_municipal_issue_review_authorizations: {
@@ -1057,6 +1062,10 @@ export type Database = {
 					id: string;
 					lat: number | null;
 					lng: number | null;
+					location_label: string | null;
+					location_precision: string | null;
+					location_source_provider: string | null;
+					location_source_url: string | null;
 					municipality_ine_code: string | null;
 					municipality_name: string;
 					origin: string;
@@ -1079,6 +1088,10 @@ export type Database = {
 					id?: string;
 					lat?: number | null;
 					lng?: number | null;
+					location_label?: string | null;
+					location_precision?: string | null;
+					location_source_provider?: string | null;
+					location_source_url?: string | null;
 					municipality_ine_code?: string | null;
 					municipality_name: string;
 					origin?: string;
@@ -1101,6 +1114,10 @@ export type Database = {
 					id?: string;
 					lat?: number | null;
 					lng?: number | null;
+					location_label?: string | null;
+					location_precision?: string | null;
+					location_source_provider?: string | null;
+					location_source_url?: string | null;
 					municipality_ine_code?: string | null;
 					municipality_name?: string;
 					origin?: string;
@@ -1631,6 +1648,247 @@ export type Database = {
 				};
 				Relationships: [];
 			};
+			public_spending_breakdown_items: {
+				Row: {
+					amount: number;
+					capacity: string | null;
+					compact: boolean;
+					created_at: string;
+					description: string | null;
+					detail: string;
+					fill: string | null;
+					investigation_slug: string;
+					item_id: string;
+					label: string;
+					place: string | null;
+					rate: number | null;
+					rect_height: number | null;
+					rect_width: number | null;
+					rect_x: number | null;
+					rect_y: number | null;
+					short_label: string | null;
+					sort_order: number;
+					text_color: string | null;
+					unit: string | null;
+				};
+				Insert: {
+					amount: number;
+					capacity?: string | null;
+					compact?: boolean;
+					created_at?: string;
+					description?: string | null;
+					detail: string;
+					fill?: string | null;
+					investigation_slug: string;
+					item_id: string;
+					label: string;
+					place?: string | null;
+					rate?: number | null;
+					rect_height?: number | null;
+					rect_width?: number | null;
+					rect_x?: number | null;
+					rect_y?: number | null;
+					short_label?: string | null;
+					sort_order: number;
+					text_color?: string | null;
+					unit?: string | null;
+				};
+				Update: {
+					amount?: number;
+					capacity?: string | null;
+					compact?: boolean;
+					created_at?: string;
+					description?: string | null;
+					detail?: string;
+					fill?: string | null;
+					investigation_slug?: string;
+					item_id?: string;
+					label?: string;
+					place?: string | null;
+					rate?: number | null;
+					rect_height?: number | null;
+					rect_width?: number | null;
+					rect_x?: number | null;
+					rect_y?: number | null;
+					short_label?: string | null;
+					sort_order?: number;
+					text_color?: string | null;
+					unit?: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'public_spending_breakdown_items_investigation_slug_fkey';
+						columns: ['investigation_slug'];
+						isOneToOne: false;
+						referencedRelation: 'public_spending_investigations';
+						referencedColumns: ['slug'];
+					}
+				];
+			};
+			public_spending_investigations: {
+				Row: {
+					accent: string;
+					amount: number;
+					amount_approximate: boolean;
+					amount_qualifier: string;
+					breakdown_coverage: string;
+					breakdown_note: string;
+					breakdown_title: string;
+					category: string;
+					created_at: string;
+					detail_description: string | null;
+					detail_variant: string;
+					disclaimer: string | null;
+					evidence_note: string;
+					eyebrow: string;
+					featured_label: string;
+					featured_metric: string;
+					known_facts: string[];
+					manager: string;
+					period: string;
+					publication_status: string;
+					published_on: string;
+					recipient: string;
+					reviewed_on: string;
+					short_title: string;
+					slug: string;
+					sort_order: number;
+					stage: string;
+					summary: string;
+					territory: string;
+					title: string;
+					unknown_facts: string[];
+					updated_at: string;
+					verification_status: string | null;
+					why_it_matters: string;
+				};
+				Insert: {
+					accent: string;
+					amount: number;
+					amount_approximate?: boolean;
+					amount_qualifier: string;
+					breakdown_coverage: string;
+					breakdown_note: string;
+					breakdown_title: string;
+					category: string;
+					created_at?: string;
+					detail_description?: string | null;
+					detail_variant?: string;
+					disclaimer?: string | null;
+					evidence_note: string;
+					eyebrow: string;
+					featured_label: string;
+					featured_metric: string;
+					known_facts?: string[];
+					manager: string;
+					period: string;
+					publication_status?: string;
+					published_on: string;
+					recipient: string;
+					reviewed_on: string;
+					short_title: string;
+					slug: string;
+					sort_order: number;
+					stage: string;
+					summary: string;
+					territory: string;
+					title: string;
+					unknown_facts?: string[];
+					updated_at?: string;
+					verification_status?: string | null;
+					why_it_matters: string;
+				};
+				Update: {
+					accent?: string;
+					amount?: number;
+					amount_approximate?: boolean;
+					amount_qualifier?: string;
+					breakdown_coverage?: string;
+					breakdown_note?: string;
+					breakdown_title?: string;
+					category?: string;
+					created_at?: string;
+					detail_description?: string | null;
+					detail_variant?: string;
+					disclaimer?: string | null;
+					evidence_note?: string;
+					eyebrow?: string;
+					featured_label?: string;
+					featured_metric?: string;
+					known_facts?: string[];
+					manager?: string;
+					period?: string;
+					publication_status?: string;
+					published_on?: string;
+					recipient?: string;
+					reviewed_on?: string;
+					short_title?: string;
+					slug?: string;
+					sort_order?: number;
+					stage?: string;
+					summary?: string;
+					territory?: string;
+					title?: string;
+					unknown_facts?: string[];
+					updated_at?: string;
+					verification_status?: string | null;
+					why_it_matters?: string;
+				};
+				Relationships: [];
+			};
+			public_spending_sources: {
+				Row: {
+					claim_summary: string | null;
+					created_at: string;
+					editorial_use: string | null;
+					investigation_slug: string;
+					organization: string;
+					sort_order: number;
+					source_date_label: string;
+					source_id: string;
+					source_kind: string;
+					title: string;
+					url: string;
+					what_it_proves: string | null;
+				};
+				Insert: {
+					claim_summary?: string | null;
+					created_at?: string;
+					editorial_use?: string | null;
+					investigation_slug: string;
+					organization: string;
+					sort_order: number;
+					source_date_label: string;
+					source_id: string;
+					source_kind: string;
+					title: string;
+					url: string;
+					what_it_proves?: string | null;
+				};
+				Update: {
+					claim_summary?: string | null;
+					created_at?: string;
+					editorial_use?: string | null;
+					investigation_slug?: string;
+					organization?: string;
+					sort_order?: number;
+					source_date_label?: string;
+					source_id?: string;
+					source_kind?: string;
+					title?: string;
+					url?: string;
+					what_it_proves?: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'public_spending_sources_investigation_slug_fkey';
+						columns: ['investigation_slug'];
+						isOneToOne: false;
+						referencedRelation: 'public_spending_investigations';
+						referencedColumns: ['slug'];
+					}
+				];
+			};
 			public_spending_submissions: {
 				Row: {
 					amount_text: string | null;
@@ -1684,6 +1942,41 @@ export type Database = {
 					updated_at?: string;
 				};
 				Relationships: [];
+			};
+			public_spending_trace_steps: {
+				Row: {
+					created_at: string;
+					detail: string;
+					investigation_slug: string;
+					label: string;
+					sort_order: number;
+					state: string;
+				};
+				Insert: {
+					created_at?: string;
+					detail: string;
+					investigation_slug: string;
+					label: string;
+					sort_order: number;
+					state: string;
+				};
+				Update: {
+					created_at?: string;
+					detail?: string;
+					investigation_slug?: string;
+					label?: string;
+					sort_order?: number;
+					state?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'public_spending_trace_steps_investigation_slug_fkey';
+						columns: ['investigation_slug'];
+						isOneToOne: false;
+						referencedRelation: 'public_spending_investigations';
+						referencedColumns: ['slug'];
+					}
+				];
 			};
 			reports: {
 				Row: {

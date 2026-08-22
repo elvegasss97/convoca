@@ -1,10 +1,11 @@
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import { publicSpendingInvestigationBySlug } from '$lib/data/publicSpendingInvestigations';
+import { listPublicSpendingInvestigations } from '$lib/services/publicSpendingService';
 
-export const load: PageLoad = ({ params }) => {
-	const investigation = publicSpendingInvestigationBySlug.get(params.slug);
+export const load: PageLoad = async ({ params }) => {
+	const investigations = await listPublicSpendingInvestigations();
+	const investigation = investigations.find((item) => item.slug === params.slug);
 	if (!investigation) error(404, 'Investigación no encontrada');
 
-	return { investigation };
+	return { investigation, investigations };
 };

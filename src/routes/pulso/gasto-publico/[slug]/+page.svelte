@@ -18,13 +18,13 @@
 	import Seo from '$lib/components/Seo.svelte';
 	import PulsoSectionTabs from '$lib/components/pulso/PulsoSectionTabs.svelte';
 	import {
-		publicSpendingInvestigations,
 		publicSpendingStageLabels,
 		type PublicSpendingTraceState
-	} from '$lib/data/publicSpendingInvestigations';
+	} from '$lib/data/publicSpending';
 
 	let { data }: { data: PageData } = $props();
 	const investigation = $derived(data.investigation);
+	const investigations = $derived(data.investigations);
 	let selectedBreakdownIndex = $state(0);
 
 	const euroFormatter = new Intl.NumberFormat('es-ES', {
@@ -35,16 +35,10 @@
 
 	const selectedBreakdown = $derived(investigation.breakdown[selectedBreakdownIndex]);
 	const breakdownMax = $derived(Math.max(...investigation.breakdown.map((item) => item.amount)));
-	const caseIndex = $derived(
-		publicSpendingInvestigations.findIndex((item) => item.slug === investigation.slug)
-	);
-	const previousCase = $derived(
-		caseIndex > 0 ? publicSpendingInvestigations[caseIndex - 1] : undefined
-	);
+	const caseIndex = $derived(investigations.findIndex((item) => item.slug === investigation.slug));
+	const previousCase = $derived(caseIndex > 0 ? investigations[caseIndex - 1] : undefined);
 	const nextCase = $derived(
-		caseIndex < publicSpendingInvestigations.length - 1
-			? publicSpendingInvestigations[caseIndex + 1]
-			: undefined
+		caseIndex < investigations.length - 1 ? investigations[caseIndex + 1] : undefined
 	);
 
 	function formatMainAmount(amount: number, approximate = false): string {

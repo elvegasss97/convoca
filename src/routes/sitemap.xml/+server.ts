@@ -2,8 +2,8 @@ import type { RequestHandler } from './$types';
 import { listPublicEvents } from '$lib/services/eventsService';
 import { listPublishedConcerns } from '$lib/services/concernsService';
 import { listPublishedTopics } from '$lib/services/topicsService';
+import { listPublicSpendingInvestigations } from '$lib/services/publicSpendingService';
 import { SITE_URL } from '$lib/seo';
-import { publicSpendingInvestigations } from '$lib/data/publicSpendingInvestigations';
 
 /**
  * Sitemap generado en cada petición a partir de las convocatorias públicas
@@ -19,11 +19,6 @@ const STATIC_PATHS = [
 	{ path: '/pulso/escucha', changefreq: 'daily', priority: '0.7' },
 	{ path: '/pulso/soluciones', changefreq: 'daily', priority: '0.7' },
 	{ path: '/pulso/gasto-publico', changefreq: 'weekly', priority: '0.7' },
-	...publicSpendingInvestigations.map((investigation) => ({
-		path: `/pulso/gasto-publico/${investigation.slug}`,
-		changefreq: 'weekly',
-		priority: '0.6'
-	})),
 	{ path: '/legal/aviso-legal', changefreq: 'yearly', priority: '0.2' },
 	{ path: '/legal/privacidad', changefreq: 'yearly', priority: '0.2' },
 	{ path: '/legal/terminos', changefreq: 'yearly', priority: '0.2' },
@@ -35,10 +30,11 @@ function xmlEscape(value: string): string {
 }
 
 export const GET: RequestHandler = async () => {
-	const [events, concerns, topics] = await Promise.all([
+	const [events, concerns, topics, publicSpendingInvestigations] = await Promise.all([
 		listPublicEvents(),
 		listPublishedConcerns(),
-		listPublishedTopics()
+		listPublishedTopics(),
+		listPublicSpendingInvestigations()
 	]);
 
 	const staticEntries = STATIC_PATHS.map(
@@ -76,9 +72,24 @@ export const GET: RequestHandler = async () => {
 \t</url>`
 	);
 
+	const publicSpendingEntries = publicSpendingInvestigations.map(
+		(investigation) => `\t<url>
+\t\t<loc>${xmlEscape(`${SITE_URL}/pulso/gasto-publico/${investigation.slug}`)}</loc>
+\t\t<lastmod>${investigation.reviewedOn}</lastmod>
+\t\t<changefreq>weekly</changefreq>
+\t\t<priority>0.6</priority>
+\t</url>`
+	);
+
 	const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticEntries, ...eventEntries, ...concernEntries, ...topicEntries].join('\n')}
+${[
+	...staticEntries,
+	...eventEntries,
+	...concernEntries,
+	...topicEntries,
+	...publicSpendingEntries
+].join('\n')}
 </urlset>
 `;
 

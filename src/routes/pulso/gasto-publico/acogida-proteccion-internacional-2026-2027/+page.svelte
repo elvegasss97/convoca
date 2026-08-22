@@ -17,15 +17,22 @@
 		Route,
 		ShieldCheck
 	} from '@lucide/svelte';
+	import type { PageData } from './$types';
 	import Seo from '$lib/components/Seo.svelte';
 	import PulsoSectionTabs from '$lib/components/pulso/PulsoSectionTabs.svelte';
-	import {
-		publicSpendingClaimOrigin,
-		publicSpendingPilot,
-		publicSpendingShare,
-		publicSpendingSources,
-		publicSpendingWallItems
-	} from '$lib/data/publicSpendingPilotData';
+	import { publicSpendingShare as calculatePublicSpendingShare } from '$lib/data/publicSpending';
+
+	let { data }: { data: PageData } = $props();
+	const publicSpendingPilot = $derived({
+		plannedTotal: data.investigation.amount,
+		period: data.investigation.period,
+		status: data.investigation.verificationStatus,
+		reviewedAt: data.investigation.reviewedAt,
+		disclaimer: data.investigation.disclaimer
+	});
+	const publicSpendingWallItems = $derived(data.investigation.breakdown);
+	const publicSpendingClaimOrigin = $derived(data.claimOrigin);
+	const publicSpendingSources = $derived(data.primarySources);
 
 	let selectedId = $state('acogida-vulnerable-reforzada');
 	const selectedItem = $derived(
@@ -48,6 +55,10 @@
 
 	function formatMillions(amount: number): string {
 		return `${decimalFormatter.format(amount / 1_000_000)} M€`;
+	}
+
+	function publicSpendingShare(amount: number): number {
+		return calculatePublicSpendingShare(amount, publicSpendingPilot.plannedTotal);
 	}
 </script>
 
