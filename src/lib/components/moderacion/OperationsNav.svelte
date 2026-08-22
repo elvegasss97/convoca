@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { onMount, type Component } from 'svelte';
 	import { Menu, Radar, Users, X as XIcon } from '@lucide/svelte';
-	import { getRegisteredUserCount } from '$lib/services/staffMetricsService';
+	import {
+		getRegisteredUserStats,
+		type RegisteredUserStats
+	} from '$lib/services/staffMetricsService';
 
 	export interface OperationsNavItem {
 		key: string;
@@ -27,14 +30,14 @@
 	let mobileOpen = $state(false);
 	let triggerEl = $state<HTMLButtonElement | undefined>(undefined);
 	let closeButtonEl = $state<HTMLButtonElement | undefined>(undefined);
-	let registeredUserCount = $state<number | null>(null);
-	let registeredUserCountFailed = $state(false);
+	let registeredUserStats = $state<RegisteredUserStats | null>(null);
+	let registeredUserStatsFailed = $state(false);
 
 	onMount(async () => {
 		try {
-			registeredUserCount = await getRegisteredUserCount();
+			registeredUserStats = await getRegisteredUserStats();
 		} catch {
-			registeredUserCountFailed = true;
+			registeredUserStatsFailed = true;
 		}
 	});
 
@@ -112,12 +115,24 @@
 			<Users class="size-4 shrink-0" />
 			<span>Usuarios registrados</span>
 		</p>
-		{#if registeredUserCountFailed}
+		{#if registeredUserStatsFailed}
 			<p class="mt-1 text-xs text-ink-400">No disponible</p>
-		{:else if registeredUserCount === null}
+		{:else if registeredUserStats === null}
 			<p class="mt-1 text-xs text-ink-400">Cargando…</p>
 		{:else}
-			<p class="mt-1 font-display text-2xl font-semibold text-ink-900">{registeredUserCount}</p>
+			<p class="mt-1 font-display text-2xl font-semibold text-ink-900">
+				{registeredUserStats.total}
+			</p>
+			<div class="mt-2 grid grid-cols-2 gap-2 border-t border-ink-100 pt-2">
+				<div>
+					<p class="text-[10px] font-medium tracking-wide text-ink-400 uppercase">Últimas 24 h</p>
+					<p class="mt-0.5 text-sm font-semibold text-ink-800">+{registeredUserStats.last24h}</p>
+				</div>
+				<div>
+					<p class="text-[10px] font-medium tracking-wide text-ink-400 uppercase">Últimos 7 días</p>
+					<p class="mt-0.5 text-sm font-semibold text-ink-800">+{registeredUserStats.last7d}</p>
+				</div>
+			</div>
 		{/if}
 	</div>
 {/snippet}

@@ -3,6 +3,7 @@
 	import type { Topic } from '$lib/types';
 	import type { TopicMethodologyInfo } from '$lib/data/topicMethodologyData';
 	import { formatEventDateWithYear } from '$lib/utils/date';
+	import ProposalSourcesPanel from '$lib/components/pulso/ProposalSourcesPanel.svelte';
 
 	interface Props {
 		topic: Topic;
@@ -113,6 +114,13 @@
 						<dt class="inline font-semibold text-ink-800">Propuesta abierta:</dt>
 						<dd class="inline">medida, objetivo o decisión sometida a deliberación.</dd>
 					</div>
+					<div>
+						<dt class="inline font-semibold text-ink-800">Fuente propositiva:</dt>
+						<dd class="inline">
+							actor externo que formula una solución concreta. Se registra su procedencia y se
+							contrasta sin que su inclusión implique apoyo de CONVOCA.
+						</dd>
+					</div>
 				</dl>
 			</div>
 
@@ -147,3 +155,5 @@
 		</div>
 	{/if}
 </section>
+
+<ProposalSourcesPanel topicId={topic.id} />
