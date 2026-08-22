@@ -106,8 +106,8 @@ create trigger topic_proposal_inputs_set_updated_at
 	before update on public.topic_proposal_inputs
 	for each row execute function public.set_updated_at();
 
--- En 2026 Supabase deja de exponer automáticamente tablas nuevas al Data API.
--- Los GRANT se declaran de forma explícita y RLS sigue siendo la barrera por fila.
+-- Desde 2026 las tablas nuevas no deben depender de exposición implícita al
+-- Data API: los GRANT se declaran de forma explícita y RLS limita las filas.
 revoke all on public.proposal_actors from public, anon, authenticated;
 revoke all on public.topic_proposal_inputs from public, anon, authenticated;
 
@@ -126,11 +126,19 @@ create policy "proposal_actors_select_public_or_staff"
 	to anon, authenticated
 	using (is_published or public.is_moderator_or_admin());
 
-create policy "proposal_actors_write_staff"
-	on public.proposal_actors for all
+create policy "proposal_actors_insert_staff"
+	on public.proposal_actors for insert
+	to authenticated
+	with check (public.is_moderator_or_admin());
+create policy "proposal_actors_update_staff"
+	on public.proposal_actors for update
 	to authenticated
 	using (public.is_moderator_or_admin())
 	with check (public.is_moderator_or_admin());
+create policy "proposal_actors_delete_staff"
+	on public.proposal_actors for delete
+	to authenticated
+	using (public.is_moderator_or_admin());
 
 create policy "topic_proposal_inputs_select_public_or_staff"
 	on public.topic_proposal_inputs for select
@@ -154,11 +162,19 @@ create policy "topic_proposal_inputs_select_public_or_staff"
 		)
 	);
 
-create policy "topic_proposal_inputs_write_staff"
-	on public.topic_proposal_inputs for all
+create policy "topic_proposal_inputs_insert_staff"
+	on public.topic_proposal_inputs for insert
+	to authenticated
+	with check (public.is_moderator_or_admin());
+create policy "topic_proposal_inputs_update_staff"
+	on public.topic_proposal_inputs for update
 	to authenticated
 	using (public.is_moderator_or_admin())
 	with check (public.is_moderator_or_admin());
+create policy "topic_proposal_inputs_delete_staff"
+	on public.topic_proposal_inputs for delete
+	to authenticated
+	using (public.is_moderator_or_admin());
 
 -- Primer caso de uso. Se registra el propio encuadre público de Atenea y su
 -- informe de vivienda, sin atribuir todavía ninguna medida concreta de CONVOCA.
