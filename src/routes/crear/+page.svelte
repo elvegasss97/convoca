@@ -14,10 +14,15 @@
 		Send,
 		Loader2,
 		AlertCircle,
-		AlertTriangle
+		AlertTriangle,
+		ExternalLink
 	} from '@lucide/svelte';
 	import type { EventCategory, EventTheme, PriorCommunicationStatus } from '$lib/types';
 	import { categoryLabels, themeLabels, themeLabel, priorCommunicationLabels } from '$lib/labels';
+	import {
+		resolvePriorCommunicationRegime,
+		priorCommunicationAuthorities
+	} from '$lib/utils/priorCommunicationAuthority';
 	import { createEvent } from '$lib/services/eventsService';
 	import { getOrganizer } from '$lib/services/organizersService';
 	import { createChannel } from '$lib/services/channelsService';
@@ -112,6 +117,9 @@
 	let done = $state<{ slug: string } | null>(null);
 
 	let form = $state(restoredDraft?.form ?? defaultFormFactory());
+	const priorAuthority = $derived(
+		priorCommunicationAuthorities[resolvePriorCommunicationRegime(form.province, form.cityName)]
+	);
 
 	// Guarda el borrador en cada cambio (mientras no se haya enviado ya).
 	$effect(() => {
@@ -692,6 +700,21 @@
 						</label>
 					{/each}
 				</div>
+				{#if form.priorCommunication === 'planned' || form.priorCommunication === 'unknown'}
+					<div class="rounded-2xl border border-brand-100 bg-brand-50 p-3.5 text-sm text-brand-900">
+						<p class="font-medium">¿Cómo se solicita?</p>
+						<p class="mt-0.5 text-brand-800">{priorAuthority.description}</p>
+						<a
+							href={priorAuthority.url}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="mt-1.5 inline-flex items-center gap-1 font-semibold text-brand-700 hover:underline"
+						>
+							Ir al trámite — {priorAuthority.label}
+							<ExternalLink class="size-3.5" />
+						</a>
+					</div>
+				{/if}
 				<div
 					class="flex items-start gap-2 rounded-2xl border border-warning-300 bg-warning-50 p-3.5 text-xs text-warning-700"
 				>
