@@ -28,6 +28,17 @@ export interface PublicSpendingSource {
 	status: 'Fuente primaria';
 }
 
+export interface PublicSpendingClaimOrigin {
+	id: string;
+	organization: string;
+	title: string;
+	date: string;
+	url: string;
+	claimSummary: string;
+	editorialUse: string;
+	status: 'Publicación analizada';
+}
+
 export const publicSpendingPilot = {
 	id: 'acogida-proteccion-internacional-2026-2027',
 	title: 'Sistema de acogida de protección internacional',
@@ -150,6 +161,20 @@ export const publicSpendingWallItems: PublicSpendingWallItem[] = [
 		compact: true
 	}
 ];
+
+export const publicSpendingClaimOrigin: PublicSpendingClaimOrigin = {
+	id: 'uhn-plus-150-euros',
+	organization: 'UHN Plus',
+	title:
+		'El plan de Pedro Sánchez para los refugiados consta de 670 millones de euros mientras asfixia a los contribuyentes españoles',
+	date: '19 de junio de 2026',
+	url: 'https://www.uhnplus.com/el-plan-de-pedro-sanchez-para-los-refugiados-consta-de-670-millones-mientras-asfixia-a-los-contribuyentes-espanoles/',
+	claimSummary:
+		'Presenta los 150 € como una tarifa diaria por usuario dentro de la acogida de vulnerabilidad reforzada, sin mostrar en ese punto que la planificación la limita a 55 plazas.',
+	editorialUse:
+		'Sirve para entender de dónde nace la duda pública. CONVOCA no la usa como prueba del gasto: contrasta su lectura con el BOE y las resoluciones oficiales.',
+	status: 'Publicación analizada'
+};
 
 export const publicSpendingSources: PublicSpendingSource[] = [
 	{

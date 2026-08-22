@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+	publicSpendingClaimOrigin,
 	publicSpendingPilot,
 	publicSpendingShare,
+	publicSpendingSources,
 	publicSpendingWallItems
 } from './publicSpendingPilotData';
 
@@ -26,5 +28,14 @@ describe('public spending pilot data', () => {
 			0
 		);
 		expect(area).toBeCloseTo(100, 2);
+	});
+
+	it('keeps the publication that originated the claim separate from official evidence', () => {
+		expect(publicSpendingClaimOrigin.status).toBe('Publicación analizada');
+		expect(publicSpendingClaimOrigin.organization).toBe('UHN Plus');
+		expect(publicSpendingSources.every((source) => source.status === 'Fuente primaria')).toBe(true);
+		expect(
+			publicSpendingSources.some((source) => source.url === publicSpendingClaimOrigin.url)
+		).toBe(false);
 	});
 });
