@@ -1,4 +1,4 @@
-import type { Event, Organizer } from '$lib/types';
+import type { Event, Organizer, Topic } from '$lib/types';
 
 /**
  * Dominio público real de Convoca. Todas las URLs canónicas, OG y JSON-LD
@@ -93,4 +93,8 @@ export function eventJsonLd(event: Event, organizer: Organizer | null, path: str
 
 export function eventOgImagePath(event: Event): string {
 	return event.coverImageUrl ?? `/og/convocatorias/${event.slug}`;
+}
+
+export function topicOgImagePath(topic: Topic): string {
+	return topic.coverImageUrl ?? `/og/planes/${topic.slug}`;
 }
