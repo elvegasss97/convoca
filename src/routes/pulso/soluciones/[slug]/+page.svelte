@@ -30,6 +30,7 @@
 		TOPIC_CATEGORY_PENDING_LABEL
 	} from '$lib/labels';
 	import { formatEventDate, formatEventDateWithYear } from '$lib/utils/date';
+	import { topicOgImagePath } from '$lib/seo';
 	import Seo from '$lib/components/Seo.svelte';
 	import ContentTypeTag from '$lib/components/pulso/ContentTypeTag.svelte';
 	import ConcernResultsChart from '$lib/components/pulso/ConcernResultsChart.svelte';
@@ -262,6 +263,7 @@
 <Seo
 	title={`${topic.title} — Propuestas de Convoca`}
 	description={topic.summary || `Tema en preparación dentro de Pulso ciudadano: ${topic.title}.`}
+	image={topicOgImagePath(topic)}
 />
 
 <div class="mx-auto max-w-3xl px-4 pt-4 pb-24 sm:px-6 md:pb-10">
