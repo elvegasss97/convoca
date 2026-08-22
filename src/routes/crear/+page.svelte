@@ -19,10 +19,6 @@
 	} from '@lucide/svelte';
 	import type { EventCategory, EventTheme, PriorCommunicationStatus } from '$lib/types';
 	import { categoryLabels, themeLabels, themeLabel, priorCommunicationLabels } from '$lib/labels';
-	import {
-		resolvePriorCommunicationRegime,
-		priorCommunicationAuthorities
-	} from '$lib/utils/priorCommunicationAuthority';
 	import { createEvent } from '$lib/services/eventsService';
 	import { getOrganizer } from '$lib/services/organizersService';
 	import { createChannel } from '$lib/services/channelsService';
@@ -53,6 +49,11 @@
 		PriorCommunicationStatus,
 		string
 	][];
+	// Enlace único a la sede electrónica nacional (Delegación/Subdelegación
+	// del Gobierno). Cataluña y País Vasco tienen su propia autoridad, pero
+	// no se distingue aquí: mantenerlo simple.
+	const PRIOR_COMMUNICATION_TRAMITE_URL =
+		'https://sede.administracionespublicas.gob.es/pagina/index/directorio/comunicacion_reunion';
 
 	// El borrador se guarda en localStorage para que, si hay que enviar a la
 	// persona a /login a mitad de formulario, lo recupere íntegro al volver
@@ -117,9 +118,6 @@
 	let done = $state<{ slug: string } | null>(null);
 
 	let form = $state(restoredDraft?.form ?? defaultFormFactory());
-	const priorAuthority = $derived(
-		priorCommunicationAuthorities[resolvePriorCommunicationRegime(form.province, form.cityName)]
-	);
 
 	// Guarda el borrador en cada cambio (mientras no se haya enviado ya).
 	$effect(() => {
@@ -703,14 +701,17 @@
 				{#if form.priorCommunication === 'planned' || form.priorCommunication === 'unknown'}
 					<div class="rounded-2xl border border-brand-100 bg-brand-50 p-3.5 text-sm text-brand-900">
 						<p class="font-medium">¿Cómo se solicita?</p>
-						<p class="mt-0.5 text-brand-800">{priorAuthority.description}</p>
+						<p class="mt-0.5 text-brand-800">
+							Se presenta ante la Delegación o Subdelegación del Gobierno de tu provincia, a través
+							de la sede electrónica.
+						</p>
 						<a
-							href={priorAuthority.url}
+							href={PRIOR_COMMUNICATION_TRAMITE_URL}
 							target="_blank"
 							rel="noopener noreferrer"
 							class="mt-1.5 inline-flex items-center gap-1 font-semibold text-brand-700 hover:underline"
 						>
-							Ir al trámite — {priorAuthority.label}
+							Ir al trámite
 							<ExternalLink class="size-3.5" />
 						</a>
 					</div>
